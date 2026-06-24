@@ -1,6 +1,6 @@
 # GForm 表单系统技术文档
 
-> 版本：V1.02  
+> 版本：V2.00  
 > 日期：2026.06.24  
 > 作者：Wey. Silver Grid
 
@@ -234,18 +234,37 @@ bool gform::IsFormOnStack(FormId id);
 - 4个 Form.cpp: #include → GForm.h, API → gform::
 - GUICntr.h 不再被任何活跃 sim 源文件 include
 
-### Phase 4 (待执行) — 清理
+### Phase 4 — 流式解码与稳定性修复 ✅ (2026.06.24)
+
+- **Segfault 修复**: 模拟器 `platform::Lock` 改为空操作，消除静态初始化阶段 `std::mutex` 构造顺序崩溃
+- **表单注册回退**: `FormRegistrar` 静态构造导致跨 TU 初始化顺序问题，回退到 `s_formTable` 集中注册
+- **GUIMain 回退**: 改为调用 `GUIStart()` + `GUICenter()` 适配层，而非直接 `gform::` API
+- **CSGDraw 流式解码器探索**:
+  - `CsgDecodePixels` 不支持 DEFLATE (CAS=2) 和 Huffman (CAS=4)
+  - 仅支持 None/RLE/MiniLZ77 (CAS=0/1/3)
+  - `state.stream` 必须在 `CsgDecodeInit` **之后**设置（Init 内部清零）
+  - 像素解码步长始终为 `bpc`（与 CRN 无关）
+  - `baseOffset` 使用 `prevDecoded` 快照避免负值
+- **CSGDraw 双路径架构**:
+  - `#ifdef __vmSIMULATOR__`: 内部调用 `CSGDecoder::DecodePicture()`（全 CAS 支持，已验证）
+  - `#else` (MCU): 流式解码器 `CsgDecodeInit/CsgDecodePixels`（CAS 0/1/3，待 Keil 验证）
+
+### Phase 5 (待执行) — 清理
 
 - [ ] 删除 `GUICntr.cpp/h`（确认真机代码中 KEYDB_OnChanged 等迁移完毕）
 - [ ] 删除 `FormManager.cpp/h`
 - [ ] 旧文件 GB2312 → UTF-8 BOM 批量转换
 - [ ] Keil MDK 真机编译验证
 - [ ] 非活跃表单（GPConfigForm, GPGuageForm 等）迁移到 FormRegistrar
+- [ ] MCU 流式解码器 CAS 0/1/3 真机测试
+- [ ] DEFLATE/Huffman 流式解码支持
 
-### Phase 5 — CSG 图像编解码注册 ✅ (2026.06.24)
+### Phase 6 — CSG 图像编解码注册 ✅ (2026.06.24)
 
-- GUIPicture.cpp: `GUI_DrawPicture()` 新增 `case ID_CSG:` → `CSGDecoder::DecodePicture()` → RGBA 像素绘制
-- GPSplashForm.cpp: 启动画面居中绘制 `picx128csg` (128×128 CSG 测试图像)
+- GUIPicture.cpp: `GUI_DrawPicture()` 新增 `case ID_CSG:` → `CSG_DrawPicture()` 调度
+- CSGDraw.cpp: 模拟器路径调用 `CSGDecoder::DecodePicture()`，MCU 路径预留流式解码器
+- GPSplashForm.cpp: 启动画面 (100,100) 绘制 `picx128csg` (128×128 测试图像)
+- x128 测试数据: LZ77 (CAS=3), CRN=16, RGB565, 1108 bytes
 
 ---
 
@@ -397,3 +416,67 @@ GUI_DrawPicture(&picx128csg, x, y);
 **问题**: Post-build 步骤 `copy ShivaVG.dll exe\` 目标目录 `exe\` 不存在。
 
 **修复**: 改为 `copy ShivaVG.dll Build\`。
+
+### 9.7 静态初始化崩溃 (Segfault)
+
+**问题**: 模拟器启动时在 `main()` 之前 SIGSEGV 崩溃。`FormRegistrar` 静态构造器调用 `RegisterForm()` → `ScopedLock(s_lock)` → `m_mutex.lock()`。`s_lock` 是全局 `gform::platform::Lock`（内含 `std::mutex`），其构造顺序与其他翻译单元的静态初始化存在竞争。
+
+**修复**:
+1. 模拟器 `platform::Lock::Acquire/Release` 改为空操作（模拟器单线程，无需真锁）
+2. 表单注册回退到 `s_formTable` 集中注册（`GUICntr::RegisterAllForms`），由 `GUIStart()` 在 `main()` 之后调用
+3. `FormRegistrar` 静态注册对象暂禁用
+
+### 9.8 MSBuild PDB 文件锁定
+
+**问题**: 多核并行编译时，多个 `cl.exe` 进程争用同一个 `.pdb` 文件，报 `C1041`。
+
+**临时修复**: 使用 `-maxcpucount:1` 单线程编译。长期方案：添加 `/FS` 编译选项。
+
+### 9.9 Git 中 Sim 目录为子模块
+
+**问题**: `git add` 时 Sim 目录未被跟踪，`git checkout` 无法恢复 Sim 下的文件。
+
+**原因**: Sim 目录内有独立的 `.git` 目录（可能是 VS 或先前操作残留）。
+
+**修复**: `rm -rf Sim/.git` 将其纳入主仓库。
+
+---
+
+## 10. Git 提交历史
+
+| 提交 | 说明 |
+|------|------|
+| `d66d0f9` | **CSGDraw 双路径**: 模拟器路径用 CSGDecoder，MCU 路径预留流式解码 |
+| `3f1a51c` | **Segfault 修复**: 模拟器空操作锁 + s_formTable 注册 |
+| `6e62306` | **GForm 系统**: 统一表单管理 + 项目重命名 + CSG 解码集成 |
+
+---
+
+## 11. 当前状态总览 (2026.06.24 EOD)
+
+### 已完成的模块
+
+| 模块 | 状态 | 测试 |
+|------|------|------|
+| GForm 引擎 (Init/Tick/PushForm/PopForm/...) | ✅ | Sim 通过 |
+| GUICntr 适配层 (GUIStart/GUICenter → gform) | ✅ | Sim 通过 |
+| s_formTable 集中注册 (4 个活跃表单) | ✅ | Sim 通过 |
+| GUIMain → GUIStart/GUICenter | ✅ | Sim 通过 |
+| CSGDraw API (CSG_DrawPicture/Ex) | ✅ | Sim 通过 |
+| CSG 解码 (模拟器: CSGDecoder 类) | ✅ | LZ77 + DEFLATE 通过 |
+| CSG 流式解码 (MCU 路径) | 🔶 | CAS 0/1/3 代码就绪，待 Keil 测试 |
+| Splash 画面 CSG 测试图像 (100,100) | ✅ | 128×128 LZ77 正常显示 |
+| 中→英注释 + UTF-8 BOM | ✅ | 12 个 GUI 文件 |
+| C4819/C4335/C4566 警告屏蔽 | ✅ | vcxproj 配置 |
+| 项目重命名 (SG1210Sim) | ✅ | sln + vcxproj + 输出 |
+
+### 待完成
+
+| 任务 | 优先级 |
+|------|--------|
+| MCU 流式解码器 Keil 编译验证 | 高 |
+| 删除 GUICntr.cpp/h, FormManager.cpp/h | 中 |
+| 非活跃表单迁移到 FormRegistrar | 中 |
+| 旧文件 GB2312 → UTF-8 BOM | 中 |
+| DEFLATE/Huffman 流式解码支持 | 低 |
+| MSBuild `/FS` 选项（并行编译） | 低 |
