@@ -15,6 +15,9 @@
 #include "CSGDraw.h"
 
 #include "GUI.h"
+#include "GUI_Type.h"
+#include "GUI_Private.h"
+
 #include "../../../Application/GUI/CSGDraw.h"
 //===========================================================================
 // Global methods

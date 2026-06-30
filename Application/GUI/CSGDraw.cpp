@@ -2,18 +2,17 @@
 //-----------------------------------------------------------------------------
 /*
  File        : CSGDraw.cpp
- Version     : V1.04
+ Version     : V1.06
  By          : Wey. Silver Grid
 
  Description : CSG image drawing — unified Sim+MCU streaming path.
                Row-batch bitmap output: GUI_DrawBitmapExp (Sim) / FSMC burst (MCU).
-               Fast inline CrmToRgb565 + SaturateRgb565 hot path.
+               MCU clip: pClipRect parameter (nullptr=full screen, &rect=clipped).
+               Does NOT depend on emWin GUI_SetClipRect/GUI_GetClipRect.
 
- Date        : 2026.06.26 (V1.04 — performance: row-bitmap draw, inline CRM→RGB565)
-              2026.06.26 (V1.03 — VxARGB: FromCrm/ToCrm/ApplySaturation refactoring)
-              2026.06.26 (V1.02 — unified streaming path, CRM output, CAS 0/1/2/3)
-              2026.06.25 (V1.01 — saturation helpers, atlas sub-picture, picIndex param)
-              2026.06.24 (V1.00 — initial CSG drawing API)
+ Date        : 2026.06.30 (V1.06 — pClipRect parameter replaces GUI_GetClipRect)
+              2026.06.30 (V1.05 — MCU software clip rect via GUI_GetClipRect, deprecated)
+              2026.06.26 (V1.04 — performance: row-bitmap draw, inline CRM→RGB565)
 */
 //-----------------------------------------------------------------------------
 #include "CSGDraw.h"
@@ -25,6 +24,7 @@
 #include "GUIBitmap.h"
 
 #include "GUI.h"
+#include "LCD.h"
 #include "GUI_Private.h"
 
 #ifndef __vmSIMULATOR__
@@ -211,9 +211,29 @@ static inline uint16_t SaturateRgb565(uint16_t v, int sat) {
     return ((uint16_t)(r >> 3) << 11) | ((uint16_t)(g >> 2) << 5) | (uint16_t)(b >> 3);
 }
 
+//=============================================================================
+// Draw CSG Picture
+//=============================================================================
+// CSG_DrawPicture — Unified Sim+MCU streaming draw
+//
+// MCU path writes directly to LCD via FSMC, bypassing emWin entirely.
+// Therefore emWin's GUI_SetClipRect/GUI_GetClipRect cannot be used.
+// Instead, clip is controlled by the pClipRect parameter:
+//   pClipRect = nullptr  → draw full image (default, zero overhead)
+//   pClipRect = &rect    → draw only pixels within rect
+//
+// Callers that need partial redraw (e.g. _EraseSelArea in GPMenuForm)
+// pass an explicit clip rect.  All other callers omit the parameter and
+// get full-screen drawing with no clipping overhead.
+//=============================================================================
+
 void CSG_DrawPicture(const TGUIPicture* pPic, int x0, int y0,
-                     int picIndex, int saturation)
+                     int picIndex, int saturation, const GUI_RECT* pClipRect)
 {
+#ifdef __vmSIMULATOR__
+    (void)pClipRect;    // Sim: emWin handles clip internally via GUI_SetClipRect
+#endif
+  
     if (pPic == nullptr || pPic->pData == nullptr) return;
     if (pPic->Type != ID_CSG) return;
 
@@ -359,65 +379,117 @@ void CSG_DrawPicture(const TGUIPicture* pPic, int x0, int y0,
                               static_cast<const U8*>(bmpBuf), nullptr);
         }
 #else
-        // ---- MCU: CRM → RGB565 ----
-        // Only for **RGB565 CSG!
-        //   Rows with transparent pixels: per-pixel write, skip transparent.
-        //   Rows without transparent pixels: fast burst write entire row.
+        // ---- MCU: CRM → RGB565 (with software clip rect) ----
+        // Always enforce GUI_GetClipRect — every pixel write is clipped.
 
-        const uint16_t* puwPixels = (uint16_t*)(outBuf);
-        if (hasTransparency) {
-            // Scan for transparent pixels in this row
-            bool bHasTransp = false;
-            for (int i = 0; i < n && !bHasTransp; ++i) {
-                //if (CrmToRgb565(outBuf + i * bpc, colorMode) == transpRgb565)
-                if( puwPixels[i] == transpRgb565 )
-                    bHasTransp = true;
+        if( nullptr != pClipRect ) {
+            // Skip row entirely if outside clip Y range
+            if (y0 + row < pClipRect->y0 ) {
+                ++row; continue;
+            } else if(y0 + row > pClipRect->y1) {
+                break;
             }
-            
-            if (bHasTransp) {
-                // Per-pixel: set cursor per opaque pixel, skip transparent
-                U32 bNeedCursor = 1;
-                for (int i = 0; i < n; ++i) {
-                    //uint16_t v = CrmToRgb565(outBuf + i * bpc, colorMode);
-                  
-                    U16 uwColor = *puwPixels++;
-                    if (uwColor == transpRgb565) {
-                      bNeedCursor = 1;
-                      continue;
-                    }
-                    
-                    if( bNeedCursor ) {
-                      bNeedCursor = 0;
-                      LCD_SetCursor(x0 + i, y0 + row);
-                    }
-                    
-                    LCD_DATADDR = uwColor;
-                    
-//                    LCD_WRAM_Prepare();
-//                    *lcd = v;
+
+            // Clipped column range for burst-path rows
+            int iClipStart = (pClipRect->x0 > x0) ? (pClipRect->x0 - x0) : 0;
+            int iClipEnd   = (pClipRect->x1 < x0 + n - 1) ? (pClipRect->x1 - x0 + 1) : n;
+            if (iClipStart >= iClipEnd) { ++row; continue; }
+        
+            const uint16_t* puwPixels = (uint16_t*)(outBuf);
+            if (hasTransparency) {
+                // Scan for transparent pixels in this row
+                bool bHasTransp = false;
+                for (int i = 0; i < n && !bHasTransp; ++i) {
+                    if( puwPixels[i] == transpRgb565 )
+                        bHasTransp = true;
                 }
+        
+                if (bHasTransp) {
+                    // Per-pixel: skip transparent + clipped pixels
+                    U32 bNeedCursor = 1;
+                    for (int i = 0; i < n; ++i) {
+                        U16 uwColor = *puwPixels++;
+                        int  sx      = x0 + i;
+        
+                        if (sx < pClipRect->x0 || sx > pClipRect->x1) 
+                           continue;
+                        
+                        if (uwColor == transpRgb565) { 
+                           bNeedCursor = 1; 
+                           continue; 
+                        }
+        
+                        if (bNeedCursor) {
+                            bNeedCursor = 0;
+                            LCD_SetCursor(sx, y0 + row);
+                        }
+                        LCD_DATADDR = uwColor;
+                    }
+                } else {
+                    // Fast burst — clipped range only
+                    LCD_SetCursor(x0 + iClipStart, y0 + row);
+                    puwPixels += iClipStart;
+                    for (int i = iClipStart; i < iClipEnd; ++i)
+                        LCD_DATADDR = *puwPixels++;
+                    puwPixels += (n - iClipEnd);
+                }
+            } else if (doSat && crn == 0) {
+                LCD_SetCursor(x0 + iClipStart, y0 + row);
+                puwPixels += iClipStart;
+                for (int i = iClipStart; i < iClipEnd; ++i)
+                    LCD_DATADDR = SaturateRgb565(*puwPixels++, saturation);
             } else {
-                // Fast path: no transparent pixels in this row
-                LCD_SetCursor(x0, y0 + row);
-                //LCD_WRAM_Prepare();
-                for (int i = 0; i < n; ++i) {
-                    LCD_DATADDR = *puwPixels++; //CrmToRgb565(outBuf + i * bpc, colorMode);
-                }
-            }
-        } else if (doSat && crn == 0) {
-            LCD_SetCursor(x0, y0 + row);
-            //LCD_WRAM_Prepare();
-            for (int i = 0; i < n; ++i) {
-                //LCD_DATADDR = SaturateRgb565(CrmToRgb565(outBuf + i * bpc, colorMode), saturation);
-              LCD_DATADDR = SaturateRgb565(*puwPixels++, saturation);
+                LCD_SetCursor(x0 + iClipStart, y0 + row);
+                puwPixels += iClipStart;
+                for (int i = iClipStart; i < iClipEnd; ++i)
+                    LCD_DATADDR = *puwPixels++;
             }
         } else {
-            LCD_SetCursor(x0, y0 + row);
-            //LCD_WRAM_Prepare();
-            for (int i = 0; i < n; ++i) {
-                LCD_DATADDR = *puwPixels++; //CrmToRgb565(outBuf + i * bpc, colorMode);
+            // No Clip rect.
+            const uint16_t* puwPixels = (uint16_t*)(outBuf);
+            if (hasTransparency) {
+                // Scan for transparent pixels in this row
+                bool bHasTransp = false;
+                for (int i = 0; i < n && !bHasTransp; ++i) {
+                    if( puwPixels[i] == transpRgb565 )
+                        bHasTransp = true;
+                }
+        
+                if (bHasTransp) {
+                    // Per-pixel: skip transparent + clipped pixels
+                    U32 bNeedCursor = 1;
+                    for (int i = 0; i < n; ++i) {
+                        U16 uwColor = *puwPixels++;
+                        if (uwColor == transpRgb565) {
+                          bNeedCursor = 1;
+                          continue;
+                        }
+
+                        if (bNeedCursor) {
+                            bNeedCursor = 0;
+                            LCD_SetCursor(x0 + i, y0 + row);
+                        }
+                        
+                        LCD_DATADDR = uwColor;
+                    }
+                } else {
+                    // Fast path: no transparent pixels in this row
+                    LCD_SetCursor(x0, y0 + row);
+                    for (int i = 0; i < n; ++i)
+                        LCD_DATADDR = *puwPixels++;
+                }
+            } else if (doSat && crn == 0) {
+                LCD_SetCursor(x0, y0 + row);
+                for (int i = 0; i < n; ++i) {
+                    LCD_DATADDR = SaturateRgb565(*puwPixels++, saturation);
+                }
+            } else {
+                LCD_SetCursor(x0, y0 + row);
+                for (int i = 0; i < n; ++i) {
+                    LCD_DATADDR = *puwPixels++;
+                }
             }
-        }
+          }
 #endif
         ++row;
     }

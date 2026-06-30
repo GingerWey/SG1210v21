@@ -50,6 +50,7 @@
 #include "PictureRes.h"
 #include "Graphics/ImageRes.h"
 #include "Strings/TextStrs.h"
+#include "GUIMisc.h"
 
 #include "DevRegs.h"
 
@@ -418,7 +419,8 @@ static void _DrawLayer0(void)
   GUI_EnableAlpha(0);
 
 #ifdef MF_LOGO_IDX
-  // Logo — full opacity
+  // Logo — full opacity (emWin FillRect above may have changed clip)
+  SetFullClip();
   GUI_DrawPicture(&picMAUAtlascsg, MF_LOGO_X, MF_LOGO_Y, MF_LOGO_IDX, 100);
 #endif
 
@@ -678,6 +680,7 @@ static void _UpdateWires(bool bForce)
 
 static void _UpdateIcons(bool bForce)
 {
+
   float rUin = _GetRealReg(REG_RL_Uin);
   float rBat = _GetRealReg(REG_RL_BCHRG_Level);
 
@@ -800,8 +803,8 @@ static bool _GetClockStr(bool bForce, char* pBuf, size_t nLen)
     {
     snprintf(pBuf, nLen, "%04u-%02u-%02u %02u:%02u",
            st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute);
-      
-    m_State.ucLastMinute = dt.Minutes;
+
+    m_State.ucLastMinute = st.wMinute;
       
     return true;
     }

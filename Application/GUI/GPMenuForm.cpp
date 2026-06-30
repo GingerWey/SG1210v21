@@ -48,6 +48,7 @@
 #include "Graphics/ImageRes.h"
 #include "Strings/TextStrs.h"
 #include "CSGDraw.h"
+#include "GUIMisc.h"
 
 #include <string.h>
 
@@ -199,9 +200,7 @@ static void _EraseSelArea(int idx)
             pItem->yIcon + MU_SEL_DY - 1,
             MU_SEL_W + 2, MU_SEL_H + 2);         // 向外扩展 1px Margin
 
-  GUI_SetClipRect(&rClip);
-  CSG_DrawPicture(&picbkg320x240Lcsg, 0, 0, 0, 100);   // 重绘背景图层
-  GUI_SetClipRect(nullptr);                              // 解除裁剪
+  CSG_DrawPicture(&picbkg320x240Lcsg, 0, 0, 0, 100, &rClip ); // 重绘背景图层
 }
 
 //=============================================================================
@@ -214,14 +213,15 @@ static void _EraseSelArea(int idx)
 //-----------------------------------------------------------------------------
 static void _DrawCaptionBar(void)
 {
+
   GUI_RECT r;
 
-  // 背板 — 20% 不透明度叠加在 CSG 背景图上
+//  // 背板 — 20% 不透明度叠加在 CSG 背景图上
   GUI_EnableAlpha(1);
-  GUI_SetAlpha(MU_CAP_ALPHA);
-  _MakeRect(&r, MU_CAP_X, MU_CAP_Y, MU_CAP_W, MU_CAP_H);
-  GUI_SetColor(MU_CAP_FILL);
-  GUI_FillRectEx(&r);
+//  GUI_SetAlpha(MU_CAP_ALPHA);
+//  _MakeRect(&r, MU_CAP_X, MU_CAP_Y, MU_CAP_W, MU_CAP_H);
+//  GUI_SetColor(MU_CAP_FILL);
+//  GUI_FillRectEx(&r);
 
   // 分割线 — 15% 不透明度
   GUI_SetAlpha(MU_SEP_ALPHA);
@@ -252,7 +252,7 @@ static void _DrawCaptionTitle(void)
 //-----------------------------------------------------------------------------
 static void _DrawHome(void)
 {
-  CSG_DrawPicture(&picMAUAtlascsg, MU_HOME_X, MU_HOME_Y, MU_HOME_PICIDX, 100);
+  CSG_DrawPicture(&picMAUAtlascsg, MU_HOME_X, MU_HOME_Y, MU_HOME_PICIDX);
 }
 
 //-----------------------------------------------------------------------------
@@ -283,35 +283,14 @@ static void _DrawHint(void)
 //-----------------------------------------------------------------------------
 static void _DrawMenuItem(int idx, bool bSelect)
 {
+
   const TMenuItem* pItem = &kMenuItems[idx];
-
-  // --- 计算移位偏移 ---
-  int dx = 0, dy = 0;
-  //if (bSelect)
-  //{
-  //  if (m_State.bEnterDown)
-  //  {
-  //    dx = 1; dy = 1;   // Enter 按下：右下移位
-  //  }
-  //  else
-  //  {
-  //    dx = -1; dy = -1;  // 选中态：左上移位
-  //  }
-  //}
-
-  // 不再用黑色填充擦除旧选取框。选中态切换时由调用方通过
-  // _CaptureItemBg/_RestoreItemBg 管理 MemDev 快照来精确还原背景。
-  // _DrawMenuItem(idx, false) 仅在 _DrawAllItems 初始绘制时使用，
-  // 此时屏幕刚清空，不需要擦除。
-
-  int ix = pItem->xIcon + dx;
-  int iy = pItem->yIcon + dy;
 
   // --- 绘制选取框（空心圆角矩形边框）---
   if (bSelect)
   {
-    int sx = pItem->xIcon + MU_SEL_DX + dx;
-    int sy = pItem->yIcon + MU_SEL_DY + dy;
+    int sx = pItem->xIcon + MU_SEL_DX;
+    int sy = pItem->yIcon + MU_SEL_DY;
 
     GUI_SetColor(MU_SEL_COLOR);
     GUI_SetPenSize(1);
@@ -320,14 +299,14 @@ static void _DrawMenuItem(int idx, bool bSelect)
   }
 
   // --- 绘制图标 ---
-  CSG_DrawPicture(&picMAUAtlascsg, ix, iy, pItem->picIdx, 100);
+  CSG_DrawPicture(&picMAUAtlascsg, pItem->xIcon, pItem->yIcon, pItem->picIdx);
 
   // --- 绘制标签 ---
   const char* pStr = GetMultiLangString(pItem->uNameId);
   if (nullptr != pStr)
   {
     GUI_RECT r;
-    _MakeRect(&r, pItem->xLbl + dx, pItem->yLbl + dy,
+    _MakeRect(&r, pItem->xLbl, pItem->yLbl,
               pItem->wLbl, pItem->hLbl);
     GUI_SetFont(MU_HINT_FONT);   // GUI_FONT_16LTH_CHN
     GUI_SetColor(MU_HINT_COLOR);
@@ -359,11 +338,12 @@ static void _Redraw(void)
   GUI_Clear();
 
   // Layer0
-  CSG_DrawPicture(&picbkg320x240Lcsg, MU_BKG_X, MU_BKG_Y, 0, 100);
+  CSG_DrawPicture(&picbkg320x240Lcsg, MU_BKG_X, MU_BKG_Y, 0);
+  
   _DrawCaptionBar();
   _DrawCaptionTitle();
 
-  // Layer1
+  // Layer1 — emWin calls above may change clip, each CSG call site resets
   _DrawHome();
   _DrawHint();
   _DrawAllItems();
@@ -375,14 +355,12 @@ static void _Redraw(void)
 //-----------------------------------------------------------------------------
 static void _RedrawItems(int iOld, int iNew)
 {
-  // 1. 擦除旧项选取框区域，重绘旧项图标于正常位置
+  // 1. 局部擦除旧选取框（_EraseSelArea 设小 ClipRect → 背景 CSG 仅覆盖选取框区域）
   _EraseSelArea(iOld);
+
+  // 2. 恢复全屏 ClipRect，保证后续图标绘制不被限制
   _DrawMenuItem(iOld, false);
-
-  // 2. 新项只画选取框+移位图标（不画非选中态，避免重影）
   _DrawMenuItem(iNew, true);
-
-  // 3. 更新提示文字
   _DrawHint();
 }
 
@@ -395,6 +373,7 @@ static void _RedrawItems(int iOld, int iNew)
 //-----------------------------------------------------------------------------
 static void _MoveTo(int row, int col)
 {
+
   int iNew = _RowColToIdx(row, col);
   if (iNew < 0 || iNew == m_State.iCurItem) return;
 

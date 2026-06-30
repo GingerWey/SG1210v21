@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 /*
  File        : CSGDraw.h
@@ -19,6 +19,8 @@
 #define GUI_CSGDRAW_H
 
 #include "GUIPicture.h"
+
+#include <GUI.h>
 #include <cstdint>
 
 //-----------------------------------------------------------------------------
@@ -38,17 +40,24 @@ extern "C" {
 // Public API
 //=============================================================================
 
-/// Draw a CSG image (unified Sim+MCU path via streaming decoder).
-/// Output buffer allocated from GUI_ALLOC in CRM format.
-/// Sim: CRM→RGBA→GUI_DrawPixel.  MCU: CRM→LCD direct write.
-///
-/// @param pPic       TGUIPicture with Type=ID_CSG, pData=CSG bytes, Size=byte count
-/// @param x0         Left coordinate on LCD
-/// @param y0         Top coordinate on LCD
-/// @param picIndex   0-based sub-picture index within an atlas (default 0)
-/// @param saturation Saturation percentage 10–100 (default 100 = no change)
+//-----------------------------------------------------------------------------
+// Draw a CSG image (unified Sim+MCU path via streaming decoder).
+//
+// MCU path bypasses emWin and writes directly to LCD (FSMC), so it cannot
+// rely on GUI_SetClipRect/GUI_GetClipRect.  Instead, clip is controlled by
+// the pClipRect parameter:
+//   pClipRect = nullptr  → full screen (default, no clipping overhead)
+//   pClipRect = &rect    → draw only pixels within rect (e.g. _EraseSelArea)
+//
+// @param pPic       TGUIPicture with Type=ID_CSG
+// @param x0,y0      Top-left coordinate on LCD
+// @param picIndex   0-based sub-picture index within an atlas (default 0)
+// @param saturation Saturation 10–100 (default 100 = no change)
+// @param pClipRect  Software clip rectangle in LCD coords (default nullptr = full screen)
+//-----------------------------------------------------------------------------
 void CSG_DrawPicture(const TGUIPicture* pPic, int x0, int y0,
-                     int picIndex = 0, int saturation = 100);
+                     int picIndex = 0, int saturation = 100,
+                     const GUI_RECT* pClipRect = nullptr);
 
 //-----------------------------------------------------------------------------
 #ifdef __cplusplus

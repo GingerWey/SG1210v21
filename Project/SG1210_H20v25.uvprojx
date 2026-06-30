@@ -921,11 +921,6 @@
               <FilePath>..\Application\GUI\GUIEditors.cpp</FilePath>
             </File>
             <File>
-              <FileName>GUIMisc.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\Application\GUI\GUIMisc.cpp</FilePath>
-            </File>
-            <File>
               <FileName>GUIBitmap.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Middlewares\emWin\user\GUIBitmap.h</FilePath>
@@ -936,14 +931,19 @@
               <FilePath>..\Middlewares\emWin\user\GUIBitmap.c</FilePath>
             </File>
             <File>
+              <FileName>PictureRes.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\Application\GUI\PictureRes.cpp</FilePath>
+            </File>
+            <File>
               <FileName>GUIPicture.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\Middlewares\emWin\user\GUIPicture.cpp</FilePath>
             </File>
             <File>
-              <FileName>PictureRes.cpp</FileName>
+              <FileName>GUIMisc.cpp</FileName>
               <FileType>8</FileType>
-              <FilePath>..\Application\GUI\PictureRes.cpp</FilePath>
+              <FilePath>..\Application\GUI\GUIMisc.cpp</FilePath>
             </File>
           </Files>
         </Group>

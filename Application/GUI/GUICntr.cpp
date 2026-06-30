@@ -272,7 +272,9 @@ void GUIStart()
     GUI_SetBkColor(GUI_BLACK);
     GUI_Clear();
   
+#ifndef __vmSIMULATOR__
   INDLED_LCDBG( 1 );
+#endif
 
 #ifndef __vmSIMULATOR__
 #if osCMSIS >= 0x20000U

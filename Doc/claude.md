@@ -395,3 +395,84 @@ kMaxStack = 16;    // 导航栈深度
 - Git Bash 中使用 `-p:` 而非 `/p:`
 - 使用 `-m:1` 避免 PDB 文件锁定 (C1041)
 - 编译前确认 vcxproj 的 `<ClCompile>` 列表与实际文件一致
+
+**ARMCLANG 命令行**
+- ARM Compiler 6 路径：`D:/Apps/Keil/ARM/ARMCLANG/bin/armclang.exe`
+- 语法检查最小命令模板：
+```bash
+ARMCLANG="D:/Apps/Keil/ARM/ARMCLANG/bin/armclang.exe"
+"$ARMCLANG" \
+  --target=arm-arm-none-eabi \
+  -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 \
+  -std=c++17 -xc++ -fsyntax-only -Wc++11-narrowing \
+  -DUSE_HAL_DRIVER -DSTM32F407xx -D__TARGET_FPU_VFP -D__FPU_PRESENT=1U \
+  -I ...include paths... \
+  file.cpp
+```
+- FreeRTOS include 路径注意：实际路径为 `Middlewares/FreeRTOS/include/` 和 `Middlewares/FreeRTOS/CMSIS_RTOS_V2/`，不是 `Source/include` 和 `Source/CMSIS_RTOS_V2`
+- `portmacro.h` 在 `Middlewares/FreeRTOS/portable/RVDS/ARM_CM4F/`，需额外添加
+- `GUI_RECT` 字段类型为 `I16`(short)，`LCD_GetXSize()` 返回 `int`，花括号初始化会触发 `-Wc++11-narrowing` 错误。改为逐字段赋值 + `static_cast<I16>()`
+
+---
+
+## MCU 性能优化经验
+
+### CSGDraw.cpp MCU 路径优化
+
+**三级优化（2026.06.30）**：
+
+| 优化 | 代码 | 收益 |
+|------|------|------|
+| 指针直转 | `const uint16_t* puwPixels = (uint16_t*)outBuf` 替代逐像素 `CrmToRgb565()` | 消除函数调用（仅适用 RGB565 CRM，bpc=2） |
+| FSMC 寄存器直写 | `LCD_DATADDR = uwColor` 替代 `*(volatile uint16_t*)0x60000000 = v` | 减少 volatile 解引用中间步骤 |
+| 游标批处理 | 仅透明→不透明切换时设一次 `LCD_SetCursor`；连续不透明像素间 ST7789 自动递增 | 大幅减少 SPI 命令开销 |
+
+**游标批处理模式**：
+```cpp
+U32 bNeedCursor = 1;
+for (int i = 0; i < n; ++i) {
+    if (uwColor == transpRgb565) { bNeedCursor = 1; continue; }  // 透明：标记下次需设游标
+    if (bNeedCursor) { bNeedCursor = 0; LCD_SetCursor(x0 + i, y0 + row); }
+    LCD_DATADDR = uwColor;  // ST7789 列地址自动+1
+}
+```
+
+### GPMainForm 时钟更新优化
+
+| 优化 | 旧 | 新 |
+|------|-----|-----|
+| 状态存储 | `char szClock[32]` + `strcmp` | `uint8_t ucLastMinute` + 单字节比较 |
+| 检测逻辑 | `_UpdateClock` 做 strcmp → 调 `_GetClockStr` | `_GetClockStr(bForce, ...)` 内部比较分钟并返回 bool |
+
+节省 32B 静态内存，时钟更新从字符串比较降为单字节比较。
+
+---
+
+## GUI 绘制注意事项
+
+### emWin ClipRect 与 MCU 直写
+
+- **Sim**：`GUI_SetClipRect` 在 emWin 驱动层生效，所有绘制自动裁剪
+- **MCU**：`CSG_DrawPicture` 通过 `LCD_DATADDR` 直写 FSMC，**完全绕过 emWin**，`GUI_SetClipRect` 无效
+- **解决**：CSGDraw V1.05 在 MCU 路径手动读取 `GUI_GetClipRect()` 并软件裁剪行列范围
+
+```cpp
+const GUI_RECT* pClip = GUI_GetClipRect();
+// 全屏时 bHasClip=false → 零开销快速路径
+// 有裁剪时：行级跳过（Y 范围）、列级裁剪（iClipStart/iClipEnd）、像素级跳过（per-pixel 路径）
+```
+
+### 栈溢出风险
+
+- `CSGDecoderState` 含 `window[8192]`（~8.3KB），绝不能放栈上
+- HMITask 栈 8KB，放栈上必然 HardFault
+- 固定用法：`static CSGDecoderState state;` → `.bss` 段
+- 代价：函数不可重入（GUI 单线程无影响）
+
+### emWin Alpha 混合在 Win32 模拟器下不可用
+
+- `GUI_EnableAlpha(1)` + `GUI_SetAlpha()` → Sim 无效
+- `GUI_AlphaEnableFillRectHW(1)` → Sim 无效
+- `GUI_AA_FillRoundedRect` → 需 `GUI_AA_EnableHiRes()`，但会引起全局渲染异常
+- `GUI_MEMDEV_CreateFixed32` 快照/还原 → Win32 驱动不支持往返
+- **结论**：Sim 下不要依赖 alpha 混合和 MemDev 快照。选取框改用空心圆角矩形边框。
