@@ -1,14 +1,15 @@
-//-----------------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 /*
  File        : MiniLZ77.cpp
- Version     : V1.51
+ Version     : V1.52
  By          : Wey. Silver Grid
 
  Description : MiniLZ77 codec — VP-style 8-token control groups, max match=258,
                max lookback=128.  Circular window indexing for large images.
 
- Date        : 2026.06.26 (V1.51 — circular window: win[pos % CSG_DEC_WINDOW_BYTES])
+ Date        : 2026.07.02 (V1.52 — Yoda conditions & mandatory braces for if/for/while)
+              2026.06.26 (V1.51 — circular window: win[pos % CSG_DEC_WINDOW_BYTES])
               2026.06.25 (V1.50 — original CSG v1.5 implementation)
 */
 //-----------------------------------------------------------------------------
@@ -47,7 +48,7 @@ static std::pair<int,int> findMatch(const uint8_t* p, int pos, int n, int window
     for (int j = wStart; j < pos; ++j) {
         int ml = 0;
         int maxCheck = std::min(MAX_MATCH, n - pos);
-        while (ml < maxCheck && p[pos + ml] == p[j + ml]) ++ml;
+        while (ml < maxCheck && p[pos + ml] == p[j + ml]) { ++ml; }
         if (ml > bestLen || (ml == bestLen && (pos - j) < bestDist)) {
             bestLen = ml; bestDist = pos - j;
         }
@@ -62,7 +63,9 @@ std::vector<uint8_t> MiniLZ77Codec::Compress(
     int bpc = BytesPerColor(cm);
     int pixelStride = (crn > 0) ? 1 : bpc;
     int n = totalPixels * pixelStride;
-    if (n == 0) return {};
+    if (0 == n) {
+        return {};
+    }
 
     int window = (n < 256) ? n : 256;
     std::vector<uint8_t> out;
@@ -78,14 +81,14 @@ std::vector<uint8_t> MiniLZ77Codec::Compress(
 
             // Lazy matching: if next position has a much better match,
             // emit literal now and take the better match next iteration.
-            if (bestLen >= MIN_MATCH && bestLen < 32 && i + 1 < n) {
+            if (MIN_MATCH <= bestLen && 32 > bestLen && i + 1 < n) {
                 auto [nextLen, nextDist] = findMatch(pixels, i + 1, n, window);
-                if (nextLen > bestLen + 1) {
+                if (bestLen + 1 < nextLen) {
                     bestLen = 0;
                 }
             }
 
-            if (bestLen >= MIN_MATCH) {
+            if (MIN_MATCH <= bestLen) {
                 tokens.push_back(static_cast<uint8_t>(bestLen - MIN_MATCH));
                 tokens.push_back(static_cast<uint8_t>(bestDist - 1));
                 ctrl |= (1u << tcnt);
@@ -123,7 +126,7 @@ std::vector<MiniLZ77Codec::Lz77Symbol> MiniLZ77Codec::CompressToSymbols(
             int ml = 0;
             int maxCheck = std::min(MAX_MATCH, n - i);
             while (ml < maxCheck
-                   && pixels[i + ml] == pixels[j + ml]) ++ml;
+                   && pixels[i + ml] == pixels[j + ml]) { ++ml; }
             if (ml > bestLen
                 || (ml == bestLen && (i - j) < bestDist)) {
                 bestLen = ml; bestDist = i - j;
@@ -131,7 +134,7 @@ std::vector<MiniLZ77Codec::Lz77Symbol> MiniLZ77Codec::CompressToSymbols(
         }
 
         Lz77Symbol sym;
-        if (bestLen >= MIN_MATCH) {
+        if (MIN_MATCH <= bestLen) {
             sym.isLiteral = false;
             sym.distance  = static_cast<uint16_t>(bestDist);
             sym.length    = static_cast<uint16_t>(bestLen);
@@ -160,32 +163,36 @@ CSG_ErrCode MiniLZ77Codec::Decompress(
     size_t ip = 0;
 
     while (outPos < totalBytes && ip < inputLen) {
-        if (ip >= inputLen) break;
+        if (ip >= inputLen) { break; }
         uint8_t ctrl = input[ip++];
 
         for (int t = 0; t < TOKENS_PER_GROUP && outPos < totalBytes; ++t) {
-            if (ip >= inputLen) break;
+            if (ip >= inputLen) { break; }
 
-            if (ctrl & (1u << t)) {
-                if (ip + 1 >= inputLen)
+            if (0 != (ctrl & (1u << t))) {
+                if (ip + 1 >= inputLen) {
                     return CSG_ErrCode::kErrLz77GroupErr;
+                }
                 int encLen  = input[ip++];
                 int encDist = input[ip++];
                 int matchLen = encLen + MIN_MATCH;
                 int dist     = encDist + 1;
 
-                if (dist < 1 || dist > outPos)
+                if (dist < 1 || dist > outPos) {
                     return CSG_ErrCode::kErrLz77DistErr;
-                if (outPos + matchLen > totalBytes)
+                }
+                if (outPos + matchLen > totalBytes) {
                     return CSG_ErrCode::kErrLz77GroupErr;
+                }
 
                 int ref = outPos - dist;
-                for (int j = 0; j < matchLen; ++j)
+                for (int j = 0; j < matchLen; ++j) {
                     output[outPos++] = output[ref + j];
+                }
             } else {
                 output[outPos++] = input[ip++];
             }
         }
     }
-    return (outPos == totalBytes) ? CSG_ErrCode::kOk : CSG_ErrCode::kErrLz77GroupErr;
+    return (totalBytes == outPos) ? CSG_ErrCode::kOk : CSG_ErrCode::kErrLz77GroupErr;
 }

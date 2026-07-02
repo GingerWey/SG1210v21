@@ -1,14 +1,15 @@
-//-----------------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 /*
  File        : CSGCommon.h
- Version     : V1.52
+ Version     : V1.53
  By          : Wey. Silver Grid
 
  Description : CSG core types, enumerations, constants, CRC16, Huffman tables,
                decoder state, color packing/unpacking, VxARGB with CRM+saturation.
 
- Date        : 2026.06.26 (V1.52 — VxARGB: FromCrm/ToCrm/ApplySaturation/IsTransparent)
+ Date        : 2026.07.02 (V1.53 — Yoda conditions & mandatory braces for if/for/while)
+              2026.06.26 (V1.52 — VxARGB: FromCrm/ToCrm/ApplySaturation/IsTransparent)
               2026.06.26 (V1.51 — kCsgMaxWidth=500/kCsgMaxHeight=360, CSGDecoderState:
                           pendMatchLen/pendRef, pendRleCount/Type/Cri, deflateBufHandle,
                           streamSize, CSG_DEC_WINDOW_BYTES=8192)
@@ -71,7 +72,7 @@ inline constexpr int     kCalShift          = 4;     // Shift CAL into high nibb
 // ============================================================================
 
 inline constexpr char kEncoderName[]    = "CSG Toolkits";
-inline constexpr int  kEncoderVersion   = 0x01052633;  // v1.5.2633
+inline constexpr int  kEncoderVersion   = 0x01062627;  // v1.6.2627 (2026 wk27)
 
 // ============================================================================
 // CSG magic markers
@@ -85,7 +86,7 @@ inline constexpr char kCsgPictureMagic[2] = {'V', 'x'};
 // ============================================================================
 
 inline constexpr uint8_t kCsgVersionMajor = 1;
-inline constexpr uint8_t kCsgVersionMinor = 5;
+inline constexpr uint8_t kCsgVersionMinor = 6;
 inline constexpr uint8_t kCsgCurVersion   = (kCsgVersionMajor * 10
                                              + kCsgVersionMinor);
 
@@ -249,7 +250,7 @@ struct VxARGB {
     // ---- Saturation: ITU-R BT.601 luma-based desaturation (in-place) ----
     // sat: 0–100 (100 = no change, 0 = grayscale)
     void ApplySaturation(int sat) noexcept {
-        if (sat >= 100 || sat < 0) return;
+        if (100 <= sat || 0 > sat) { return; }
         int gray  = (static_cast<int>(r) * 299 +
                      static_cast<int>(g) * 587 +
                      static_cast<int>(b) * 114) / 1000;
@@ -293,9 +294,10 @@ struct CSGHeader {
     // Resolve the byte offset of picture picIndex (0-based).
     // Returns 0 on error.
     uint32_t GetPicOffset(int picIndex) const {
-        if (picIndex < 0
-            || static_cast<size_t>(picIndex) >= GetPicCount())
+        if (0 > picIndex
+            || GetPicCount() <= static_cast<size_t>(picIndex)) {
             return 0;
+        }
 
         uint32_t result;
         if (0 == (picCount & kPicOffsetRelFlag)) {
@@ -304,11 +306,13 @@ struct CSGHeader {
         } else {
             // Relative offset mode — accumulate
             result = picOffset[0];
-            for (int i = 1; i <= picIndex; ++i)
+            for (int i = 1; i <= picIndex; ++i) {
                 result += picOffset[i];
+            }
 
-            if (result > kCsgMaxPicOffset)
+            if (kCsgMaxPicOffset < result) {
                 result = 0;
+            }
         }
         return result;
     }
@@ -558,6 +562,15 @@ inline constexpr int     kCalMax       = 7;   // Maximum valid CAL value
 inline constexpr uint8_t kCalDefault   = 2;   // Default CAL level
 
 // ============================================================================
+// CRN bit7: transparent color flag (v1.6)
+//   bit7 = 0: has transparent color (compatible with original CSG files)
+//   bit7 = 1: no transparent color
+// ============================================================================
+
+inline constexpr uint8_t kCrnTransparentFlag = 0x80;  // CRN bit7
+inline constexpr uint8_t kCrnColorCountMask  = 0x7F;  // CRN bit[6:0] = color count
+
+// ============================================================================
 // Valid CRN values
 // ============================================================================
 
@@ -598,19 +611,24 @@ inline int BitsPerIndex(int crn) noexcept {
 }
 
 inline int CSGPicture::BitsPerIndex() const noexcept {
-    return ::BitsPerIndex(crn);
+    return ::BitsPerIndex(crn & kCrnColorCountMask); // v1.6: mask bit7
 }
 
 /// Returns the palette data length in bytes for this picture.
+/// v1.6: masks CRN bit7 to get actual color count.
 inline int CSGPicture::PaletteByteCount() const noexcept {
     int bpc = BytesPerColor();
-    if (crn == 0) return bpc;       // Single transparent color
-    return crn * bpc;
+    int colorCount = crn & kCrnColorCountMask;
+    if (0 == colorCount) { return bpc; }       // v1.6: Single transparent color
+    return colorCount * bpc;
 }
 
 inline bool IsValidCrn(int crn) noexcept {
-    for (int v : kValidCrnValues)
-        if (v == crn) return true;
+    for (int v : kValidCrnValues) {
+        if (v == (crn & kCrnColorCountMask)) { // v1.6: mask bit7
+            return true;
+        }
+    }
     return false;
 }
 

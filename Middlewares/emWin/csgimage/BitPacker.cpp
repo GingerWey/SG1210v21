@@ -2,12 +2,13 @@
 //-----------------------------------------------------------------------------
 /*
  File        : BitPacker.cpp
- Version     : V1.50
+ Version     : V1.51
  By          : Wey. Silver Grid
 
  Description : BitPacker implementation — LSB-first bit-stream pack/unpack.
 
- Date        : 2026.06.25 (V1.50 — original CSG v1.5 implementation)
+ Date        : 2026.07.02 (V1.51 — Yoda conditions & mandatory braces for if/for/while)
+              2026.06.25 (V1.50 — original CSG v1.5 implementation)
 */
 //-----------------------------------------------------------------------------
 #include "BitPacker.h"
@@ -18,11 +19,11 @@
 
 void BitPacker::PackBits(uint8_t value, int numBits) {
     for (int i = 0; i < numBits; ++i) {
-        if (value & (1u << i)) {
+        if (0 != (value & (1u << i))) {
             currentByte_ |= static_cast<uint8_t>(1u << bitOffset_);
         }
         ++bitOffset_;
-        if (bitOffset_ == 8) {
+        if (8 == bitOffset_) {
             buf_.push_back(currentByte_);
             currentByte_ = 0;
             bitOffset_ = 0;
@@ -32,11 +33,11 @@ void BitPacker::PackBits(uint8_t value, int numBits) {
 
 void BitPacker::PackBits16(uint16_t value, int numBits) {
     for (int i = 0; i < numBits; ++i) {
-        if (value & (1u << i)) {
+        if (0 != (value & (1u << i))) {
             currentByte_ |= static_cast<uint8_t>(1u << bitOffset_);
         }
         ++bitOffset_;
-        if (bitOffset_ == 8) {
+        if (8 == bitOffset_) {
             buf_.push_back(currentByte_);
             currentByte_ = 0;
             bitOffset_ = 0;
@@ -46,7 +47,7 @@ void BitPacker::PackBits16(uint16_t value, int numBits) {
 
 std::vector<uint8_t> BitPacker::GetBytes() const {
     std::vector<uint8_t> out = buf_;
-    if (bitOffset_ > 0) {
+    if (0 < bitOffset_) {
         // Partial byte — zero-padded on the high side
         out.push_back(currentByte_);
     }
@@ -69,7 +70,7 @@ uint8_t BitUnpacker::UnpackBits(int numBits) {
         size_t byteIdx = bitPos_ / 8;
         size_t bitInByte = bitPos_ % 8;
         if (byteIdx < byteLen_) {
-            if (data_[byteIdx] & (1u << bitInByte)) {
+            if (0 != (data_[byteIdx] & (1u << bitInByte))) {
                 result |= static_cast<uint8_t>(1u << i);
             }
         }
@@ -84,7 +85,7 @@ uint16_t BitUnpacker::UnpackBits16(int numBits) {
         size_t byteIdx = bitPos_ / 8;
         size_t bitInByte = bitPos_ % 8;
         if (byteIdx < byteLen_) {
-            if (data_[byteIdx] & (1u << bitInByte)) {
+            if (0 != (data_[byteIdx] & (1u << bitInByte))) {
                 result |= static_cast<uint16_t>(1u << i);
             }
         }
@@ -101,7 +102,7 @@ uint8_t BitUnpacker::PeekBits(int numBits) const {
         size_t byteIdx = pos / 8;
         size_t bitInByte = pos % 8;
         if (byteIdx < byteLen_) {
-            if (data_[byteIdx] & (1u << bitInByte)) {
+            if (0 != (data_[byteIdx] & (1u << bitInByte))) {
                 result |= static_cast<uint8_t>(1u << i);
             }
         }

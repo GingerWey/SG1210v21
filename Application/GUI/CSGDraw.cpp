@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 /*
  File        : CSGDraw.cpp
- Version     : V1.06
+ Version     : V1.09
  By          : Wey. Silver Grid
 
  Description : CSG image drawing — unified Sim+MCU streaming path.
@@ -10,7 +10,10 @@
                MCU clip: pClipRect parameter (nullptr=full screen, &rect=clipped).
                Does NOT depend on emWin GUI_SetClipRect/GUI_GetClipRect.
 
- Date        : 2026.06.30 (V1.06 — pClipRect parameter replaces GUI_GetClipRect)
+ Date        : 2026.07.02 (V1.09 — strict Yoda conditions & mandatory braces for if/for/while)
+              2026.07.02 (V1.08 — v1.6 CRN bit7: crnReal=kCrnColorCountMask, hasTransparency=kCrnTransparentFlag)
+              2026.07.02 (V1.07 — Yoda-style + brace-style compliance)
+              2026.06.30 (V1.06 — pClipRect parameter replaces GUI_GetClipRect)
               2026.06.30 (V1.05 — MCU software clip rect via GUI_GetClipRect, deprecated)
               2026.06.26 (V1.04 — performance: row-bitmap draw, inline CRM→RGB565)
 */
@@ -62,21 +65,23 @@ static bool ParseCsgPicture(const uint8_t* csgData,
                             const uint8_t** dataOut,
                             size_t* dataSizeOut)
 {
-    if (csgData == nullptr || csgSize < kCsgPictureHeaderSize)
+    if (nullptr == csgData || kCsgPictureHeaderSize > csgSize) {
         return false;
+    }
 
     const uint8_t* ptr = csgData;
 
     // Check if this is a CSG atlas (starts with "CG") or a standalone picture ("Vx")
-    if (ptr[0] == kCsgGlobalMagic[0] && ptr[1] == kCsgGlobalMagic[1]) {
+    if (kCsgGlobalMagic[0] == ptr[0] && kCsgGlobalMagic[1] == ptr[1]) {
         // Atlas mode: read global header, then extract sub-picture
         const CSGHeader* hdr = reinterpret_cast<const CSGHeader*>(ptr);
 
         int count = static_cast<int>(hdr->GetPicCount());
-        if (count == 0) {
+        if (0 == count) {
             // Empty atlas with embedded picture at offset 0
-            if (csgSize < static_cast<size_t>(kCsgGlobalHeaderFixedSize + kCsgPictureHeaderSize))
+            if (csgSize < static_cast<size_t>(kCsgGlobalHeaderFixedSize + kCsgPictureHeaderSize)) {
                 return false;
+            }
             ptr += kCsgGlobalHeaderFixedSize;
             memcpy(picOut, ptr, kCsgPictureHeaderSize);
             *dataOut    = ptr + kCsgPictureHeaderSize;
@@ -85,12 +90,14 @@ static bool ParseCsgPicture(const uint8_t* csgData,
         }
 
         // Resolve sub-picture by index
-        if (picIndex < 0 || picIndex >= count)
+        if (0 > picIndex || count <= picIndex) {
             return false;
+        }
 
         uint32_t offset = hdr->GetPicOffset(picIndex);
-        if (offset == 0 || offset + kCsgPictureHeaderSize > csgSize)
+        if (0 == offset || offset + kCsgPictureHeaderSize > csgSize) {
             return false;
+        }
 
         ptr = csgData + offset;
     }
@@ -99,9 +106,10 @@ static bool ParseCsgPicture(const uint8_t* csgData,
     memcpy(picOut, ptr, kCsgPictureHeaderSize);
 
     // Validate picture magic
-    if (picOut->magic[0] != kCsgPictureMagic[0] ||
-        picOut->magic[1] != kCsgPictureMagic[1])
+    if (kCsgPictureMagic[0] != picOut->magic[0] ||
+        kCsgPictureMagic[1] != picOut->magic[1]) {
         return false;
+    }
 
     *dataOut     = ptr + kCsgPictureHeaderSize;
     *dataSizeOut = picOut->size - kCsgPictureHeaderSize;
@@ -118,7 +126,9 @@ static inline void DrawPixel(int x, int y,
                              uint8_t red, uint8_t green,
                              uint8_t blue, uint8_t alpha)
 {
-    if (alpha == 0) return;
+    if (0 == alpha) {
+        return;
+    }
 
 #ifndef __vmSIMULATOR__
     // MCU: convert RGB888 -> RGB565 and write directly to LCD
@@ -147,8 +157,8 @@ static inline void DrawPixel(int x, int y,
 static void SaturatePalette(uint8_t* palBytes, int entryCount, int bpc,
                             uint8_t colorMode, int sat)
 {
-    if (sat >= 100 || palBytes == nullptr || entryCount <= 0) return;
-    if (sat < 0) sat = 0;
+    if (100 <= sat || nullptr == palBytes || 0 >= entryCount) { return; }
+    if (0 > sat) { sat = 0; }
 
     ColorMode cm = static_cast<ColorMode>(colorMode);
     for (int i = 0; i < entryCount; ++i) {
@@ -179,7 +189,7 @@ static inline uint16_t CrmToRgb565(const uint8_t* crm, uint8_t colorMode) {
     case 0x33: // RGB888 → RGB565
         return ((uint16_t)(crm[0] >> 3) << 11) | ((uint16_t)(crm[1] >> 2) << 5) | (uint16_t)(crm[2] >> 3);
     case 0x41: // RGB8888 → RGB565 (skip transparent)
-        if (crm[3] == 0) return 0xF81F;  // magenta sentinel → skip
+        if (0 == crm[3]) { return 0xF81F; }  // magenta sentinel → skip
         return ((uint16_t)(crm[0] >> 3) << 11) | ((uint16_t)(crm[1] >> 2) << 5) | (uint16_t)(crm[2] >> 3);
     default: {
         VxARGB px = VxARGB::FromCrm(crm, static_cast<ColorMode>(colorMode));
@@ -235,11 +245,11 @@ void CSG_DrawPicture(const TGUIPicture* pPic, int x0, int y0,
     (void)pClipRect;    // Sim: emWin handles clip internally via GUI_SetClipRect
 #endif
   
-    if (pPic == nullptr || pPic->pData == nullptr) return;
-    if (pPic->Type != ID_CSG) return;
+    if (nullptr == pPic || nullptr == pPic->pData) { return; }
+    if (pPic->Type != ID_CSG) { return; }
 
-    if (saturation < 10) saturation = 10;
-    if (saturation > 100) saturation = 100;
+    if (10 > saturation) { saturation = 10; }
+    if (100 < saturation) { saturation = 100; }
 
     const uint8_t* csgData = static_cast<const uint8_t*>(pPic->pData);
 
@@ -249,49 +259,55 @@ void CSG_DrawPicture(const TGUIPicture* pPic, int x0, int y0,
     size_t         compSize = 0;
 
     if (!ParseCsgPicture(csgData, pPic->Size, picIndex,
-                         &pic, &compData, &compSize))
+                         &pic, &compData, &compSize)) {
         return;
+    }
 
     int bpc    = pic.BytesPerColor();
     int crn    = pic.crn;
+    int crnReal = crn & kCrnColorCountMask;           // v1.6: actual color count (mask bit7)
+    bool hasTransparency = (0 < crnReal
+                            && 0 == (crn & kCrnTransparentFlag)); // v1.6: bit7=0 → transparent
     int totalPixels = pic.width * pic.height;
     int width  = pic.width;
     ColorMode outMode = static_cast<ColorMode>(pic.colorMode);
     uint8_t colorMode = pic.colorMode;
 
-    // 2. Read embedded palette
+    // 2. Read embedded palette (v1.6: use crnReal, not crn)
     const uint8_t* embPalette = nullptr;
-    if (crn > 0 && pic.ppos > 0 &&
-        pic.ppos + static_cast<uint16_t>(crn * bpc) <= pic.size) {
+    if (0 < crnReal && 0 < pic.ppos
+        && pic.ppos + static_cast<uint16_t>(crnReal * bpc) <= pic.size) {
         embPalette = compData + pic.ppos - kCsgPictureHeaderSize;
     }
 
-    // 3. Apply saturation to palette
+    // 3. Apply saturation to palette (v1.6: use crnReal)
     uint8_t* satPalBuf = nullptr;
     GUI_HMEM hPalBuf = 0;
     const uint8_t* activePalette = embPalette;
-    const bool doSat = (saturation != 100);
-    if (doSat && embPalette != nullptr && crn > 0) {
-        int palBytes = crn * bpc;
+    const bool doSat = (100 != saturation);
+    if (true == doSat && nullptr != embPalette && 0 < crnReal) {
+        int palBytes = crnReal * bpc;
         hPalBuf = GUI_ALLOC_AllocZero(palBytes);
-        if (hPalBuf != 0) {
+        if (0 != hPalBuf) {
             satPalBuf = static_cast<uint8_t*>(GUI_ALLOC_h2p(hPalBuf));
             memcpy(satPalBuf, embPalette, palBytes);
-            SaturatePalette(satPalBuf, crn, bpc, colorMode, saturation);
+            SaturatePalette(satPalBuf, crnReal, bpc, colorMode, saturation);
             activePalette = satPalBuf;
         }
     }
 
     // 4. Precompute transparent color in RGB565 (palette[0] → RGB565)
+    //    hasTransparency was computed at line 261 (v1.6 CRN bit7 check)
     uint16_t transpRgb565 = 0x0000;
-    bool hasTransparency = (crn > 0 && activePalette != nullptr);
-    if (hasTransparency) {
+    if (true == hasTransparency) {
         transpRgb565 = CrmToRgb565(activePalette, colorMode);
     }
 
     // 5. Allocate buffers: CRM output + bitmap (RGB565 for MCU, 32-bit for Sim)
     int maxBatch = width;
-    if (maxBatch > totalPixels) maxBatch = totalPixels;
+    if (totalPixels < maxBatch) {
+        maxBatch = totalPixels;
+    }
     int crmBytes = maxBatch * bpc;
 #ifdef __vmSIMULATOR__
     int bmpBytes = maxBatch * 4;  // 32-bit 0x00RRGGBB for GUICC_M8888I
@@ -300,10 +316,16 @@ void CSG_DrawPicture(const TGUIPicture* pPic, int x0, int y0,
 #endif
     GUI_HMEM hOutBuf = GUI_ALLOC_AllocZero(crmBytes);
     GUI_HMEM hBmpBuf = GUI_ALLOC_AllocZero(bmpBytes);
-    if (hOutBuf == 0 || hBmpBuf == 0) {
-        if (hOutBuf != 0) GUI_ALLOC_Free(hOutBuf);
-        if (hBmpBuf != 0) GUI_ALLOC_Free(hBmpBuf);
-        if (hPalBuf != 0) GUI_ALLOC_Free(hPalBuf);
+    if (0 == hOutBuf || 0 == hBmpBuf) {
+        if (0 != hOutBuf) {
+            GUI_ALLOC_Free(hOutBuf);
+        }
+        if (0 != hBmpBuf) {
+            GUI_ALLOC_Free(hBmpBuf);
+        }
+        if (0 != hPalBuf) {
+            GUI_ALLOC_Free(hPalBuf);
+        }
         return;
     }
     uint8_t* outBuf = static_cast<uint8_t*>(GUI_ALLOC_h2p(hOutBuf));
@@ -315,8 +337,11 @@ void CSG_DrawPicture(const TGUIPicture* pPic, int x0, int y0,
     static CSGDecoderState state;
     if (CsgDecodeInit(&state, &pic, outBuf, activePalette, outMode)
         != CSG_ErrCode::kOk) {
-        GUI_ALLOC_Free(hOutBuf); GUI_ALLOC_Free(hBmpBuf);
-        if (hPalBuf != 0) GUI_ALLOC_Free(hPalBuf);
+        GUI_ALLOC_Free(hOutBuf); 
+        GUI_ALLOC_Free(hBmpBuf);
+        if (0 != hPalBuf) {
+            GUI_ALLOC_Free(hPalBuf);
+        }
         return;
     }
     state.stream     = compData + (pic.dpos - kCsgPictureHeaderSize);
@@ -328,24 +353,30 @@ void CSG_DrawPicture(const TGUIPicture* pPic, int x0, int y0,
         int prevDecoded = state.pixelsDecoded;
         CSG_ErrCode decErr = CsgDecodePixels(&state, outBuf, maxBatch);
         int n = state.pixelsDecoded - prevDecoded;
-        if (decErr != CSG_ErrCode::kOk || n == 0) break;
+        if (CSG_ErrCode::kOk != decErr || 0 == n) {
+            break;
+        }
 
 #ifdef __vmSIMULATOR__
         // ---- Sim: hybrid draw ----
         //   Rows with transparent pixels: per-pixel draw, skip transparent.
         //   Rows without transparent pixels: fast GUI_DrawBitmapExp.
-        if (hasTransparency) {
+        if (true == hasTransparency) {
             uint32_t transp32 = Rgb565ToSim(transpRgb565);
             bool bHasTransp = false;
-            for (int i = 0; i < n && !bHasTransp; ++i) {
-                if (Rgb565ToSim(CrmToRgb565(outBuf + i * bpc, colorMode)) == transp32)
+            for (int i = 0; i < n && false == bHasTransp; ++i) {
+              if( transp32 == Rgb565ToSim( CrmToRgb565( outBuf + i * bpc, colorMode ) ) ) {
                     bHasTransp = true;
+                  }
             }
-            if (bHasTransp) {
+            if (true == bHasTransp) {
                 // Slow path: per-pixel draw, skip transparent → background shows through
                 for (int i = 0; i < n; ++i) {
                     uint16_t v565 = CrmToRgb565(outBuf + i * bpc, colorMode);
-                    if (v565 == transpRgb565) continue;  // skip transparent
+                    if (v565 == transpRgb565) {
+                        continue; // skip transparent
+                    }
+
                     uint32_t c = Rgb565ToSim(v565);
                     GUI_SetColor(c & 0x00FFFFFF);  // strip alpha, keep RGB
                     GUI_DrawPixel(x0 + i, y0 + row);
@@ -353,17 +384,19 @@ void CSG_DrawPicture(const TGUIPicture* pPic, int x0, int y0,
             } else {
                 // Fast path: no transparency in this row → bitmap draw
                 uint32_t* bmp32 = static_cast<uint32_t*>(bmpBuf);
-                if (doSat && crn == 0) {
-                    for (int i = 0; i < n; ++i)
+                if (true == doSat && 0 == crn) {
+                    for (int i = 0; i < n; ++i) {
                         bmp32[i] = Rgb565ToSim(SaturateRgb565(CrmToRgb565(outBuf + i*bpc, colorMode), saturation));
+                    }
                 } else {
-                    for (int i = 0; i < n; ++i)
-                        bmp32[i] = Rgb565ToSim(CrmToRgb565(outBuf + i*bpc, colorMode));
+                  for( int i = 0; i < n; ++i ) {
+                        bmp32[i] = Rgb565ToSim(CrmToRgb565(outBuf + i * bpc, colorMode));
+                    }
                 }
                 GUI_DrawBitmapExp(x0, y0 + row, n, 1, 1, 1, 32, n * 4,
                                   static_cast<const U8*>(bmpBuf), nullptr);
             }
-        } else if (doSat && crn == 0) {
+        } else if (true == doSat && 0 == crn) {
             uint32_t* bmp32 = static_cast<uint32_t*>(bmpBuf);
             for (int i = 0; i < n; ++i) {
                 bmp32[i] = Rgb565ToSim(SaturateRgb565(
@@ -386,7 +419,8 @@ void CSG_DrawPicture(const TGUIPicture* pPic, int x0, int y0,
         if( nullptr != pClipRect ) {
             // Skip row entirely if outside clip Y range
             if (y0 + row < pClipRect->y0 ) {
-                ++row; continue;
+                ++row;
+                continue;
             } else if(y0 + row > pClipRect->y1) {
                 break;
             }
@@ -394,33 +428,38 @@ void CSG_DrawPicture(const TGUIPicture* pPic, int x0, int y0,
             // Clipped column range for burst-path rows
             int iClipStart = (pClipRect->x0 > x0) ? (pClipRect->x0 - x0) : 0;
             int iClipEnd   = (pClipRect->x1 < x0 + n - 1) ? (pClipRect->x1 - x0 + 1) : n;
-            if (iClipStart >= iClipEnd) { ++row; continue; }
-        
+            if (iClipStart >= iClipEnd) {
+                ++row;
+                continue;
+            }
+
             const uint16_t* puwPixels = (uint16_t*)(outBuf);
-            if (hasTransparency) {
+            if (true == hasTransparency) {
                 // Scan for transparent pixels in this row
                 bool bHasTransp = false;
-                for (int i = 0; i < n && !bHasTransp; ++i) {
-                    if( puwPixels[i] == transpRgb565 )
+                for (int i = 0; i < n && false == bHasTransp; ++i) {
+                    if( transpRgb565 == puwPixels[i] ) {
                         bHasTransp = true;
+                    }
                 }
-        
-                if (bHasTransp) {
+
+                if (true == bHasTransp) {
                     // Per-pixel: skip transparent + clipped pixels
                     U32 bNeedCursor = 1;
                     for (int i = 0; i < n; ++i) {
                         U16 uwColor = *puwPixels++;
                         int  sx      = x0 + i;
         
-                        if (sx < pClipRect->x0 || sx > pClipRect->x1) 
+                        if (sx < pClipRect->x0 || sx > pClipRect->x1) {
                            continue;
-                        
-                        if (uwColor == transpRgb565) { 
-                           bNeedCursor = 1; 
-                           continue; 
                         }
-        
-                        if (bNeedCursor) {
+
+                        if (transpRgb565 == uwColor) {
+                           bNeedCursor = 1;
+                           continue;
+                        }
+
+                        if (0 != bNeedCursor) {
                             bNeedCursor = 0;
                             LCD_SetCursor(sx, y0 + row);
                         }
@@ -430,56 +469,61 @@ void CSG_DrawPicture(const TGUIPicture* pPic, int x0, int y0,
                     // Fast burst — clipped range only
                     LCD_SetCursor(x0 + iClipStart, y0 + row);
                     puwPixels += iClipStart;
-                    for (int i = iClipStart; i < iClipEnd; ++i)
+                    for (int i = iClipStart; i < iClipEnd; ++i) {
                         LCD_DATADDR = *puwPixels++;
+                    }
                     puwPixels += (n - iClipEnd);
                 }
-            } else if (doSat && crn == 0) {
+            } else if (true == doSat && 0 == crn) {
                 LCD_SetCursor(x0 + iClipStart, y0 + row);
                 puwPixels += iClipStart;
-                for (int i = iClipStart; i < iClipEnd; ++i)
+                for (int i = iClipStart; i < iClipEnd; ++i) {
                     LCD_DATADDR = SaturateRgb565(*puwPixels++, saturation);
+                }
             } else {
                 LCD_SetCursor(x0 + iClipStart, y0 + row);
                 puwPixels += iClipStart;
-                for (int i = iClipStart; i < iClipEnd; ++i)
+                for (int i = iClipStart; i < iClipEnd; ++i) {
                     LCD_DATADDR = *puwPixels++;
+                }
             }
         } else {
             // No Clip rect.
             const uint16_t* puwPixels = (uint16_t*)(outBuf);
-            if (hasTransparency) {
+            if (true == hasTransparency) {
                 // Scan for transparent pixels in this row
                 bool bHasTransp = false;
-                for (int i = 0; i < n && !bHasTransp; ++i) {
-                    if( puwPixels[i] == transpRgb565 )
+                for (int i = 0; i < n && false == bHasTransp; ++i) {
+                    if( transpRgb565 == puwPixels[i] ) {
                         bHasTransp = true;
+                    }
                 }
-        
-                if (bHasTransp) {
+
+                if (true == bHasTransp) {
                     // Per-pixel: skip transparent + clipped pixels
                     U32 bNeedCursor = 1;
                     for (int i = 0; i < n; ++i) {
                         U16 uwColor = *puwPixels++;
-                        if (uwColor == transpRgb565) {
+                        if (transpRgb565 == uwColor) {
                           bNeedCursor = 1;
                           continue;
                         }
 
-                        if (bNeedCursor) {
+                        if (0 != bNeedCursor) {
                             bNeedCursor = 0;
                             LCD_SetCursor(x0 + i, y0 + row);
                         }
-                        
+
                         LCD_DATADDR = uwColor;
                     }
                 } else {
                     // Fast path: no transparent pixels in this row
                     LCD_SetCursor(x0, y0 + row);
-                    for (int i = 0; i < n; ++i)
+                    for (int i = 0; i < n; ++i) {
                         LCD_DATADDR = *puwPixels++;
+                    }
                 }
-            } else if (doSat && crn == 0) {
+            } else if (true == doSat && 0 == crn) {
                 LCD_SetCursor(x0, y0 + row);
                 for (int i = 0; i < n; ++i) {
                     LCD_DATADDR = SaturateRgb565(*puwPixels++, saturation);
@@ -501,11 +545,13 @@ void CSG_DrawPicture(const TGUIPicture* pPic, int x0, int y0,
     }
 
     // Free DEFLATE intermediate buffer if allocated
-    if (state.deflateBufHandle != 0) {
+    if (0 != state.deflateBufHandle) {
         GUI_ALLOC_Free(static_cast<GUI_HMEM>(state.deflateBufHandle));
     }
 
     GUI_ALLOC_Free(hOutBuf);
     GUI_ALLOC_Free(hBmpBuf);
-    if (hPalBuf != 0) GUI_ALLOC_Free(hPalBuf);
+    if (0 != hPalBuf) { 
+       GUI_ALLOC_Free(hPalBuf); 
+    }
 }

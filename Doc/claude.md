@@ -198,6 +198,59 @@ extern "C" {
 #endif
 ```
 
+### 禁止单行代码
+- 单行if要加{}对, 及else(可空)
+  if( ? ) {
+    then
+  } else {
+    ...
+  }
+- 类似的：for, while...
+  - 不允许下方出现不带{}的代码
+- 禁止将{}放一行
+  - 不可以：
+  if( ? ) { then. }
+  - 要写成：
+  if( ? ) {
+    then
+  }
+
+### if的写法(Yoda-style comparisons)
+- 变量与数字比较：
+  - 数字在前，变量在后
+  if( n == 0 )  不可以
+  if( 0 == n )  可以
+- 变量与常量比较：
+  - 常量在前，变量在后
+  if( n == const )  不可以
+  if( const == n )  可以
+- 变量与表达式比较
+  - 表达式在前，变量在后
+  if( n == x + 1)   不可以
+  if( x + 1 == n )  可以
+- 变量与变量比较：
+  - 局部变量在前，全局变量在后
+  if( m_n == n )  不可以
+  if( n == m_n )  可以
+- 为0或空指针判断
+  - 为0判断
+   if(n)  不可以
+   if(0 != n ) 可以
+   if(!n) 不可以
+   if(0 == n ) 可以
+  - 为空指针判断
+   if(p)  不可以
+   if(nullptr != p ) 可以
+   if(!p) 不可以
+   if(nullptr == p ) 可以
+- 为true/false判断
+  - 显式写判断
+    if( btrans )  不可以
+    if( true == btrans )  可以
+    if( !btrans ) 不可以
+    if( false == btrans ) 可以
+
+
 ### 变体文件 (`_` 后缀)
 部分文件存在 `_` 后缀变体，用于不同硬件版本：
 - `CoilCtrl.cpp` / `CoilCtrl_.cpp` — 不同线圈控制逻辑

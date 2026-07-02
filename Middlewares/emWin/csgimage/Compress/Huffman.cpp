@@ -1,14 +1,15 @@
-//-----------------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 /*
  File        : Huffman.cpp
- Version     : V1.50
+ Version     : V1.51
  By          : Wey. Silver Grid
 
  Description : Huffman codec — self-describing header, MSB-first bitstream
                encode/decode, canonical codeword assignment.
 
- Date        : 2026.06.25 (V1.50 — original CSG v1.5 implementation)
+ Date        : 2026.07.02 (V1.51 — Yoda conditions & mandatory braces for if/for/while)
+              2026.06.25 (V1.50 — original CSG v1.5 implementation)
 */
 //-----------------------------------------------------------------------------
 #include "Compress/Huffman.h"
@@ -44,15 +45,16 @@ void HuffmanCodec::BuildCodeTables() {
 
     // Pure Huffman (256 symbols)
     if (!HuffGenLengthsPure(cal_, pureLengths_)) {
-        for (int i = 0; i < kHuffPureSymbols; ++i)
+        for (int i = 0; i < kHuffPureSymbols; ++i) {
             pureLengths_[i] = kHuffPureBaseCodeLen;
+        }
     }
     HuffAssignCodewords(pureLengths_, kHuffPureSymbols, pureCodewords_, C);
     HuffBuildDecodeTable(pureCodewords_, pureLengths_, kHuffPureSymbols,
                          pureDecodeTable_, pureMaxBits_);
 
     // DEFLATE lit/len (286 symbols, CAL ≥ 3)
-    if (cal_ >= 3) {
+    if (3 <= cal_) {
         HuffGenLengthsDeflateLitLen(cal_, litLenLengths_);
         HuffAssignCodewords(litLenLengths_, kHuffLitLenSymbols,
                             litLenCodewords_, C);
@@ -60,8 +62,9 @@ void HuffmanCodec::BuildCodeTables() {
                              kHuffLitLenSymbols,
                              litLenDecodeTable_, litLenMaxBits_);
     } else {
-        for (int i = 0; i < kHuffLitLenSymbols; ++i)
+        for (int i = 0; i < kHuffLitLenSymbols; ++i) {
             litLenLengths_[i] = kHuffPureBaseCodeLen;
+        }
         HuffAssignCodewords(litLenLengths_, kHuffLitLenSymbols,
                             litLenCodewords_, kHuffPureBaseCodeLen);
         HuffBuildDecodeTable(litLenCodewords_, litLenLengths_,
@@ -97,21 +100,23 @@ static std::vector<uint8_t> EncodeSymbolsImpl(
         unsigned sym = static_cast<unsigned>(symbols[i]);
         uint8_t len = lengths[sym];
         uint16_t cw  = codewords[sym];
-        if (len == 0) continue;
+        if (0 == len) { continue; }
 
         for (int b = len - 1; b >= 0; --b) {
-            if (cw & (1u << b))
+            if (0 != (cw & (1u << b))) {
                 bitBuf |= (1u << bitCount);
+            }
             ++bitCount;
-            if (bitCount == 8) {
+            if (8 == bitCount) {
                 output.push_back(static_cast<uint8_t>(bitBuf & 0xFF));
                 bitBuf = 0;
                 bitCount = 0;
             }
         }
     }
-    if (bitCount > 0)
+    if (0 < bitCount) {
         output.push_back(static_cast<uint8_t>(bitBuf & 0xFF));
+    }
     return output;
 }
 
@@ -138,23 +143,26 @@ static CSG_ErrCode DecodeSymbolsImpl(
         while (bitsCollected < maxBits && tmpByte < inputLen) {
             peek = (peek << 1) | ((input[tmpByte] >> tmpBit) & 1);
             ++bitsCollected; ++tmpBit;
-            if (tmpBit == 8) { tmpBit = 0; ++tmpByte; }
+            if (8 == tmpBit) { tmpBit = 0; ++tmpByte; }
         }
 
-        if (bitsCollected < maxBits && bitsCollected == 0)
+        if (bitsCollected < maxBits && 0 == bitsCollected) {
             break;
+        }
 
         uint16_t idx = static_cast<uint16_t>(peek & ((1u << maxBits) - 1));
         uint32_t entry = decodeTable[idx];
 
-        if (entry == kHuffTableSentinel)
+        if (kHuffTableSentinel == entry) {
             return CSG_ErrCode::kErrHuffNoMatch;
+        }
 
         uint8_t  symLen = entry & 0xFF;
         uint16_t sym    = static_cast<uint16_t>((entry >> 8) & 0xFFFF);
 
-        if (symLen == 0 || symLen > static_cast<uint8_t>(bitsCollected))
+        if (0 == symLen || static_cast<uint8_t>(bitsCollected) < symLen) {
             return CSG_ErrCode::kErrHuffNoMatch;
+        }
 
         symbols[*outCount] = static_cast<TSym>(sym);
         (*outCount)++;
@@ -181,14 +189,18 @@ std::vector<uint8_t> HuffmanCodec::Compress(
     data.reserve(totalPixels * ((crn > 0) ? 1 : bpc));
     for (int i = 0; i < totalPixels; ++i) {
         const uint8_t* p = pixels + i * pixelStride;
-        if (crn > 0) data.push_back(*p);
+        if (0 < crn) { data.push_back(*p); }
         else for (int j = 0; j < bpc; ++j) data.push_back(p[j]);
     }
-    if (data.empty()) return {};
+    if (data.empty()) {
+        return {};
+    }
 
     // Frequency counts
     std::vector<int> freq(256, 0);
-    for (uint8_t b : data) freq[b]++;
+    for (uint8_t b : data) {
+        freq[b]++;
+    }
 
     // Build Huffman tree
     struct HTNode { int f, left, right, sym; };
@@ -197,16 +209,18 @@ std::vector<uint8_t> HuffmanCodec::Compress(
     std::priority_queue<PQItem, std::vector<PQItem>, std::greater<PQItem>> pq;
 
     for (int s = 0; s < 256; ++s) {
-        if (freq[s] > 0) {
+        if (0 < freq[s]) {
             int id = static_cast<int>(pool.size());
             pool.push_back({freq[s], -1, -1, s});
             pq.push({freq[s], id});
         }
     }
-    if (pq.empty()) return {};
+    if (pq.empty()) {
+        return {};
+    }
 
     // Single-symbol edge case
-    if (pq.size() == 1) {
+    if (1 == pq.size()) {
         int s = pool[pq.top().second].sym;
         std::vector<uint8_t> out;
         uint32_t n = static_cast<uint32_t>(data.size());
@@ -234,17 +248,18 @@ std::vector<uint8_t> HuffmanCodec::Compress(
     // Assign code lengths via DFS
     std::vector<int> lengths(256, 0);
     std::function<void(int,int)> dfs = [&](int node, int depth) {
-        if (pool[node].sym >= 0) { lengths[pool[node].sym] = depth; return; }
-        if (pool[node].left >= 0) dfs(pool[node].left, depth + 1);
-        if (pool[node].right >= 0) dfs(pool[node].right, depth + 1);
+        if (0 <= pool[node].sym) { lengths[pool[node].sym] = depth; return; }
+        if (0 <= pool[node].left) { dfs(pool[node].left, depth + 1); }
+        if (0 <= pool[node].right) { dfs(pool[node].right, depth + 1); }
     };
     dfs(pq.top().second, 0);
 
     // Collect used symbols, sort canonical
     struct SL { int sym, len; };
     std::vector<SL> sl;
-    for (int s = 0; s < 256; ++s)
-        if (lengths[s] > 0) sl.push_back({s, lengths[s]});
+    for (int s = 0; s < 256; ++s) {
+        if (0 < lengths[s]) { sl.push_back({s, lengths[s]}); }
+    }
     std::sort(sl.begin(), sl.end(),
               [](const SL& a, const SL& b) {
                   return a.len != b.len ? a.len < b.len : a.sym < b.sym;
@@ -253,9 +268,13 @@ std::vector<uint8_t> HuffmanCodec::Compress(
     // Canonical codeword assignment
     std::vector<uint32_t> code(256, 0);
     int maxLen = 0;
-    for (auto& x : sl) maxLen = std::max(maxLen, x.len);
+    for (auto& x : sl) {
+        maxLen = std::max(maxLen, x.len);
+    }
     std::vector<int> cntAt(maxLen + 1, 0);
-    for (auto& x : sl) cntAt[x.len]++;
+    for (auto& x : sl) {
+        cntAt[x.len]++;
+    }
 
     if (!sl.empty()) {
         uint32_t cw = 0;
@@ -278,7 +297,7 @@ std::vector<uint8_t> HuffmanCodec::Compress(
             if (--bitsLeft == 0) { bs.push_back(cur); cur = 0; bitsLeft = 8; }
         }
     }
-    if (bitsLeft < 8) bs.push_back(cur);
+    if (8 > bitsLeft) { bs.push_back(cur); }
 
     // Assemble output
     std::vector<uint8_t> out;
@@ -293,7 +312,9 @@ std::vector<uint8_t> HuffmanCodec::Compress(
         out.push_back(static_cast<uint8_t>(c));
         out.push_back(static_cast<uint8_t>(c >> 8));
     }
-    for (auto& x : sl) out.push_back(static_cast<uint8_t>(x.sym));
+    for (auto& x : sl) {
+        out.push_back(static_cast<uint8_t>(x.sym));
+    }
     uint32_t bz = static_cast<uint32_t>(bs.size());
     out.push_back(static_cast<uint8_t>(bz));
     out.push_back(static_cast<uint8_t>(bz >> 8));
@@ -308,7 +329,9 @@ CSG_ErrCode HuffmanCodec::Decompress(
     uint8_t* output, int width, int height, int crn, ColorMode cm) {
 
     (void)crn; (void)cm; (void)width; (void)height;
-    if (inputLen < 5) return CSG_ErrCode::kErrHuffHeader;
+    if (5 > inputLen) {
+        return CSG_ErrCode::kErrHuffHeader;
+    }
     size_t pos = 0;
 
     // origCount
@@ -317,38 +340,52 @@ CSG_ErrCode HuffmanCodec::Decompress(
         | (static_cast<uint32_t>(input[pos + 2]) << 16)
         | (static_cast<uint32_t>(input[pos + 3]) << 24);
     pos += 4;
-    if (pos >= inputLen) return CSG_ErrCode::kErrHuffHeader;
+    if (pos >= inputLen) {
+        return CSG_ErrCode::kErrHuffHeader;
+    }
 
     // maxLen
     int maxLen = input[pos++];
-    if (maxLen == 0 || maxLen > 32) return CSG_ErrCode::kErrHuffHeader;
+    if (0 == maxLen || 32 < maxLen) {
+        return CSG_ErrCode::kErrHuffHeader;
+    }
 
     // counts per length
     std::vector<int> cntAt(maxLen + 1, 0);
     for (int l = 1; l <= maxLen; ++l) {
-        if (pos + 2 > inputLen) return CSG_ErrCode::kErrHuffHeader;
+        if (pos + 2 > inputLen) {
+            return CSG_ErrCode::kErrHuffHeader;
+        }
         cntAt[l] = static_cast<int>(input[pos])
                  | (static_cast<int>(input[pos + 1]) << 8);
         pos += 2;
     }
     int totalSyms = 0;
-    for (int l = 1; l <= maxLen; ++l) totalSyms += cntAt[l];
-    if (pos + static_cast<size_t>(totalSyms) > inputLen)
+    for (int l = 1; l <= maxLen; ++l) {
+        totalSyms += cntAt[l];
+    }
+    if (pos + static_cast<size_t>(totalSyms) > inputLen) {
         return CSG_ErrCode::kErrHuffHeader;
+    }
 
     // symbol table
     std::vector<uint8_t> symTable(totalSyms);
-    for (int k = 0; k < totalSyms; ++k)
+    for (int k = 0; k < totalSyms; ++k) {
         symTable[k] = input[pos++];
+    }
 
     // bitstream length
-    if (pos + 4 > inputLen) return CSG_ErrCode::kErrHuffHeader;
+    if (pos + 4 > inputLen) {
+        return CSG_ErrCode::kErrHuffHeader;
+    }
     uint32_t bsLen = static_cast<uint32_t>(input[pos])
         | (static_cast<uint32_t>(input[pos + 1]) << 8)
         | (static_cast<uint32_t>(input[pos + 2]) << 16)
         | (static_cast<uint32_t>(input[pos + 3]) << 24);
     pos += 4;
-    if (pos + bsLen > inputLen) return CSG_ErrCode::kErrHuffHeader;
+    if (pos + bsLen > inputLen) {
+        return CSG_ErrCode::kErrHuffHeader;
+    }
     const uint8_t* bs = input + pos;
 
     // Rebuild decode table
@@ -359,8 +396,8 @@ CSG_ErrCode HuffmanCodec::Decompress(
         int prevL = 0;
         int symIdx = 0;
         for (int l = 1; l <= maxLen; ++l) {
-            if (cntAt[l] == 0) continue;
-            if (prevL > 0) cw <<= (l - prevL);
+            if (0 == cntAt[l]) { continue; }
+            if (0 < prevL) { cw <<= (l - prevL); }
             for (int k = 0; k < cntAt[l]; ++k) {
                 table.push_back({cw, l, symTable[symIdx++]});
                 ++cw;
@@ -383,10 +420,10 @@ CSG_ErrCode HuffmanCodec::Decompress(
     };
     refill();
 
-    while (outPos < static_cast<int>(origCount) && accumBits > 0) {
+    while (outPos < static_cast<int>(origCount) && 0 < accumBits) {
         bool found = false;
         for (const auto& e : table) {
-            if (e.len > accumBits) continue;
+            if (e.len > accumBits) { continue; }
             uint32_t cand = (accum >> (accumBits - e.len))
                           & ((1u << e.len) - 1);
             if (cand == e.code) {
@@ -398,7 +435,7 @@ CSG_ErrCode HuffmanCodec::Decompress(
                 break;
             }
         }
-        if (!found) break;
+        if (false == found) { break; }
     }
     return (outPos >= static_cast<int>(origCount))
         ? CSG_ErrCode::kOk : CSG_ErrCode::kErrBitpackTrunc;
@@ -418,12 +455,14 @@ std::vector<uint8_t> HuffmanCodec::DecompressRaw(const uint8_t* data, size_t len
 
 // Convenience: decode into vector (sized from self-describing header)
 std::vector<uint8_t> HuffmanCodec::DecompressVec(const uint8_t* input, size_t inputLen) {
-    if (inputLen < 5) return {};
+    if (5 > inputLen) {
+        return {};
+    }
     uint32_t origCount = (uint32_t)input[0]|((uint32_t)input[1]<<8)
                        |((uint32_t)input[2]<<16)|((uint32_t)input[3]<<24);
     std::vector<uint8_t> out(origCount);
     CSG_ErrCode err = Decompress(input, inputLen, out.data(), 1, (int)origCount, 0, ColorMode::kRGB565);
-    if (err != CSG_ErrCode::kOk) out.clear();
+    if (CSG_ErrCode::kOk != err) { out.clear(); }
     return out;
 }
 

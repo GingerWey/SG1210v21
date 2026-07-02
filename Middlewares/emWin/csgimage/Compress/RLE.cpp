@@ -1,14 +1,15 @@
-//-----------------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 /*
  File        : RLE.cpp
- Version     : V1.51
+ Version     : V1.52
  By          : Wey. Silver Grid
 
  Description : RLE codec implementation — ZRC/DPS/CPS/CPL encode/decode,
                DPS cross-batch pending, streaming decoder support.
 
- Date        : 2026.06.26 (V1.51 — DPS cross-batch pending in streaming decoder)
+ Date        : 2026.07.02 (V1.52 — Yoda conditions & mandatory braces for if/for/while)
+              2026.06.26 (V1.51 — DPS cross-batch pending in streaming decoder)
               2026.06.25 (V1.50 — original CSG v1.5 implementation)
 */
 //-----------------------------------------------------------------------------
@@ -27,18 +28,18 @@ constexpr uint32_t RLE_FRAME_CPL = 0b11;
 // ============================================================================
 
 void CompressionBase::SetCal(uint8_t cal) {
-    cal_ = (cal > 7) ? 2 : cal;
+    cal_ = (7 < cal) ? 2 : cal;
 }
 
 bool RleCodec::IsTransparent(const uint8_t* pixel, int crn, ColorMode cm,
                               const uint8_t* transparentVal) const {
     int bpc = BytesPerColor(cm);
-    if (crn > 0) {
+    if (0 < crn) {
         // CRN > 0: pixel is a palette index (stored as uint8_t)
-        return *pixel == 0;
+        return (0 == *pixel);
     } else {
         // CRN == 0: pixel is CRM-encoded; compare with palette[0]
-        return std::memcmp(pixel, transparentVal, bpc) == 0;
+        return (0 == std::memcmp(pixel, transparentVal, bpc));
     }
 }
 
@@ -64,16 +65,18 @@ void RleCodec::WriteDPS(BitPacker& bp, const uint8_t* pixels, int count,
     uint8_t header = static_cast<uint8_t>(((N & kRleCountMask6) << kRleCountShift) | RLE_FRAME_DPS);
     bp.PackBits(header, 8);
 
-    if (crn > 0) {
+    if (0 < crn) {
         int bpi = BitsPerIndex(crn);
-        for (int i = 0; i < count; ++i)
+        for (int i = 0; i < count; ++i) {
             bp.PackBits(pixels[i], bpi);
+        }
     } else {
         int bpc = BytesPerColor(cm);
         for (int i = 0; i < count; ++i) {
             const uint8_t* p = pixels + i * bpc;
-            for (int j = 0; j < bpc; ++j)
+            for (int j = 0; j < bpc; ++j) {
                 bp.PackBits(p[j], 8);
+            }
         }
     }
 }
@@ -85,13 +88,14 @@ void RleCodec::WriteCPS(BitPacker& bp, const uint8_t* pixel, int count,
     uint8_t header = static_cast<uint8_t>(((N & kRleCountMask6) << kRleCountShift) | RLE_FRAME_CPS);
     bp.PackBits(header, 8);
 
-    if (crn > 0) {
+    if (0 < crn) {
         int bpi = BitsPerIndex(crn);
         bp.PackBits(*pixel, bpi);
     } else {
         int bpc = BytesPerColor(cm);
-        for (int j = 0; j < bpc; ++j)
+        for (int j = 0; j < bpc; ++j) {
             bp.PackBits(pixel[j], 8);
+        }
     }
 }
 
@@ -104,13 +108,14 @@ void RleCodec::WriteCPL(BitPacker& bp, const uint8_t* pixel, int count,
     bp.PackBits(low, 8);
     bp.PackBits(high, 8);
 
-    if (crn > 0) {
+    if (0 < crn) {
         int bpi = BitsPerIndex(crn);
         bp.PackBits(*pixel, bpi);
     } else {
         int bpc = BytesPerColor(cm);
-        for (int j = 0; j < bpc; ++j)
+        for (int j = 0; j < bpc; ++j) {
             bp.PackBits(pixel[j], 8);
+        }
     }
 }
 
@@ -144,7 +149,7 @@ std::vector<uint8_t> RleCodec::Compress(
 
         // 1. Check for transparent run (ZRC)
         // Transparent is CRI=0 for CRN>0, or matches transparent for CRN=0
-        if (crn > 0 && *cur == 0) {
+        if (0 < crn && 0 == *cur) {
             int runLen = 0;
             while (pos + runLen < totalPixels
                    && pixels[(pos + runLen) * pixelStride] == 0
@@ -160,16 +165,16 @@ std::vector<uint8_t> RleCodec::Compress(
         int runLen = 1;
         while (pos + runLen < totalPixels && runLen < kRleCplMax) {
             const uint8_t* next = pixels + (pos + runLen) * pixelStride;
-            bool same = (pixelStride == 1)
+            bool same = (1 == pixelStride)
                 ? (*next == *cur)
-                : (std::memcmp(next, cur, pixelStride) == 0);
-            if (!same) break;
+                : (0 == std::memcmp(next, cur, pixelStride));
+            if (!same) { break; }
             ++runLen;
         }
 
-        if (runLen >= kRleMinRun) {
+        if (kRleMinRun <= runLen) {
             // Use CPS for short runs, CPL for longer
-            if (runLen <= kRleCpsMax) {
+            if (kRleCpsMax >= runLen) {
                 WriteCPS(bp, cur, runLen, crn, cm);
             } else {
                 WriteCPL(bp, cur, runLen, crn, cm);
@@ -187,16 +192,18 @@ std::vector<uint8_t> RleCodec::Compress(
                 const uint8_t* ahead2 = pixels + (pos + dpsLen + 1) * pixelStride;
                 const uint8_t* ahead3 = pixels + (pos + dpsLen + 2) * pixelStride;
 
-                bool isRun = (pixelStride == 1)
+                bool isRun = (1 == pixelStride)
                     ? (*ahead == *ahead2 && *ahead == *ahead3)
-                    : (std::memcmp(ahead, ahead2, pixelStride) == 0
-                       && std::memcmp(ahead, ahead3, pixelStride) == 0);
+                    : (0 == std::memcmp(ahead, ahead2, pixelStride)
+                       && 0 == std::memcmp(ahead, ahead3, pixelStride));
 
                 // Also stop if transparent (for CRN>0)
-                if (crn > 0 && *ahead == 0)
+                if (0 < crn && 0 == *ahead) {
                     break;
-                if (isRun)
+                }
+                if (isRun) {
                     break;
+                }
             }
             ++dpsLen;
         }
@@ -231,7 +238,7 @@ CSG_ErrCode RleCodec::Decompress(
     while (outPos < totalPixels) {
         if (bu.BitsRemaining() < 8) {
             // Allow trailing zero-padding; if we've produced all pixels, done
-            if (outPos == totalPixels) break;
+            if (totalPixels == outPos) { break; }
             return CSG_ErrCode::kErrRleFrameErr;
         }
 
@@ -241,13 +248,16 @@ CSG_ErrCode RleCodec::Decompress(
 
         switch (frameType) {
         case RLE_FRAME_ZRC: { // ZRC — transparent run
-            if (N_short == 0) return CSG_ErrCode::kErrRleFrameErr;
-            int count = N_short;  // 1..63
-            if (outPos + count > totalPixels)
+            if (0 == N_short) {
                 return CSG_ErrCode::kErrRleFrameErr;
+            }
+            int count = N_short;  // 1..63
+            if (outPos + count > totalPixels) {
+                return CSG_ErrCode::kErrRleFrameErr;
+            }
 
             for (int i = 0; i < count; ++i) {
-                if (crn > 0) {
+                if (0 < crn) {
                     output[outPos * pixelStride] = 0;  // CRI=0 transparent
                 } else {
                     // All bytes zero (transparent CRM representation)
@@ -260,18 +270,21 @@ CSG_ErrCode RleCodec::Decompress(
 
         case RLE_FRAME_DPS: { // DPS — discrete pixels
             int count = N_short + 1;  // 1..64
-            if (outPos + count > totalPixels)
+            if (outPos + count > totalPixels) {
                 return CSG_ErrCode::kErrRleFrameErr;
+            }
 
             for (int i = 0; i < count; ++i) {
-                if (crn > 0) {
-                    if (static_cast<int>(bu.BitsRemaining()) < bpi)
+                if (0 < crn) {
+                    if (static_cast<int>(bu.BitsRemaining()) < bpi) {
                         return CSG_ErrCode::kErrRleCriMiss;
+                    }
                     output[outPos * pixelStride] = bu.UnpackBits(bpi);
                 } else {
                     for (int j = 0; j < bpc; ++j) {
-                        if (bu.BitsRemaining() < 8)
+                        if (bu.BitsRemaining() < 8) {
                             return CSG_ErrCode::kErrRleCriMiss;
+                        }
                         output[outPos * pixelStride + j] = bu.UnpackBits(8);
                     }
                 }
@@ -282,18 +295,21 @@ CSG_ErrCode RleCodec::Decompress(
 
         case RLE_FRAME_CPS: { // CPS — short continuous run
             int count = N_short + 1;  // 1..64
-            if (outPos + count > totalPixels)
+            if (outPos + count > totalPixels) {
                 return CSG_ErrCode::kErrRleFrameErr;
+            }
 
             uint8_t colorVal[4] = {0};
-            if (crn > 0) {
-                if (static_cast<int>(bu.BitsRemaining()) < bpi)
+            if (0 < crn) {
+                if (static_cast<int>(bu.BitsRemaining()) < bpi) {
                     return CSG_ErrCode::kErrRleCriMiss;
+                }
                 colorVal[0] = bu.UnpackBits(bpi);
             } else {
                 for (int j = 0; j < bpc; ++j) {
-                    if (bu.BitsRemaining() < 8)
+                    if (bu.BitsRemaining() < 8) {
                         return CSG_ErrCode::kErrRleCriMiss;
+                    }
                     colorVal[j] = bu.UnpackBits(8);
                 }
             }
@@ -306,23 +322,27 @@ CSG_ErrCode RleCodec::Decompress(
         }
 
         case RLE_FRAME_CPL: { // CPL — long continuous run
-            if (bu.BitsRemaining() < 8)
+            if (bu.BitsRemaining() < 8) {
                 return CSG_ErrCode::kErrRleCplTrunc;
+            }
             uint8_t N_high = bu.UnpackBits(8);
             int N = N_short | (static_cast<int>(N_high) << 6);
             int count = N + 1;  // 1..16384
-            if (outPos + count > totalPixels)
+            if (outPos + count > totalPixels) {
                 return CSG_ErrCode::kErrRleFrameErr;
+            }
 
             uint8_t colorVal[4] = {0};
-            if (crn > 0) {
-                if (static_cast<int>(bu.BitsRemaining()) < bpi)
+            if (0 < crn) {
+                if (static_cast<int>(bu.BitsRemaining()) < bpi) {
                     return CSG_ErrCode::kErrRleCriMiss;
+                }
                 colorVal[0] = bu.UnpackBits(bpi);
             } else {
                 for (int j = 0; j < bpc; ++j) {
-                    if (bu.BitsRemaining() < 8)
+                    if (bu.BitsRemaining() < 8) {
                         return CSG_ErrCode::kErrRleCriMiss;
+                    }
                     colorVal[j] = bu.UnpackBits(8);
                 }
             }
@@ -336,7 +356,7 @@ CSG_ErrCode RleCodec::Decompress(
         }  // end switch
     }  // end while
 
-    return (outPos == totalPixels)
+    return (totalPixels == outPos)
         ? CSG_ErrCode::kOk
         : CSG_ErrCode::kErrRleFrameErr;
 }

@@ -264,10 +264,10 @@ void GUIStart()
 #endif
 
     // Init emWin
+    GUI_Init();
 #ifdef __vmSIMULATOR__
     WM_MULTIBUF_Enable(1);
 #endif
-    GUI_Init();
 
     GUI_SetBkColor(GUI_BLACK);
     GUI_Clear();

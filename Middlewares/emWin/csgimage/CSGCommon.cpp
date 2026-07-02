@@ -1,14 +1,15 @@
-//-----------------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 /*
  File        : CSGCommon.cpp
- Version     : V1.50
+ Version     : V1.51
  By          : Wey. Silver Grid
 
  Description : CRC16, string helpers, file I/O, Huffman code-length generation,
                code assignment, and decode-table builder implementations.
 
- Date        : 2026.06.25 (V1.50 — original CSG v1.5 implementation)
+ Date        : 2026.07.02 (V1.51 — Yoda conditions & mandatory braces for if/for/while)
+              2026.06.25 (V1.50 — original CSG v1.5 implementation)
 */
 //-----------------------------------------------------------------------------
 #include "CSGCommon.h"
@@ -224,12 +225,16 @@ std::string CurrentTimeString() {
 // ============================================================================
 
 std::string WideToUtf8(const std::wstring& ws) {
-    if (ws.empty()) return {};
+    if (ws.empty()) {
+        return {};
+    }
 #ifdef _WIN32
     int len = WideCharToMultiByte(CP_UTF8, 0, ws.c_str(),
                                   static_cast<int>(ws.size()),
                                   nullptr, 0, nullptr, nullptr);
-    if (len <= 0) return {};
+    if (0 >= len) {
+        return {};
+    }
     std::string result(len, '\0');
     WideCharToMultiByte(CP_UTF8, 0, ws.c_str(),
                         static_cast<int>(ws.size()),
@@ -353,14 +358,19 @@ std::string GenerateHeaderGuard(const std::string& fileName,
 // ============================================================================
 
 bool HuffGenLengthsPure(int cal, uint8_t lengths[kHuffPureSymbols]) {
-    if (cal < 2 || cal > kCalMax) return false;
+    if (2 > cal || kCalMax < cal) {
+        return false;
+    }
     int C = kHuffCalTable[cal];         // MAX_CODE_LEN
-    if (C < kHuffPureBaseCodeLen) return false;
+    if (kHuffPureBaseCodeLen > C) {
+        return false;
+    }
 
-    if (cal == kCalDefault) {
+    if (kCalDefault == cal) {
         // C == 8: all symbols at length 8
-        for (int i = 0; i < kHuffPureSymbols; ++i)
+        for (int i = 0; i < kHuffPureSymbols; ++i) {
             lengths[i] = kHuffPureBaseCodeLen;
+        }
         return true;
     }
 
@@ -372,16 +382,21 @@ bool HuffGenLengthsPure(int cal, uint8_t lengths[kHuffPureSymbols]) {
     for (int g = 0; g < groupCount; ++g) {
         uint8_t len = static_cast<uint8_t>(kHuffPureBaseCodeLen + g);
         int count   = perGroup + (g < rem ? 1 : 0);
-        for (int j = 0; j < count; ++j)
+        for (int j = 0; j < count; ++j) {
             lengths[sym++] = len;
+        }
     }
     return true;
 }
 
 bool HuffGenLengthsDeflateLitLen(int cal, uint8_t lengths[kHuffLitLenSymbols]) {
-    if (cal < 3 || cal > kCalMax) return false;
+    if (3 > cal || kCalMax < cal) {
+        return false;
+    }
     int C = kHuffCalTable[cal];
-    if (C < kHuffLitLenBaseCodeLen) return false;
+    if (kHuffLitLenBaseCodeLen > C) {
+        return false;
+    }
 
     int groupCount = C - (kHuffLitLenBaseCodeLen - 1);  // lengths 9..C
     int perGroup   = kHuffLitLenSymbols / groupCount;
@@ -390,15 +405,17 @@ bool HuffGenLengthsDeflateLitLen(int cal, uint8_t lengths[kHuffLitLenSymbols]) {
     for (int g = 0; g < groupCount; ++g) {
         uint8_t len = static_cast<uint8_t>(kHuffLitLenBaseCodeLen + g);
         int count   = perGroup + (g < rem ? 1 : 0);
-        for (int j = 0; j < count; ++j)
+        for (int j = 0; j < count; ++j) {
             lengths[sym++] = len;
+        }
     }
     return true;
 }
 
 void HuffGenLengthsDeflateDist(uint8_t lengths[kHuffDistSymbols]) {
-    for (int i = 0; i < kHuffDistSymbols; ++i)
+    for (int i = 0; i < kHuffDistSymbols; ++i) {
         lengths[i] = kHuffDistCodeLen;
+    }
 }
 
 // ============================================================================
@@ -417,7 +434,7 @@ int HuffAssignCodewords(const uint8_t lengths[], int numSymbols,
     Entry sorted[286];
     int n = 0;
     for (int i = 0; i < numSymbols; ++i) {
-        if (lengths[i] > 0 && lengths[i] <= maxLen) {
+        if (0 < lengths[i] && lengths[i] <= maxLen) {
             sorted[n].sym = i;
             sorted[n].len = lengths[i];
             ++n;
@@ -433,7 +450,7 @@ int HuffAssignCodewords(const uint8_t lengths[], int numSymbols,
             else if (sorted[i].len == sorted[j].len
                      && sorted[i].sym > sorted[j].sym)
                 doSwap = true;
-            if (doSwap) {
+            if (true == doSwap) {
                 Entry t = sorted[i];
                 sorted[i] = sorted[j];
                 sorted[j] = t;
@@ -441,11 +458,14 @@ int HuffAssignCodewords(const uint8_t lengths[], int numSymbols,
         }
     }
 
-    if (n == 0) return 0;
+    if (0 == n) {
+        return 0;
+    }
 
     // Zero out all codewords first
-    for (int i = 0; i < numSymbols; ++i)
+    for (int i = 0; i < numSymbols; ++i) {
         codewords[i] = 0;
+    }
 
     // Assign canonical codes (MSB-first to be written to bitstream)
     uint16_t code = 0;
@@ -460,8 +480,11 @@ int HuffAssignCodewords(const uint8_t lengths[], int numSymbols,
     }
 
     int maxUsed = 0;
-    for (int i = 0; i < numSymbols; ++i)
-        if (lengths[i] > maxUsed) maxUsed = lengths[i];
+    for (int i = 0; i < numSymbols; ++i) {
+        if (lengths[i] > maxUsed) {
+            maxUsed = lengths[i];
+        }
+    }
     return maxUsed;
 }
 
@@ -476,13 +499,15 @@ void HuffBuildDecodeTable(const uint16_t codewords[],
                           int maxBits) {
     int tableSize = 1 << maxBits;
     // Initialize table with sentinel value
-    for (int i = 0; i < tableSize; ++i)
+    for (int i = 0; i < tableSize; ++i) {
         table[i] = kHuffTableSentinel;
+    }
 
     for (int s = 0; s < numSymbols; ++s) {
         uint8_t len = lengths[s];
-        if (len == 0 || len > static_cast<uint8_t>(maxBits))
+        if (0 == len || static_cast<uint8_t>(maxBits) < len) {
             continue;
+        }
 
         uint16_t cw = codewords[s];
         int shift = maxBits - len;

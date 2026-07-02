@@ -1,14 +1,15 @@
-//-----------------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 /*
  File        : CSGCodec.cpp
- Version     : V1.51
+ Version     : V1.52
  By          : Wey. Silver Grid
 
  Description : CSG codec factory — encode/decode single pictures and atlases,
                CRC16 validation, header serialization, palette handling.
 
- Date        : 2026.06.26 (V1.51 — encoder header.size overflow guard: totalSize > kCsgMaxSinglePic)
+ Date        : 2026.07.02 (V1.52 — Yoda conditions & mandatory braces for if/for/while)
+              2026.06.26 (V1.51 — encoder header.size overflow guard: totalSize > kCsgMaxSinglePic)
               2026.06.25 (V1.50 — original CSG v1.5 codec)
 */
 //-----------------------------------------------------------------------------
@@ -47,7 +48,9 @@ std::unique_ptr<CompressionBase> CreateCodec(CompressAlgorithm algo) {
 std::unique_ptr<CompressionBase> CreateCodec(CompressAlgorithm algo,
                                               uint8_t cal) {
     auto c = CreateCodec(algo);
-    if (c) c->SetCal(cal);
+    if (nullptr != c) {
+        c->SetCal(cal);
+    }
     return c;
 }
 
@@ -56,8 +59,9 @@ std::unique_ptr<CompressionBase> CreateCodec(CompressAlgorithm algo,
 // ============================================================================
 
 void PadToAlign4(std::vector<uint8_t>& vec) {
-    while (vec.size() % 4 != 0)
+    while (vec.size() % 4 != 0) { 
         vec.push_back(0);
+    }
 }
 
 int GlobalHeaderSize(int pictureCount) {
@@ -71,12 +75,13 @@ int GlobalHeaderSize(int pictureCount) {
 // ============================================================================
 
 static bool EncodeSinglePicture(CSGPictureEncodeData& pic) {
+
     int pixelCount = pic.targetWidth * pic.targetHeight;
     int bpc = BytesPerColor(pic.colorMode);
     int bpi = (pic.crn > 0) ? BitsPerIndex(pic.crn) : 0;
 
     // ---- Step 1: Raw pixel data (CRM-encoded or CRI indices) ----
-    if (pic.crn > 0) {
+    if (0 < pic.crn) {
         // Palette mode: pixel bytes are CRI indices
         // The rawPixelData should already contain palette indices
     } else {
@@ -92,18 +97,19 @@ static bool EncodeSinglePicture(CSGPictureEncodeData& pic) {
     }
 
     // ---- Step 2: Compress if needed ----
-    if (pic.algo == CompressAlgorithm::kNone) {
+    if (CompressAlgorithm::kNone == pic.algo) {
         // No compression — bit-pack palette indices, or store CRM bytes directly
-        if (pic.crn > 0) {
+        if (0 < pic.crn) {
             // Bit-pack CRI indices
             BitPacker bp;
-            for (int idx : pic.rawPixelData)
+            for (int idx : pic.rawPixelData) {
                 bp.PackBits(static_cast<uint8_t>(idx), bpi);
+            }
             pic.compressedData = bp.GetBytes();
         } else {
             pic.compressedData = pic.rawPixelData;
         }
-    } else if (pic.algo == CompressAlgorithm::kDEFLATE) {
+    } else if (CompressAlgorithm::kDEFLATE == pic.algo) {
         // DEFLATE pipeline: MiniLZ77 → Huffman (VP-style mLZ+Huffman)
         auto lz77 = std::make_unique<MiniLZ77Codec>();
         auto lzBytes = lz77->Compress(
@@ -116,7 +122,9 @@ static bool EncodeSinglePicture(CSGPictureEncodeData& pic) {
     } else {
         // RLE, Huffman, or MiniLZ77 standalone
         auto codec = CreateCodec(pic.algo, pic.cal);
-        if (!codec) return false;
+        if (nullptr == codec) {
+            return false;
+        }
 
         pic.compressedData = codec->Compress(
             pic.rawPixelData.data(),
@@ -147,7 +155,7 @@ static bool EncodeSinglePicture(CSGPictureEncodeData& pic) {
     // Picture size = dpos + compressed_data_size (aligned to 4)
     uint32_t totalSize = dpos + Align4(static_cast<uint32_t>(
         pic.compressedData.size()));
-    if (totalSize > kCsgMaxSinglePic) {
+    if (kCsgMaxSinglePic < totalSize) {
         return false;  // Image too large for CSG format (size field is uint16_t)
     }
     header.size = static_cast<uint16_t>(totalSize);
@@ -165,8 +173,9 @@ static bool EncodeSinglePicture(CSGPictureEncodeData& pic) {
                               pic.palette.begin(), pic.palette.end());
 
     // Pad after palette to 4-byte alignment
-    while (pic.encodedPicture.size() % 4 != 0)
+    while (pic.encodedPicture.size() % 4 != 0) {
         pic.encodedPicture.push_back(0);
+    }
 
     // Write compressed data
     pic.encodedPicture.insert(pic.encodedPicture.end(),
@@ -174,8 +183,9 @@ static bool EncodeSinglePicture(CSGPictureEncodeData& pic) {
                               pic.compressedData.end());
 
     // Pad end to 4-byte alignment
-    while (pic.encodedPicture.size() % 4 != 0)
+    while (pic.encodedPicture.size() % 4 != 0) {
         pic.encodedPicture.push_back(0);
+    }
 
     pic.encodedSize = static_cast<uint16_t>(pic.encodedPicture.size());
 
@@ -205,12 +215,15 @@ static bool EncodeSinglePicture(CSGPictureEncodeData& pic) {
 // ============================================================================
 
 bool EncodeAtlas(CSGAtlas& atlas) {
-    if (!atlas.IsValid()) return false;
+    if (!atlas.IsValid()) {
+        return false;
+    }
 
     // Encode each picture first
     for (auto& pic : atlas.pictures) {
-        if (!EncodeSinglePicture(pic))
+        if (!EncodeSinglePicture(pic)) {
             return false;
+        }
     }
 
     // ---- Build global header ----
@@ -227,7 +240,7 @@ bool EncodeAtlas(CSGAtlas& atlas) {
     }
 
     // Determine offset mode
-    bool useRelative = (absOffsets.back() >= kCsgMaxPicOffset);
+    bool useRelative = (kCsgMaxPicOffset <= absOffsets.back());
 
     // Build header directly into the byte buffer to avoid writing past
     // CSGHeader::picOffset[1] (the struct only declares one array element).
@@ -243,12 +256,13 @@ bool EncodeAtlas(CSGAtlas& atlas) {
     headerBytes[4] = kCsgCurVersion;
 
     uint8_t countByte = static_cast<uint8_t>(picCount & 0x7F);
-    if (useRelative)
+    if (true == useRelative) {
         countByte |= 0x80;
+    }
     headerBytes[5] = countByte;
 
     // Variable-length picOffset array at offset 6
-    if (useRelative) {
+    if (true == useRelative) {
         uint16_t v = static_cast<uint16_t>(absOffsets[0]);
         headerBytes[6] = static_cast<uint8_t>(v & 0xFF);
         headerBytes[7] = static_cast<uint8_t>((v >> 8) & 0xFF);
@@ -276,8 +290,9 @@ bool EncodeAtlas(CSGAtlas& atlas) {
         atlas.bytes.insert(atlas.bytes.end(),
                            picBytes.begin(), picBytes.end());
         // Pad to 4-byte alignment between pictures
-        while (atlas.bytes.size() % 4 != 0)
+        while (atlas.bytes.size() % 4 != 0) {
             atlas.bytes.push_back(0);
+        }
     }
 
     // ---- Compute global CRC16 ----
@@ -303,32 +318,38 @@ bool EncodeAtlas(CSGAtlas& atlas) {
 CSG_ErrCode DecodeAtlasHeader(const uint8_t* data, size_t len,
                                CSGHeader& header) {
     // Need at least fixed 6 bytes + 2 bytes for first picOffset
-    if (len < sizeof(CSGHeader))
+    if (len < sizeof(CSGHeader)) {
         return CSG_ErrCode::kErrFileEof;
+    }
 
     std::memcpy(&header, data, sizeof(CSGHeader));
 
     // Verify magic
-    if (header.magic[0] != kCsgGlobalMagic[0]
-        || header.magic[1] != kCsgGlobalMagic[1])
+    if (header.magic[0] != kCsgGlobalMagic[0] || 
+        header.magic[1] != kCsgGlobalMagic[1]) {
         return CSG_ErrCode::kErrGlobalMagic;
+    }
 
     // Verify version
-    if (header.version > kCsgCurVersion)
+    if (kCsgCurVersion < header.version) {
         return CSG_ErrCode::kErrVersionInvalid;
+    }
 
     // Verify picture count
     int count = static_cast<int>(header.GetPicCount());
-    if (count == 0)
+    if (0 == count) {
         return CSG_ErrCode::kErrPicCountZero;
-    if (count > kCsgMaxPicCount)
+    }
+    if (kCsgMaxPicCount < count) {
         return CSG_ErrCode::kErrPicCountLimit;
+    }
 
     // Verify global CRC
-    if (header.crc16 != 0) {
+    if (0 != header.crc16) {
         uint16_t computed = Crc16(data + 4, static_cast<uint32_t>(len - 4));
-        if (computed != header.crc16)
+        if (computed != header.crc16) {
             return CSG_ErrCode::kErrGlobalCrc;
+        }
     }
 
     return CSG_ErrCode::kOk;
@@ -339,23 +360,31 @@ CSG_ErrCode DecodeAtlasHeader(const uint8_t* data, size_t len,
 // uninitialized memory for i > 0.  This function reads offsets directly from
 // the raw buffer and resolves them to absolute offsets.
 std::vector<uint32_t> ReadPicOffsets(const uint8_t* data, size_t len) {
-    if (len < 6) return {};
+    if (len < 6) {
+        return {};
+    }
     uint8_t picCountByte = data[5];
     int picCount = picCountByte & kPicCountMask;
-    if (picCount == 0 || picCount > kCsgMaxPicCount) return {};
-    bool useRelative = (picCountByte & kPicOffsetRelFlag) != 0;
+    if (0 == picCount || kCsgMaxPicCount < picCount) {
+        return {};
+    }
+    bool useRelative = (0 != (picCountByte & kPicOffsetRelFlag));
 
     size_t offTableSize = static_cast<size_t>(picCount) * kCsgPicOffsetEntrySize;
-    if (6 + offTableSize > len) return {};
+    if (6 + offTableSize > len) {
+        return {};
+    }
 
     std::vector<uint32_t> offsets(picCount);
-    if (useRelative) {
+    if (true == useRelative) {
         offsets[0] = data[6] | (static_cast<uint32_t>(data[7]) << 8);
         for (int i = 1; i < picCount; ++i) {
             uint32_t rel = data[6 + i * 2]
                          | (static_cast<uint32_t>(data[6 + i * 2 + 1]) << 8);
             offsets[i] = offsets[i - 1] + rel;
-            if (offsets[i] > kCsgMaxPicOffset) return {};
+            if (kCsgMaxPicOffset < offsets[i]) {
+                return {};
+            }
         }
     } else {
         for (int i = 0; i < picCount; ++i) {
@@ -368,50 +397,61 @@ std::vector<uint32_t> ReadPicOffsets(const uint8_t* data, size_t len) {
 
 CSG_ErrCode DecodePictureHeader(const uint8_t* data, size_t maxLen,
                                  CSGPicture& picture) {
-    if (maxLen < 16)
+    if (maxLen < 16) {
         return CSG_ErrCode::kErrFileEof;
+    }
 
     std::memcpy(&picture, data, 16);
 
     // Verify magic
     if (picture.magic[0] != kCsgPictureMagic[0]
-        || picture.magic[1] != kCsgPictureMagic[1])
+        || picture.magic[1] != kCsgPictureMagic[1]) {
         return CSG_ErrCode::kErrPicMagic;
+    }
 
     // Verify dimensions
-    if (picture.width < 10 || picture.width > kCsgMaxWidth)
+    if (10 > picture.width || kCsgMaxWidth < picture.width) {
         return CSG_ErrCode::kErrWidthInvalid;
-    if (picture.height < 10 || picture.height > kCsgMaxHeight)
+    }
+    if (10 > picture.height || kCsgMaxHeight < picture.height) {
         return CSG_ErrCode::kErrHeightInvalid;
+    }
 
     // Verify color mode
-    if (!IsValidColorMode(picture.colorMode))
+    if (!IsValidColorMode(picture.colorMode)) {
         return CSG_ErrCode::kErrCrmInvalid;
+    }
 
     // Verify CRN
-    if (!IsValidCrn(picture.crn))
+    if (!IsValidCrn(picture.crn)) {
         return CSG_ErrCode::kErrCrnInvalid;
+    }
 
     // Verify CAS
     auto cas = picture.GetCompressAlgorithm();
-    if (static_cast<uint8_t>(cas) > 4)
+    if (static_cast<uint8_t>(cas) > 4) {
         return CSG_ErrCode::kErrCasInvalid;
+    }
 
     // Verify offsets
-    if (picture.ppos == 0 || !IsAligned4(picture.ppos))
+    if (0 == picture.ppos || !IsAligned4(picture.ppos)) {
         return CSG_ErrCode::kErrPposAlign;
-    if (picture.dpos == 0 || !IsAligned4(picture.dpos))
+    }
+    if (0 == picture.dpos || !IsAligned4(picture.dpos)) {
         return CSG_ErrCode::kErrDposAlign;
+    }
 
     // Verify size
-    if (picture.size == 0 || picture.size > kCsgMaxSinglePic)
+    if (0 == picture.size || kCsgMaxSinglePic < picture.size) {
         return CSG_ErrCode::kErrSinglePicTooLarge;
+    }
 
     // Verify CRC
-    if (picture.crc16 != 0) {
+    if (0 != picture.crc16) {
         uint16_t computed = Crc16(data + 4, picture.size - 4);
-        if (computed != picture.crc16)
+        if (computed != picture.crc16) {
             return CSG_ErrCode::kErrPicCrc;
+        }
     }
 
     return CSG_ErrCode::kOk;
@@ -435,8 +475,9 @@ bool WriteCsgFile(const std::wstring& path, const CSGAtlas& atlas) {
 CSG_ErrCode ReadCsgFile(const std::wstring& path, CSGAtlas& atlas) {
     // Read the file
     std::ifstream f(path, std::ios::binary | std::ios::ate);
-    if (!f)
+    if (!f) {
         return CSG_ErrCode::kErrFileOpen;
+    }
 
     auto size = static_cast<size_t>(f.tellg());
     f.seekg(0, std::ios::beg);
@@ -444,20 +485,24 @@ CSG_ErrCode ReadCsgFile(const std::wstring& path, CSGAtlas& atlas) {
     std::vector<uint8_t> data(size);
     f.read(reinterpret_cast<char*>(data.data()),
            static_cast<std::streamsize>(size));
-    if (f.fail() && !f.eof())
+    if (f.fail() && !f.eof()) {
         return CSG_ErrCode::kErrFileRead;
+    }
 
     f.close();
 
     // Decode header
     CSGHeader header;
     CSG_ErrCode err = DecodeAtlasHeader(data.data(), data.size(), header);
-    if (err != CSG_ErrCode::kOk) return err;
+    if (CSG_ErrCode::kOk != err) {
+        return err;
+    }
 
     // Read offsets directly — CSGHeader::picOffset[1] can't hold >1 entry
     std::vector<uint32_t> offsets = ReadPicOffsets(data.data(), data.size());
-    if (offsets.empty())
+    if (offsets.empty()) {
         return CSG_ErrCode::kErrOffsetTableBroken;
+    }
 
     atlas.bytes = std::move(data);
     atlas.pictures.clear();
@@ -465,14 +510,17 @@ CSG_ErrCode ReadCsgFile(const std::wstring& path, CSGAtlas& atlas) {
     int picCount = static_cast<int>(offsets.size());
     for (int i = 0; i < picCount; ++i) {
         uint32_t offset = offsets[i];
-        if (offset >= atlas.bytes.size())
+        if (offset >= atlas.bytes.size()) {
             return CSG_ErrCode::kErrOffsetTableBroken;
+        }
 
         CSGPicture picHeader;
         err = DecodePictureHeader(atlas.bytes.data() + offset,
                                    atlas.bytes.size() - offset,
                                    picHeader);
-        if (err != CSG_ErrCode::kOk) return err;
+        if (CSG_ErrCode::kOk != err) {
+            return err;
+        }
 
         CSGPictureEncodeData pic;
         pic.targetWidth  = picHeader.width;
@@ -485,8 +533,9 @@ CSG_ErrCode ReadCsgFile(const std::wstring& path, CSGAtlas& atlas) {
 
         // Copy encoded bytes
         size_t picEnd = offset + picHeader.size;
-        if (picEnd > atlas.bytes.size())
+        if (picEnd > atlas.bytes.size()) {
             return CSG_ErrCode::kErrPicSizeOverflow;
+        }
 
         pic.encodedPicture.assign(atlas.bytes.begin() + offset,
                                   atlas.bytes.begin() + picEnd);
@@ -523,10 +572,11 @@ std::string FormatByteArray(const uint8_t* data, size_t len,
     auto flushLine = [&](bool isLast) {
         std::string hexPart = lineBuf.str();
         ss << hexPart;
-        if (isLast && bytesOnLine < kCppExportBytesPerLine) {
+        if (isLast && kCppExportBytesPerLine > bytesOnLine) {
             // Pad to align trailing comment with full-length lines
-            if (hexPart.size() < fullLineLen)
+            if (hexPart.size() < fullLineLen) {
                 ss << std::string(fullLineLen - hexPart.size(), ' ');
+            }
         }
         // Trailing comment: 1-based index of the last byte on this line
         size_t lastIdx = firstIdxOnLine + bytesOnLine;  // 1-based
@@ -538,18 +588,22 @@ std::string FormatByteArray(const uint8_t* data, size_t len,
     };
 
     for (size_t i = 0; i < len; ++i) {
-        if (bytesOnLine == 0)
+        if (0 == bytesOnLine) {
             lineBuf << indent;
+        }
         lineBuf << "0x" << std::hex << std::setw(2) << std::setfill('0')
                 << static_cast<int>(data[i]);
         ++bytesOnLine;
-        if (i + 1 < len)
+        if (i + 1 < len) {
             lineBuf << ", ";
-        if (bytesOnLine == kCppExportBytesPerLine)
+        }
+        if (kCppExportBytesPerLine == bytesOnLine) {
             flushLine(/*isLast=*/false);
+        }
     }
-    if (bytesOnLine > 0)
+    if (0 < bytesOnLine) {
         flushLine(/*isLast=*/true);
+    }
 
     ss << std::dec;
     return ss.str();
@@ -558,9 +612,10 @@ std::string FormatByteArray(const uint8_t* data, size_t len,
 static std::string GeneratePictureComment(const CSGPictureEncodeData& pic) {
     // Compression ratio: encoded size / source size * 100 (2 decimal places)
     double ratio = 0.0;
-    if (pic.srcFileSize > 0)
+    if (0 < pic.srcFileSize) {
         ratio = static_cast<double>(pic.encodedSize) * 100.0
                 / static_cast<double>(pic.srcFileSize);
+    }
 
     // Helper: emit one comment line with colon-aligned label (right-justified)
     auto line = [](std::ostringstream& s, const char* label,
@@ -667,11 +722,14 @@ bool ExportCppSource(const std::wstring& cppPath,
 
 static std::vector<uint8_t> IndicesPack(const std::vector<int>& indices, int crn) {
     int bpi = BitsPerIndex(crn);
-    if (bpi < 1) return {};
+    if (1 > bpi) {
+        return {};
+    }
 
     BitPacker bp;
-    for (int idx : indices)
+    for (int idx : indices) {
         bp.PackBits(static_cast<uint8_t>(idx & 0xFF), bpi);
+    }
     return bp.GetBytes();
 }
 

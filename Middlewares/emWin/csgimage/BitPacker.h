@@ -2,12 +2,13 @@
 //-----------------------------------------------------------------------------
 /*
  File        : BitPacker.h
- Version     : V1.50
+ Version     : V1.51
  By          : Wey. Silver Grid
 
  Description : LSB-first bit-stream packer / unpacker for CSG CRI index coding.
 
- Date        : 2026.06.25 (V1.50 — original CSG v1.5 implementation)
+ Date        : 2026.07.02 (V1.51 — Yoda conditions & mandatory braces for if/for/while)
+              2026.06.25 (V1.50 — original CSG v1.5 implementation)
 */
 //-----------------------------------------------------------------------------
 #ifndef TOOLKITS_INCLUDE_BITPACKER_H_
@@ -75,7 +76,7 @@ public:
     /// Total number of bits remaining.
     size_t BitsRemaining() const {
         size_t totalBits = byteLen_ * 8;
-        return (bitPos_ < totalBits) ? (totalBits - bitPos_) : 0;
+        return (totalBits > bitPos_) ? (totalBits - bitPos_) : 0;
     }
 
     /// Current bit position.

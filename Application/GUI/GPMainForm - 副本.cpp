@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 /*
  File        : GPMainForm.cpp
- Version     : V2.04
+ Version     : V2.03
  By          : Wey. Silver Grid
 
  Description : Main operation form. Displays measurements, status graphics,
@@ -31,8 +31,7 @@
      - Graphics:    every  1 s (IO-state driven, or +/-10 % deadband)
      - Status text: every  1 s
 
- Date        : 2026.07.01 (V2.04 — coordinated sync to 表单设计.md)
-              2026.07.01 (V2.03 — animated wire highlight 20%→80% one-way)
+ Date        : 2026.07.01 (V2.03 — animated wire highlight 20%→80%→20% @10%/s)
               2026.06.29 (V2.02 — removed full-screen memdev; TRANS-based Layer1)
               2026.06.29 (V2.01 — GUI_MEMDEV for Layer0/Layer1 isolation)
               2026.06.29 (V2.00 — rewritten per form design spec)
@@ -85,16 +84,16 @@
 #define MF_BKG_X            0
 #define MF_BKG_Y            0
 
-// Caption back panel (40 px tall, solid colour #041736)
+// Caption back panel (71 px tall, solid colour #041736)
 #define MF_CAP_X            0
 #define MF_CAP_Y            0
 #define MF_CAP_W            320
-#define MF_CAP_H            40
+#define MF_CAP_H            63
 #define MF_CAP_COLOR        0x041736
 
 // Caption divider line
 #define MF_SEP_X            0
-#define MF_SEP_Y            40
+#define MF_SEP_Y            64
 #define MF_SEP_W            320
 #define MF_SEP_H            1
 #define MF_SEP_COLOR        0x2F5CA6
@@ -104,28 +103,26 @@
 //#define MF_LOGO_Y           220
 //#define MF_LOGO_IDX         picIdxMA_Logo78x18
 
-// Measurement data labels — static, drawn once in Layer0
-//   输入电压 / 输出电压: 24 px font (top Caption area)
-//   充电电流 / 放电电流: 16 px font (lower status area)
+// Measurement data labels (4 × 24 px font) — static, drawn once in Layer0
 #define MF_LBL_UIN_X        10
-#define MF_LBL_UIN_Y        8
+#define MF_LBL_UIN_Y        5
 #define MF_LBL_UIN_W        60
 #define MF_LBL_UIN_H        24
 
 #define MF_LBL_UOUT_X       170
-#define MF_LBL_UOUT_Y       8
+#define MF_LBL_UOUT_Y       5
 #define MF_LBL_UOUT_W       60
 #define MF_LBL_UOUT_H       24
 
-#define MF_LBL_CHG_X        218
-#define MF_LBL_CHG_Y        170
-#define MF_LBL_CHG_W        40
-#define MF_LBL_CHG_H        16
+#define MF_LBL_CHG_X        10
+#define MF_LBL_CHG_Y        33
+#define MF_LBL_CHG_W        60
+#define MF_LBL_CHG_H        24
 
-#define MF_LBL_DIS_X        218
-#define MF_LBL_DIS_Y        190
-#define MF_LBL_DIS_W        40
-#define MF_LBL_DIS_H        16
+#define MF_LBL_DIS_X        170
+#define MF_LBL_DIS_Y        33
+#define MF_LBL_DIS_W        60
+#define MF_LBL_DIS_H        24
 
 #define MF_LBL24_FONT       GUI_FONT_24LTH_CHN
 #define MF_LBL24_COLOR      0xECECEC
@@ -135,20 +132,20 @@
 #define MF_LBL_TMP_X        10
 #define MF_LBL_TMP_Y        170
 #define MF_LBL_TMP_W        40
-#define MF_LBL_TMP_H        16
+#define MF_LBL_TMP_H        17
 
 #define MF_LBL_BAT_X        10
 #define MF_LBL_BAT_Y        190
 #define MF_LBL_BAT_W        40
-#define MF_LBL_BAT_H        16
+#define MF_LBL_BAT_H        17
 
 #define MF_LBL16_FONT       GUI_FONT_16LTH_CHN
 #define MF_LBL16_COLOR      0xECECEC
-#define MF_LBL16_ALIGN      (GUI_TA_LEFT | GUI_TA_BOTTOM)
+#define MF_LBL16_ALIGN      (GUI_TA_LEFT | GUI_TA_VCENTER)
 
 // Controller area (rounded rect border, no fill)
 #define MF_CTRL_X           110
-#define MF_CTRL_Y           65
+#define MF_CTRL_Y           75
 #define MF_CTRL_W           100
 #define MF_CTRL_H           130
 #define MF_CTRL_RADIUS      10
@@ -157,29 +154,28 @@
 //=============================================================================
 // Layout — Layer1 — per spec II.2.3.2
 //=============================================================================
-// Measurement values — solid background #031635
-//   输入电压 / 输出电压: 24 px font (top Caption area)
-//   充电电流 / 放电电流: 16 px font (lower status area)
+
+// Measurement values (4 × 24 px font) — solid background #031635
 #define MF_VAL_UIN_X        70
-#define MF_VAL_UIN_Y        12
+#define MF_VAL_UIN_Y        9
 #define MF_VAL_UIN_W        80
 #define MF_VAL_UIN_H        24
 #define MF_VAL_BG           0x031635     // value background colour
 
 #define MF_VAL_UOUT_X       230
-#define MF_VAL_UOUT_Y       12
+#define MF_VAL_UOUT_Y       9
 #define MF_VAL_UOUT_W       80
 #define MF_VAL_UOUT_H       24
 
-#define MF_VAL_CHG_X        256
-#define MF_VAL_CHG_Y        172
-#define MF_VAL_CHG_W        60
-#define MF_VAL_CHG_H        16
+#define MF_VAL_CHG_X        70
+#define MF_VAL_CHG_Y        37
+#define MF_VAL_CHG_W        80
+#define MF_VAL_CHG_H        24
 
-#define MF_VAL_DIS_X        256
-#define MF_VAL_DIS_Y        192
-#define MF_VAL_DIS_W        60
-#define MF_VAL_DIS_H        16
+#define MF_VAL_DIS_X        230
+#define MF_VAL_DIS_Y        37
+#define MF_VAL_DIS_W        80
+#define MF_VAL_DIS_H        24
 
 #define MF_VAL24_FONT       GUI_FONT_24LTH_CHN
 #define MF_VAL24_COLOR      0xECECEC
@@ -202,17 +198,17 @@
 
 // Status connection wires (3 thin rectangles)
 #define MF_WIRE_IN_X        62
-#define MF_WIRE_IN_Y        100
+#define MF_WIRE_IN_Y        120
 #define MF_WIRE_IN_W        58
 #define MF_WIRE_IN_H        4
 
-#define MF_WIRE_OUT_X       200
-#define MF_WIRE_OUT_Y       100
+#define MF_WIRE_OUT_X       199
+#define MF_WIRE_OUT_Y       120
 #define MF_WIRE_OUT_W       51
 #define MF_WIRE_OUT_H       4
 
 #define MF_WIRE_BAT_X       158
-#define MF_WIRE_BAT_Y       136
+#define MF_WIRE_BAT_Y       146
 #define MF_WIRE_BAT_W       4
 #define MF_WIRE_BAT_H       26
 
@@ -222,21 +218,21 @@
 
 // Status icons (6 atlas sub-pictures)
 #define MF_ICON_AC_X        30
-#define MF_ICON_AC_Y        72
+#define MF_ICON_AC_Y        92
 #define MF_ICON_AC_IDX      picIdxMA_ACPow32x59Cyan
 
 #define MF_ICON_CTRL_X      120
-#define MF_ICON_CTRL_Y      74
+#define MF_ICON_CTRL_Y      84
 #define MF_ICON_CTRL_PSBY   picIdxMA_CtrlP80x62Cyan
 #define MF_ICON_CTRL_KON    picIdxMA_CtrlN80x62Cyan
 #define MF_ICON_CTRL_KOF    picIdxMA_CtrlF80x62Cyan
 
 #define MF_ICON_BRKR_X      250
-#define MF_ICON_BRKR_Y      71
+#define MF_ICON_BRKR_Y      91
 #define MF_ICON_BRKR_IDX    picIdxMA_Brkr56x60Cyan
 
 #define MF_ICON_BAT_X       138
-#define MF_ICON_BAT_Y       162
+#define MF_ICON_BAT_Y       172
 
 #define MF_ICON_HEAT_X      270
 #define MF_ICON_HEAT_Y      219
@@ -249,21 +245,21 @@
 #define MF_ICON_SAT_ON      100
 #define MF_ICON_SAT_OFF     10
 
-// // Status text (bypass / coil state)
-// #define MF_STAT_X           216
-// #define MF_STAT_Y           160
-// #define MF_STAT_W           100
-// #define MF_STAT_H           25
-// #define MF_STAT_FONT        GUI_FONT_24LTH_CHN
-// #define MF_STAT_ALIGN       (GUI_TA_HCENTER | GUI_TA_VCENTER)
-// #define MF_STAT_COLOR_ON    0x25B92C
-// #define MF_STAT_COLOR_OFF   0xF06D0D
- #define MF_STAT_BG          0x001838     // status value background
+// Status text (bypass / coil state)
+#define MF_STAT_X           216
+#define MF_STAT_Y           160
+#define MF_STAT_W           100
+#define MF_STAT_H           25
+#define MF_STAT_FONT        GUI_FONT_24LTH_CHN
+#define MF_STAT_ALIGN       (GUI_TA_HCENTER | GUI_TA_VCENTER)
+#define MF_STAT_COLOR_ON    0x25B92C
+#define MF_STAT_COLOR_OFF   0xF06D0D
+#define MF_STAT_BG          0x001838     // status value background
 
 // Date / time
 #define MF_CLOCK_X          10
 #define MF_CLOCK_Y          220
-#define MF_CLOCK_W          120
+#define MF_CLOCK_W          116
 #define MF_CLOCK_H          16
 #define MF_CLOCK_FONT       GUI_FONT_AA4_ASCII16B
 
@@ -295,9 +291,8 @@
 #define MF_BAT_COLOR_LO     0xF06D0D
 
 static void _DrawWireBat(void);
-//=============================================================================
+    //=============================================================================
 // Battery icon index lookup — per spec II.2.3.2 item 4
-// 根据电池电量百分比返回对应图集子图索引 (5级: >90/>70/>50/>30/else)
 //=============================================================================
 static int _GetBatteryIconIdx(float rLevel)
 {
@@ -358,9 +353,6 @@ static TMainFormState m_State;
 // Helpers
 //=============================================================================
 
-//-----------------------------------------------------------------------------
-// Convert (x, y, w, h) to emWin GUI_RECT (x0, y0, x1, y1)
-//-----------------------------------------------------------------------------
 static void _MakeRect(GUI_RECT* pR, int x, int y, int w, int h)
 {
   pR->x0 = x;
@@ -369,9 +361,6 @@ static void _MakeRect(GUI_RECT* pR, int x, int y, int w, int h)
   pR->y1 = y + h - 1;
 }
 
-//-----------------------------------------------------------------------------
-// Check if value crossed threshold ±10% deadband (prevents flicker)
-//-----------------------------------------------------------------------------
 static bool _DeadbandCrossed(float rOld, float rNew, float rThreshold)
 {
   float rDelta = rThreshold * MF_DEADBAND_PCT;
@@ -392,27 +381,22 @@ static void _EraseValueRect(int x, int y, int w, int h)
 }
 
 //=============================================================================
-// Numeric formatting — convert register values to display strings
+// Numeric formatting
 //=============================================================================
-
-// "228.1V" — 3 digits integer, 1 decimal + unit
 static void _FmtVoltage(char* pBuf, size_t n, float rVal)
 {
   snprintf(pBuf, n, "%0.1fV", rVal);
 }
-// "10.69A" — 2 digits integer, 2 decimals + unit
 static void _FmtCurrent(char* pBuf, size_t n, float rVal)
 {
   snprintf(pBuf, n, "%0.2fA", rVal);
 }
-// Uses localised format string from idMainFmSt04 (e.g. "%.1f℃")
 static void _FmtTemp(char* pBuf, size_t n, float rVal)
 {
   auto szFmt = GetMultiLangString(idMainFmSt04);
   if (szFmt )
     snprintf(pBuf, n, szFmt, rVal);
 }
-// "85.3%" — 2 digits integer, 1 decimal + '%' unit
 static void _FmtBattery(char* pBuf, size_t n, float rVal)
 {
   snprintf(pBuf, n, "%0.1f%%", rVal);
@@ -420,7 +404,6 @@ static void _FmtBattery(char* pBuf, size_t n, float rVal)
 
 //=============================================================================
 // Drawing — Layer0 (drawn once to screen in _Show)
-//   绘制背景 + Caption + 控制器边框 + 全部静态 Label
 //=============================================================================
 
 static void _DrawLayer0(void)
@@ -455,56 +438,40 @@ static void _DrawLayer0(void)
                       MF_CTRL_X + MF_CTRL_W - 1,
                       MF_CTRL_Y + MF_CTRL_H - 1, MF_CTRL_RADIUS);
 
-  // Static labels — full opacity, transparent text
-  const char* pStr;
-  GUI_RECT    r;
-
-  GUI_SetTextMode(GUI_TEXTMODE_TRANS);
-
-  // Voltage labels (24 px font — top Caption area)
+  // Static measurement labels — full opacity
   GUI_SetFont(MF_LBL24_FONT);
   GUI_SetColor(MF_LBL24_COLOR);
+  GUI_SetTextMode(GUI_TEXTMODE_TRANS);
 
-  #define DR_LBL24(id, x,y,w,h) do { \
+  const char* pStr;
+  GUI_RECT    r;
+  int a24 = MF_LBL24_ALIGN;
+
+  #define DR_LBL(id, x,y,w,h) do { \
     pStr = GetMultiLangString(id);  \
-    if (nullptr != pStr) { _MakeRect(&r,x,y,w,h); GUI_DispStringInRect(pStr,&r,MF_LBL24_ALIGN); } \
+    if (nullptr != pStr) { _MakeRect(&r,x,y,w,h); GUI_DispStringInRect(pStr,&r,a24); } \
   } while(0)
 
-  DR_LBL24(idMainLabel01, MF_LBL_UIN_X,  MF_LBL_UIN_Y,  MF_LBL_UIN_W,  MF_LBL_UIN_H);
-  DR_LBL24(idMainLabel02, MF_LBL_UOUT_X, MF_LBL_UOUT_Y, MF_LBL_UOUT_W, MF_LBL_UOUT_H);
+  DR_LBL(idMainLabel01, MF_LBL_UIN_X,  MF_LBL_UIN_Y,  MF_LBL_UIN_W,  MF_LBL_UIN_H);
+  DR_LBL(idMainLabel02, MF_LBL_UOUT_X, MF_LBL_UOUT_Y, MF_LBL_UOUT_W, MF_LBL_UOUT_H);
+  DR_LBL(idMainLabel03, MF_LBL_CHG_X,  MF_LBL_CHG_Y,  MF_LBL_CHG_W,  MF_LBL_CHG_H);
+  DR_LBL(idMainLabel04, MF_LBL_DIS_X,  MF_LBL_DIS_Y,  MF_LBL_DIS_W,  MF_LBL_DIS_H);
 
-  #undef DR_LBL24
-
-  // Current & status labels (16 px font — lower area)
+  // Static status labels
   GUI_SetFont(MF_LBL16_FONT);
   GUI_SetColor(MF_LBL16_COLOR);
+  int a16 = MF_LBL16_ALIGN;
 
-  #define DR_LBL16(id, x,y,w,h) do { \
-    pStr = GetMultiLangString(id);  \
-    if (nullptr != pStr) { _MakeRect(&r,x,y,w,h); GUI_DispStringInRect(pStr,&r,MF_LBL16_ALIGN); } \
-  } while(0)
-
-  DR_LBL16(idMainLabel03, MF_LBL_CHG_X,  MF_LBL_CHG_Y,  MF_LBL_CHG_W,  MF_LBL_CHG_H);
-  DR_LBL16(idMainLabel04, MF_LBL_DIS_X,  MF_LBL_DIS_Y,  MF_LBL_DIS_W,  MF_LBL_DIS_H);
-  DR_LBL16(idMainLabel05, MF_LBL_TMP_X,  MF_LBL_TMP_Y,  MF_LBL_TMP_W,  MF_LBL_TMP_H);
-  DR_LBL16(idMainLabel06, MF_LBL_BAT_X,  MF_LBL_BAT_Y,  MF_LBL_BAT_W,  MF_LBL_BAT_H);
-
-  #undef DR_LBL16
+  DR_LBL(idMainLabel05, MF_LBL_TMP_X, MF_LBL_TMP_Y, MF_LBL_TMP_W, MF_LBL_TMP_H);
+  DR_LBL(idMainLabel06, MF_LBL_BAT_X, MF_LBL_BAT_Y, MF_LBL_BAT_W, MF_LBL_BAT_H);
+  #undef DR_LBL
 }
 
 //=============================================================================
 // Drawing — Layer1: measurement values
-//   Voltage values: inside Caption bar (solid background → fill-then-draw)
-//   Current values: lower status area (over CSG bg → fill+TRANS)
+//   These are inside the Caption bar (solid background → fill-then-draw)
 //=============================================================================
 
-// Forward decl — _DrawValueTrans defined later (status values section)
-static void _DrawValueTrans(const char* pStr, const GUI_FONT* pFont,
-                            int x, int y, int w, int h,
-                            GUI_COLOR color, int align, GUI_COLOR bg);
-
-// ---- Draw a value on solid Caption background (erase then TRANS text) ----
-// Used for voltage values inside the Caption bar (24px font, MF_VAL_BG fill)
 static void _DrawValueSolid(const char* pStr, const GUI_FONT* pFont,
                             int x, int y, int w, int h,
                             GUI_COLOR color, int align)
@@ -519,9 +486,6 @@ static void _DrawValueSolid(const char* pStr, const GUI_FONT* pFont,
   GUI_DispStringInRect(pStr, &r, align);
 }
 
-// ---- Update 4 measurement values (voltage ×2, current ×2) ----
-// Voltage: _DrawValueSolid (Caption area, 24px), Current: _DrawValueTrans (lower area, 16px)
-// Also derives battery charge/discharge state from current direction
 static void _UpdateMeasValues(bool bForce)
 {
   char  szBuf[16];
@@ -566,17 +530,17 @@ static void _UpdateMeasValues(bool bForce)
   if (bForce || rChgI != m_State.rLastChgI) {
     m_State.rLastChgI = rChgI;
     _FmtCurrent(szBuf, sizeof(szBuf), rChgI);
-    _DrawValueTrans(szBuf, MF_VAL16_FONT,
+    _DrawValueSolid(szBuf, MF_VAL24_FONT,
                     MF_VAL_CHG_X, MF_VAL_CHG_Y, MF_VAL_CHG_W, MF_VAL_CHG_H,
-                    MF_VAL24_COLOR, MF_VAL16_ALIGN, MF_STAT_BG);
+                    MF_VAL24_COLOR, MF_VAL24_ALIGN);
   }
 
   if (bForce || rDisI != m_State.rLastDisI) {
     m_State.rLastDisI = rDisI;
     _FmtCurrent(szBuf, sizeof(szBuf), rDisI);
-    _DrawValueTrans(szBuf, MF_VAL16_FONT,
+    _DrawValueSolid(szBuf, MF_VAL24_FONT,
                     MF_VAL_DIS_X, MF_VAL_DIS_Y, MF_VAL_DIS_W, MF_VAL_DIS_H,
-                    MF_VAL24_COLOR, MF_VAL16_ALIGN, MF_STAT_BG);
+                    MF_VAL24_COLOR, MF_VAL24_ALIGN);
   }
 }
 
@@ -586,7 +550,6 @@ static void _UpdateMeasValues(bool bForce)
 //   Right-aligned + fixed-width region keeps old-pixel-bleed minimal.
 //=============================================================================
 
-// ---- Threshold-based colour: temperature (>40℃ orange, >0℃ green, else orange) ----
 static GUI_COLOR _TempColor(float rTemp)
 {
   if (rTemp > MF_TEMP_HIGH) return MF_TEMP_COLOR_HI;
@@ -594,7 +557,6 @@ static GUI_COLOR _TempColor(float rTemp)
   return MF_TEMP_COLOR_HI;
 }
 
-// ---- Threshold-based colour: battery (>80% green, >50% cyan, else orange) ----
 static GUI_COLOR _BatColor(float rLevel)
 {
   if (rLevel > MF_BAT_HIGH) return MF_BAT_COLOR_HI;
@@ -602,8 +564,6 @@ static GUI_COLOR _BatColor(float rLevel)
   return MF_BAT_COLOR_LO;
 }
 
-// ---- Draw a value over CSG background (fill solid bg then TRANS text) ----
-// Used for current values + temperature + battery (16px font, MF_STAT_BG fill)
 static void _DrawValueTrans(const char* pStr, const GUI_FONT* pFont,
                             int x, int y, int w, int h,
                             GUI_COLOR color, int align, GUI_COLOR bg)
@@ -619,7 +579,6 @@ static void _DrawValueTrans(const char* pStr, const GUI_FONT* pFont,
   GUI_DispStringInRect(pStr, &r, align);
 }
 
-// ---- Update temperature + battery status values (16px, over CSG background) ----
 static void _UpdateStatValues(bool bForce)
 {
   char  szBuf[16];
@@ -649,9 +608,6 @@ static void _UpdateStatValues(bool bForce)
 //   These are opaque rectangles; drawn directly over whatever is underneath.
 //=============================================================================
 
-// ---- Draw horizontal connection wire ----
-// rVolt < 30V: solid gray;  rVolt ≥ 30V: cyan base + animated gradient highlight
-// iHLPct: highlight centre position as % of wire width (20→80 one-way, then resets)
 static void _DrawWireH(int x, int y, int w, int h, float rVolt, int iHLPct)
 {
   if (rVolt < MF_VOLT_THRESHOLD) {
@@ -674,8 +630,6 @@ static void _DrawWireH(int x, int y, int w, int h, float rVolt, int iHLPct)
   }
 }
 
-// ---- Draw vertical battery wire with charge/discharge gradient ----
-// Charge: cyan→white upward;  Discharge: white→cyan downward;  Idle: solid cyan
 static void _DrawWireBat(int x, int y, int w, int h)
 {
 
@@ -702,15 +656,12 @@ static void _DrawWireBat(int x, int y, int w, int h)
   }
 }
 
-// ---- Draw battery wire at fixed MF_WIRE_BAT position ----
 static void _DrawWireBat( void )
 {
 
   _DrawWireBat(MF_WIRE_BAT_X, MF_WIRE_BAT_Y, MF_WIRE_BAT_W, MF_WIRE_BAT_H);
 }
 
-// ---- Update 3 status connection wires (input, output, battery) ----
-// Animates wire highlight when voltage ≥ threshold; deadband avoids flicker
 static void _UpdateWires(bool bForce)
 {
   
@@ -749,8 +700,6 @@ static void _UpdateWires(bool bForce)
 //   GUI_DrawPicture draws opaque pixels; saturation handles dim/bright.
 //=============================================================================
 
-// ---- Update 6 status icons (AC input, controller, breaker, battery, heater, fan) ----
-// Saturation dims/brightens based on voltage, IO state, or battery level
 static void _UpdateIcons(bool bForce)
 {
 
@@ -817,44 +766,44 @@ static void _UpdateIcons(bool bForce)
 //   Over CSG image background → GUI_TEXTMODE_TRANS, no explicit erase.
 //=============================================================================
 
-// static uint32_t _CoilToStrId(int iCoil)
-// {
-//   switch (iCoil) {
-//   case COIL_Passby:   return idMainStat06;
-//   case COIL_KeepOff:  return idMainStat05;
-//   case COIL_KeepOn:   return idMainStat04;
-//   default:            return 0;
-//   }
-// }
+static uint32_t _CoilToStrId(int iCoil)
+{
+  switch (iCoil) {
+  case COIL_Passby:   return idMainStat06;
+  case COIL_KeepOff:  return idMainStat05;
+  case COIL_KeepOn:   return idMainStat04;
+  default:            return 0;
+  }
+}
 
-// static void _UpdateStatText(bool bForce)
-// {
-//   TDevStateReg iCoil  = GetCoilState(0);
-//   TStateReg uPassby = _GetIOStateReg(REG_stPassby);
+static void _UpdateStatText(bool bForce)
+{
+  TDevStateReg iCoil  = GetCoilState(0);
+  TStateReg uPassby = _GetIOStateReg(REG_stPassby);
 
-//   if (bForce || iCoil != m_State.stLastCoil || uPassby != m_State.stLastPassbySt) {
-//     m_State.stLastCoil     = iCoil;
-//     m_State.stLastPassbySt = uPassby;
+  if (bForce || iCoil != m_State.stLastCoil || uPassby != m_State.stLastPassbySt) {
+    m_State.stLastCoil     = iCoil;
+    m_State.stLastPassbySt = uPassby;
 
-//     GUI_COLOR cr = (uPassby == STATE_TRUE) ? MF_STAT_COLOR_ON : MF_STAT_COLOR_OFF;
+    GUI_COLOR cr = (uPassby == STATE_TRUE) ? MF_STAT_COLOR_ON : MF_STAT_COLOR_OFF;
 
-//     uint32_t uStrId = _CoilToStrId(iCoil);
-//     const char* pStr = (uStrId != 0) ? GetMultiLangString(uStrId) : "";
-//     if (nullptr == pStr) pStr = "";
+    uint32_t uStrId = _CoilToStrId(iCoil);
+    const char* pStr = (uStrId != 0) ? GetMultiLangString(uStrId) : "";
+    if (nullptr == pStr) pStr = "";
 
-//     // Fill background, then draw text
-//     GUI_SetColor(MF_STAT_BG);
-//     GUI_FillRect(MF_STAT_X, MF_STAT_Y,
-//                  MF_STAT_X + MF_STAT_W - 1, MF_STAT_Y + MF_STAT_H - 1);
+    // Fill background, then draw text
+    GUI_SetColor(MF_STAT_BG);
+    GUI_FillRect(MF_STAT_X, MF_STAT_Y,
+                 MF_STAT_X + MF_STAT_W - 1, MF_STAT_Y + MF_STAT_H - 1);
 
-//     GUI_RECT r;
-//     _MakeRect(&r, MF_STAT_X, MF_STAT_Y, MF_STAT_W, MF_STAT_H);
-//     GUI_SetFont(MF_STAT_FONT);
-//     GUI_SetColor(cr);
-//     GUI_SetTextMode(GUI_TEXTMODE_TRANS);
-//     GUI_DispStringInRect(pStr, &r, MF_STAT_ALIGN);
-//   }
-// }
+    GUI_RECT r;
+    _MakeRect(&r, MF_STAT_X, MF_STAT_Y, MF_STAT_W, MF_STAT_H);
+    GUI_SetFont(MF_STAT_FONT);
+    GUI_SetColor(cr);
+    GUI_SetTextMode(GUI_TEXTMODE_TRANS);
+    GUI_DispStringInRect(pStr, &r, MF_STAT_ALIGN);
+  }
+}
 
 //=============================================================================
 // Drawing — Layer1: date / time
@@ -862,8 +811,6 @@ static void _UpdateIcons(bool bForce)
 //   Left-aligned; trailing space in format string clears old rightmost chars.
 //=============================================================================
 
-// ---- Format date/time string "yyyy-MM-dd HH:mm" (MCU: RTC, Sim: GetLocalTime) ----
-// Returns true if minute changed (or bForce); caches ucLastMinute to avoid redraws
 static bool _GetClockStr(bool bForce, char* pBuf, size_t nLen)
 {
 #ifndef __vmSIMULATOR__
@@ -897,7 +844,6 @@ static bool _GetClockStr(bool bForce, char* pBuf, size_t nLen)
   return false;
 }
 
-// ---- Redraw clock display if minute changed (single-byte compare, not strcmp) ----
 static void _UpdateClock(bool bForce)
 {
   
@@ -932,17 +878,11 @@ static void _UpdateClock(bool bForce)
 // Update scheduler
 //=============================================================================
 
-// ---- Tick scheduler: dispatch to sub-updaters at their configured intervals ----
 static void _UpdateAll(bool bForce)
 {
   
-#ifdef __vmSIMULATOR__
-  // Debug only: inject fake measurement values for Sim visual development
-  _SetRealReg(REG_RL_Uin,  228.12);
+  _SetRealReg(REG_RL_Uin,  228.12);  // for Debug only
   _SetRealReg(REG_RL_Uout, 229.87);
-  _SetRealReg(REG_RL_BCHRG_Ibus, 10.69);
-  _SetRealReg(REG_RL_BTOUT_Ibus, 32.52);
-#endif
   
   uint32_t uNow = GUI_GetTime();
 
@@ -963,17 +903,16 @@ static void _UpdateAll(bool bForce)
     _UpdateWires(bForce);
     _UpdateIcons(bForce);
   }
-  // if (bForce || uNow - m_State.uLastTextTick >= UPDATE_TEXT_MS) {
-  //   m_State.uLastTextTick = uNow;
-  //   _UpdateStatText(bForce);
-  // }
+  if (bForce || uNow - m_State.uLastTextTick >= UPDATE_TEXT_MS) {
+    m_State.uLastTextTick = uNow;
+    _UpdateStatText(bForce);
+  }
 }
 
 //=============================================================================
 // Form lifecycle
 //=============================================================================
 
-// ---- GWinForm: initialise form state ----
 static void _Init(const void* argument)
 {
   (void)argument;
@@ -981,7 +920,6 @@ static void _Init(const void* argument)
   m_State.uWireHLPct = 20.0f;
 }
 
-// ---- GWinForm: draw Layer0 + all Layer1 elements (bForce = true) ----
 static void _Show(const void* argument)
 {
   (void)argument;
@@ -996,20 +934,17 @@ static void _Show(const void* argument)
   _UpdateAll(true);
 }
 
-// ---- GWinForm: release resources (nothing to free currently) ----
 static void _Close(const void* argument)
 {
   (void)argument;
 }
 
-// ---- GWinForm GM_TIMER_TICK handler: incremental update (bForce = false) ----
 static void _OnTick(uint32_t uTick)
 {
   (void)uTick;
   _UpdateAll(false);
 }
 
-// ---- Keyboard handler: Enter→MenuForm, Esc→SplashForm ----
 static void _OnKeyUp(uint16_t uwKey)
 {
   switch (uwKey) {
@@ -1019,7 +954,6 @@ static void _OnKeyUp(uint16_t uwKey)
   }
 }
 
-// ---- Touch handler: any tap → MenuForm ----
 static void _OnTouch(uint16_t action, uint16_t x, uint16_t y)
 {
   (void)x; (void)y;
@@ -1027,7 +961,6 @@ static void _OnTouch(uint16_t action, uint16_t x, uint16_t y)
     gfc::PushForm(WID_MenuForm, nullptr);
 }
 
-// ---- GWinForm message dispatch: tick / key / touch → handler ----
 static void _OnMessage(GM_MESSAGE* pMsg)
 {
   if (nullptr == pMsg) return;
