@@ -790,6 +790,16 @@
               <FilePath>..\Application\System\DevRegs.cpp</FilePath>
             </File>
             <File>
+              <FileName>FuncUVTC.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\Application\System\FuncUVTC.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>Retarget.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\Application\System\Retarget.cpp</FilePath>
+            </File>
+            <File>
               <FileName>TextStrs.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\Application\System\Strings\TextStrs.cpp</FilePath>
@@ -844,16 +854,6 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
-            </File>
-            <File>
-              <FileName>FuncUVTC.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\Application\System\FuncUVTC.cpp</FilePath>
-            </File>
-            <File>
-              <FileName>Retarget.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\Application\System\Retarget.cpp</FilePath>
             </File>
           </Files>
         </Group>
@@ -936,11 +936,6 @@
               <FilePath>..\Middlewares\emWin\user\GUIBitmap.c</FilePath>
             </File>
             <File>
-              <FileName>PictureRes.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\Application\GUI\PictureRes.cpp</FilePath>
-            </File>
-            <File>
               <FileName>GUIPicture.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\Middlewares\emWin\user\GUIPicture.cpp</FilePath>
@@ -949,6 +944,11 @@
               <FileName>GUIMisc.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\Application\GUI\GUIMisc.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>PictureRes.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\Application\GUI\PictureRes.cpp</FilePath>
             </File>
           </Files>
         </Group>
@@ -1535,6 +1535,11 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+            <File>
+              <FileName>Font_ASCCAP24B.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\Middlewares\emWin\fonts\Font_ASCCAP24B.cpp</FilePath>
             </File>
             <File>
               <FileName>Font_AA4_16_B.c</FileName>

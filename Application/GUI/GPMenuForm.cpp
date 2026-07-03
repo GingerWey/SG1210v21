@@ -62,12 +62,12 @@
 #define MU_BKG_Y          0
 
 // --- Layer0: Caption 背板 (40px 高) ---
-#define MU_CAP_X          0
-#define MU_CAP_Y          0
-#define MU_CAP_W          320
-#define MU_CAP_H          40
-#define MU_CAP_FILL       0x041736     // 填充色
-#define MU_CAP_ALPHA      51           // 不透明度 20% = 255*0.20
+//#define MU_CAP_X          0
+//#define MU_CAP_Y          0
+//#define MU_CAP_W          320
+//#define MU_CAP_H          40
+//#define MU_CAP_FILL       0x041736     // 填充色
+//#define MU_CAP_ALPHA      51           // 不透明度 20% = 255*0.20
 
 // --- Layer0: Caption 分割线 ---
 #define MU_SEP_X          0
@@ -100,6 +100,10 @@
 #define MU_HINT_COLOR     0x00B5F2
 #define MU_HINT_BG        0x070D28
 #define MU_HINT_ALIGN     (GUI_TA_LEFT | GUI_TA_VCENTER)
+
+// --- Layer1: 菜单项文字 ---
+#define MU_ITEM_COLOR     0x00B5F2
+#define MU_ITEM_FONT      GUI_FONT_16LTH_CHN
 
 // --- Layer1: 选取框（空心圆角矩形边框，相对菜单项图标左上角）---
 #define MU_SEL_DX         -9
@@ -200,7 +204,7 @@ static void _EraseSelArea(int idx)
             pItem->yIcon + MU_SEL_DY - 1,
             MU_SEL_W + 2, MU_SEL_H + 2);         // 向外扩展 1px Margin
 
-  CSG_DrawPicture(&picbkg320x240Lcsg, 0, 0, 0, 100, &rClip ); // 重绘背景图层
+  CSG_DrawPicture(IMAGE_BACKGROUND, 0, 0, 0, 100, &rClip); // 重绘背景图层
 }
 
 //=============================================================================
@@ -308,8 +312,8 @@ static void _DrawMenuItem(int idx, bool bSelect)
     GUI_RECT r;
     _MakeRect(&r, pItem->xLbl, pItem->yLbl,
               pItem->wLbl, pItem->hLbl);
-    GUI_SetFont(MU_HINT_FONT);   // GUI_FONT_16LTH_CHN
-    GUI_SetColor(MU_HINT_COLOR);
+    GUI_SetFont(MU_ITEM_FONT);   // GUI_FONT_16LTH_CHN
+    GUI_SetColor(MU_ITEM_COLOR);
     GUI_SetTextMode(GUI_TEXTMODE_TRANS);
     GUI_DispStringInRect(pStr, &r, GUI_TA_HCENTER | GUI_TA_VCENTER);
   }
@@ -334,11 +338,11 @@ static void _DrawAllItems(void)
 //-----------------------------------------------------------------------------
 static void _Redraw(void)
 {
-  GUI_SetBkColor(GUI_BLACK);
-  GUI_Clear();
+  //GUI_SetBkColor(GUI_BLACK);
+  //GUI_Clear();
 
   // Layer0
-  CSG_DrawPicture(&picbkg320x240Lcsg, MU_BKG_X, MU_BKG_Y, 0);
+  CSG_DrawPicture(IMAGE_BACKGROUND, MU_BKG_X, MU_BKG_Y, 0);
   
   _DrawCaptionBar();
   _DrawCaptionTitle();

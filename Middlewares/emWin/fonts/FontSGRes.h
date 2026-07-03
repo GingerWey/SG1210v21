@@ -1,8 +1,8 @@
 //-----------------------------------------------------------------------------
 /*
-   emWinµÄ×ÖÌå×ÊÔ´
+   emWinï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´
    
-   ÎÀÈÙÆ½
+   ï¿½ï¿½ï¿½ï¿½Æ½
    2026.6.6   
 */
 //-----------------------------------------------------------------------------
@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 //=============================================================================
-// È«¾Ö±äÁ¿
+// È«ï¿½Ö±ï¿½ï¿½ï¿½
 //---------------------------------------------------------------------------
 // 8x16 ASCII
 extern const GUI_FONT GUI_FontASCII16;
@@ -27,32 +27,30 @@ extern const GUI_FONT GUI_FontASCII24;
 #define GUI_FONT_ASCII24 (&GUI_FontASCII24)
 
 // 16x16 CHN
-extern GUI_CONST_STORAGE GUI_FONT GUI_CHNFont16LTH;
-extern GUI_CONST_STORAGE GUI_FONT GUI_CHNFont16LTHx2;
+extern const GUI_FONT GUI_CHNFont16LTH;
+extern const GUI_FONT GUI_CHNFont16LTHx2;
 #define GUI_FONT_16LTH_CHN   (&GUI_CHNFont16LTH)
 
 // 24x24 CHN
-extern GUI_CONST_STORAGE  GUI_FONT GUI_CHSLTHFont24;
-extern GUI_CONST_STORAGE  GUI_FONT GUI_CHSLTHFont24x2;
+extern const  GUI_FONT GUI_CHSLTHFont24;
+extern const  GUI_FONT GUI_CHSLTHFont24x2;
 #define GUI_FONT_24LTH_CHN   (&GUI_CHSLTHFont24)
 
-// 23x32 ASCII AA2
-extern const GUI_FONT GUI_FontDigital32B;
-#define GUI_FONT_AA2_DIGITAL32B (&GUI_FontDigital32B)
+// 17X24 ASCII  CAPTAIN
+extern const GUI_FONT GUI_Font_ASCCAP24B;
+#define GUI_FONT_DIGCAP24B   (&GUI_Font_ASCCAP24B)
 
-// 34x40 Digital AA2
-extern const GUI_FONT GUI_FontDigital40;
-#define GUI_FONT_AA2_DIGITAL40 (&GUI_FontDigital40)
-
-// 32x44 Digital-Bold  AA2
-extern const GUI_FONT GUI_FontDigital44B;
-#define GUI_FONT_AA2_DIGITAL44B (&GUI_FontDigital44B)
-
+#ifdef __vmSIMULATOR__
+extern const GUI_FONT GUI_FontConsolas16B;
+#define GUI_FONT_ASCII16B    (&GUI_FontConsolas16B)
+#else
 // 16 ASCII AA4
 extern const GUI_FONT GUI_Font_AA4_16_L;
 #define GUI_FONT_AA4_ASCII16L   (&GUI_Font_AA4_16_L)
+
 extern const GUI_FONT GUI_Font_AA4_16_B;
-#define GUI_FONT_AA4_ASCII16B   (&GUI_Font_AA4_16_B)
+#define GUI_FONT_ASCII16B    (&GUI_Font_AA4_16_B)
+#endif
 //---------------------------------------------------------------------------
 #ifdef __cplusplus
 }

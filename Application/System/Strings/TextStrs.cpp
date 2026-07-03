@@ -104,9 +104,13 @@ constexpr TMultiLangStrings listMultiStrings[] =
   ,{ idMainLabel02,       "输出：",                  "Vout="    }
   ,{ idMainLabel03,       "充电：",                  "Ichg="           }
   ,{ idMainLabel04,       "放电：",                  "Iexp="           }
-  ,{ idMainLabel05,       "温度：",                  "Tbat="           }
-  ,{ idMainLabel06,       "电池：",                  "Batt="           }
-
+#ifdef __vmSIMULATOR__
+  ,{ idMainLabel05,       "温度：        ℃",        "Tbat=        ℃"           }
+  ,{ idMainLabel06,       "电量：         %",        "Batt=        %"           }
+#else
+  ,{ idMainLabel05,       "温度：    ℃",           "Tbat=      ℃"           }
+  ,{ idMainLabel06,       "电量：     %",           "Batt=      %"           }
+#endif
   ,{ idMainStat01,        "关闭",                   "Shutdown"          }
   ,{ idMainStat02,        "启动",                   "Startup"           }
   ,{ idMainStat03,        "监控",                   "Monitor"           }

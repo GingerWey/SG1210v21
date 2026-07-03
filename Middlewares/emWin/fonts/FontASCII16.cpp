@@ -14,6 +14,7 @@
 
 #include "GUI_UC_Font.h"
 #include "GUI.h"
+#include <GUI_Type.h>
 
 //-----------------------------------------------------------------------------
 #ifndef U8

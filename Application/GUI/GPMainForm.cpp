@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 /*
  File        : GPMainForm.cpp
- Version     : V2.04
+ Version     : V2.05
  By          : Wey. Silver Grid
 
  Description : Main operation form. Displays measurements, status graphics,
@@ -31,7 +31,8 @@
      - Graphics:    every  1 s (IO-state driven, or +/-10 % deadband)
      - Status text: every  1 s
 
- Date        : 2026.07.01 (V2.04 — coordinated sync to 表单设计.md)
+ Date        : 2026.07.02 (V2.05 — Yoda-style + brace-style compliance)
+              2026.07.01 (V2.04 — coordinated sync to 表单设计.md)
               2026.07.01 (V2.03 — animated wire highlight 20%→80% one-way)
               2026.06.29 (V2.02 — removed full-screen memdev; TRANS-based Layer1)
               2026.06.29 (V2.01 — GUI_MEMDEV for Layer0/Layer1 isolation)
@@ -66,15 +67,22 @@
 #include <string.h>
 #include <math.h>
 #include <cstdio>
+#include <DevTypes.h>
+#include <Dev_Cfg.h>
 
 //=============================================================================
 // Update intervals (ms) — per spec II.2.1
 //=============================================================================
 #define UPDATE_CLOCK_MS     60000
-#define UPDATE_MEAS_MS      10000
-#define UPDATE_STAT_MS      10000
+#define UPDATE_MEAS_MS      2000
+#define UPDATE_STAT_MS      2000
 #define UPDATE_GRAPHIC_MS   1000
 #define UPDATE_TEXT_MS      1000
+
+#ifndef __vmSIMULATOR__
+template<typename T> T min(T a, T b) { return (a <  b? a : b); }
+template<typename T> T max(T a, T b) { return (a >= b? a : b); }
+#endif
 
 //=============================================================================
 // Layout — Layer0 — per spec II.2.3.1
@@ -117,6 +125,21 @@
 #define MF_LBL_UOUT_W       60
 #define MF_LBL_UOUT_H       24
 
+#define MF_LBL24_FONT       GUI_FONT_24LTH_CHN
+#define MF_LBL24_COLOR      0xECECEC
+#define MF_LBL24_ALIGN      (GUI_TA_LEFT | GUI_TA_VCENTER)
+
+// Status data labels (2 × 16 px font) — static
+#define MF_LBL_TMP_X        10
+#define MF_LBL_TMP_Y        170
+#define MF_LBL_TMP_W        96   //40
+#define MF_LBL_TMP_H        16
+
+#define MF_LBL_BAT_X        10
+#define MF_LBL_BAT_Y        190
+#define MF_LBL_BAT_W        96   //40
+#define MF_LBL_BAT_H        16
+
 #define MF_LBL_CHG_X        218
 #define MF_LBL_CHG_Y        170
 #define MF_LBL_CHG_W        40
@@ -126,21 +149,6 @@
 #define MF_LBL_DIS_Y        190
 #define MF_LBL_DIS_W        40
 #define MF_LBL_DIS_H        16
-
-#define MF_LBL24_FONT       GUI_FONT_24LTH_CHN
-#define MF_LBL24_COLOR      0xECECEC
-#define MF_LBL24_ALIGN      (GUI_TA_LEFT | GUI_TA_VCENTER)
-
-// Status data labels (2 × 16 px font) — static
-#define MF_LBL_TMP_X        10
-#define MF_LBL_TMP_Y        170
-#define MF_LBL_TMP_W        40
-#define MF_LBL_TMP_H        16
-
-#define MF_LBL_BAT_X        10
-#define MF_LBL_BAT_Y        190
-#define MF_LBL_BAT_W        40
-#define MF_LBL_BAT_H        16
 
 #define MF_LBL16_FONT       GUI_FONT_16LTH_CHN
 #define MF_LBL16_COLOR      0xECECEC
@@ -171,16 +179,6 @@
 #define MF_VAL_UOUT_W       80
 #define MF_VAL_UOUT_H       24
 
-#define MF_VAL_CHG_X        256
-#define MF_VAL_CHG_Y        172
-#define MF_VAL_CHG_W        60
-#define MF_VAL_CHG_H        16
-
-#define MF_VAL_DIS_X        256
-#define MF_VAL_DIS_Y        192
-#define MF_VAL_DIS_W        60
-#define MF_VAL_DIS_H        16
-
 #define MF_VAL24_FONT       GUI_FONT_24LTH_CHN
 #define MF_VAL24_COLOR      0xECECEC
 #define MF_VAL24_ALIGN      (GUI_TA_RIGHT | GUI_TA_VCENTER)
@@ -188,22 +186,33 @@
 // Status values (2 × 16 px font) — over CSG image background
 //   Use GUI_TEXTMODE_TRANS: new text pixels overwrite old ones.
 #define MF_VAL_TMP_X        50
-#define MF_VAL_TMP_Y        172
-#define MF_VAL_TMP_W        56
+#define MF_VAL_TMP_Y        170
+#define MF_VAL_TMP_W        38
 #define MF_VAL_TMP_H        16
 
 #define MF_VAL_BAT_X        50
-#define MF_VAL_BAT_Y        192
-#define MF_VAL_BAT_W        56
+#define MF_VAL_BAT_Y        190
+#define MF_VAL_BAT_W        38
 #define MF_VAL_BAT_H        16
 
-#define MF_VAL16_FONT       GUI_FONT_16LTH_CHN
+#define MF_VAL_CHG_X        260
+#define MF_VAL_CHG_Y        170
+#define MF_VAL_CHG_W        48
+#define MF_VAL_CHG_H        16
+
+#define MF_VAL_DIS_X        260
+#define MF_VAL_DIS_Y        190
+#define MF_VAL_DIS_W        50
+#define MF_VAL_DIS_H        16
+#define MF_VAL16_FONT       GUI_FONT_ASCII16B
+
+//#define MF_VAL16_FONT       GUI_FONT_16LTH_CHN
 #define MF_VAL16_ALIGN      (GUI_TA_RIGHT | GUI_TA_VCENTER)
 
 // Status connection wires (3 thin rectangles)
 #define MF_WIRE_IN_X        62
 #define MF_WIRE_IN_Y        100
-#define MF_WIRE_IN_W        58
+#define MF_WIRE_IN_W        48
 #define MF_WIRE_IN_H        4
 
 #define MF_WIRE_OUT_X       200
@@ -227,9 +236,15 @@
 
 #define MF_ICON_CTRL_X      120
 #define MF_ICON_CTRL_Y      74
-#define MF_ICON_CTRL_PSBY   picIdxMA_CtrlP80x62Cyan
-#define MF_ICON_CTRL_KON    picIdxMA_CtrlN80x62Cyan
-#define MF_ICON_CTRL_KOF    picIdxMA_CtrlF80x62Cyan
+#define MF_ICON_CTRL_IDX    picIdxMA_CtrlG80x62Cyan
+
+#define MF_ICON_LED1_X      (MF_ICON_CTRL_X + 13)
+#define MF_ICON_LED1_Y      (MF_ICON_CTRL_Y + 19)
+#define MF_ICON_LED2_X      (MF_ICON_CTRL_X + 34)
+#define MF_ICON_LED2_Y      (MF_ICON_CTRL_Y + 33)
+#define MF_ICON_LED3_X      (MF_ICON_CTRL_X + 55)
+#define MF_ICON_LED3_Y      (MF_ICON_CTRL_Y + 19)
+#define MF_ICON_RLED_IDX    picIdxMA_CtrlLED13x13Red
 
 #define MF_ICON_BRKR_X      250
 #define MF_ICON_BRKR_Y      71
@@ -239,11 +254,11 @@
 #define MF_ICON_BAT_Y       162
 
 #define MF_ICON_HEAT_X      270
-#define MF_ICON_HEAT_Y      219
+#define MF_ICON_HEAT_Y      221
 #define MF_ICON_HEAT_IDX    picIdxMA_Fire16x16
 
 #define MF_ICON_FAN_X       293
-#define MF_ICON_FAN_Y       220
+#define MF_ICON_FAN_Y       221
 #define MF_ICON_FAN_IDX     picIdxMA_Fan16x16Cyan
 
 #define MF_ICON_SAT_ON      100
@@ -262,10 +277,10 @@
 
 // Date / time
 #define MF_CLOCK_X          10
-#define MF_CLOCK_Y          220
+#define MF_CLOCK_Y          221
 #define MF_CLOCK_W          120
 #define MF_CLOCK_H          16
-#define MF_CLOCK_FONT       GUI_FONT_AA4_ASCII16B
+#define MF_CLOCK_FONT       GUI_FONT_ASCII16B
 
 #define MF_CLOCK_COLOR      0xBDBDBD
 #define MF_CLOCK_ALIGN      (GUI_TA_LEFT | GUI_TA_VCENTER)
@@ -284,29 +299,23 @@
 // Colour thresholds — per spec II.2.3.2 item 2
 //=============================================================================
 #define MF_TEMP_HIGH        40.0f
-#define MF_TEMP_LOW         0.0f
-#define MF_TEMP_COLOR_HI    0xF06D0D
-#define MF_TEMP_COLOR_OK    0x16E83D
+#define MF_TEMP_LOW         -10.0f
+#define MF_TEMP_COLOR_HI    0xFF1010
+#define MF_TEMP_COLOR_LO    0xFF1010
+#define MF_TEMP_COLOR_OK    0x3DF83D
 
-#define MF_BAT_HIGH         80.0f
-#define MF_BAT_MID          50.0f
-#define MF_BAT_COLOR_HI     0x16E83D
-#define MF_BAT_COLOR_MID    0x00B5F2
-#define MF_BAT_COLOR_LO     0xF06D0D
+#define MF_BAT_HIGH         85.0f
+#define MF_BAT_LOW          60.0f
+#define MF_BAT_COLOR_HI     0x3DF83D
+#define MF_BAT_COLOR_MID    0xFF4020
+#define MF_BAT_COLOR_LO     0xFF1010
 
 static void _DrawWireBat(void);
 //=============================================================================
 // Battery icon index lookup — per spec II.2.3.2 item 4
-// 根据电池电量百分比返回对应图集子图索引 (5级: >90/>70/>50/>30/else)
+// 4-level hysteresis (implemented below after m_State declaration)
 //=============================================================================
-static int _GetBatteryIconIdx(float rLevel)
-{
-  if (rLevel > 90.0f) return picIdxMA_Battey44x24C5;
-  if (rLevel > 70.0f) return picIdxMA_Battey44x24C4;
-  if (rLevel > 50.0f) return picIdxMA_Battey44x24C3;
-  if (rLevel > 30.0f) return picIdxMA_Battey44x24C2;
-  return picIdxMA_Battey44x24C1;
-}
+static int _GetBatteryIconIdx(int rLevel);
 
 //=============================================================================
 // Form state — caches previous values for change detection & deadband
@@ -330,13 +339,13 @@ typedef struct tagMainFormState {
   float    rLastWireUout;
   int      iLastBatIconIdx;
   int      iLastBatSat;
-  int      iLastAcSat;
-  TStateReg stLastHeaterSt;
-  TStateReg stLastFanSt;
+  int      iLastAcSat = MF_ICON_SAT_OFF;
+  TStateReg stLastHeaterSt = MF_ICON_SAT_OFF;
+  TStateReg stLastFanSt = MF_ICON_SAT_OFF;
 
   TDevStateReg  stLastCoil;
-  TStateReg stLastPassbySt;
-  uint8_t   stCtrlOutMode;
+  TStateReg   stLastPassby;
+  uint8_t stCrtlLED[3] = { MF_ICON_SAT_OFF, MF_ICON_SAT_OFF, MF_ICON_SAT_OFF };
 
   //char     szClock[32];
   uint8_t  ucLastMinute = 0; //
@@ -353,6 +362,56 @@ typedef struct tagMainFormState {
 } TMainFormState;
 
 static TMainFormState m_State;
+
+//=============================================================================
+// Battery icon lookup table — per spec II.2.3.2 item 4
+// Ordered high→low.  Hysteresis: rise at threshold, drop at threshold - 2%.
+//=============================================================================
+struct TBatIconLevel {
+  uint8_t iThreshold;   // rLevel ≥ this → use this icon
+  uint8_t iIconIdx; // atlas sub-picture index
+};
+constexpr int kBatRiseDropDelta = 2; // 2% deadband for drop threshold
+
+static const TBatIconLevel kBatIconTable[] = {
+  { 90, picIdxMA_Battery41x26C4 },
+  { 70, picIdxMA_Battery41x26C3 },
+  { 30, picIdxMA_Battery41x26C2 },
+  {  0, picIdxMA_Battery41x26C1 },   // lowest: always stay if reached
+};
+static const int kBatIconCount = sizeof(kBatIconTable) / sizeof(kBatIconTable[0]);
+
+//=============================================================================
+// Battery icon index with hysteresis.
+//   Rise:  rLevel ≥ iRiseThreshold → immediately step up
+//   Drop:  rLevel < iDropThreshold (2% deadband) → step down
+//=============================================================================
+static int _GetBatteryIconIdx(int iLevel)
+{
+  int iLast = m_State.iLastBatIconIdx;
+
+  // Search table high→low.  
+  // If currently at a level, stay unless dropped below hysteresis.
+  for (int i = 0; i < kBatIconCount - 1; ++i) {
+    auto pLvl = &kBatIconTable[i];
+
+    if (pLvl->iIconIdx == iLast) {
+      // Currently at this level — stay unless dropped below hysteresis
+      if (iLevel < pLvl->iThreshold - kBatRiseDropDelta) {
+        continue;  // drop to next level
+      }
+      return pLvl->iIconIdx;
+    }
+
+    // Below this level — rise if threshold met
+    if (iLevel >= pLvl->iThreshold) {
+      return pLvl->iIconIdx;
+    }
+  }
+
+  // Fallback (should not reach here)
+  return kBatIconTable[kBatIconCount-1].iIconIdx;
+}
 
 //=============================================================================
 // Helpers
@@ -408,14 +467,15 @@ static void _FmtCurrent(char* pBuf, size_t n, float rVal)
 // Uses localised format string from idMainFmSt04 (e.g. "%.1f℃")
 static void _FmtTemp(char* pBuf, size_t n, float rVal)
 {
-  auto szFmt = GetMultiLangString(idMainFmSt04);
-  if (szFmt )
-    snprintf(pBuf, n, szFmt, rVal);
+  //auto szFmt = GetMultiLangString(idMainFmSt04);
+  //if (szFmt )
+  //  snprintf(pBuf, n, szFmt, rVal);
+    snprintf(pBuf, n, "%0.1f", rVal);
 }
 // "85.3%" — 2 digits integer, 1 decimal + '%' unit
 static void _FmtBattery(char* pBuf, size_t n, float rVal)
 {
-  snprintf(pBuf, n, "%0.1f%%", rVal);
+  snprintf(pBuf, n, "%0.1f", rVal);
 }
 
 //=============================================================================
@@ -426,14 +486,14 @@ static void _FmtBattery(char* pBuf, size_t n, float rVal)
 static void _DrawLayer0(void)
 {
   // Background image — full opacity
-  GUI_DrawPicture(&picbkg320x240Lcsg, MF_BKG_X, MF_BKG_Y, 0, 100);
+  GUI_DrawPicture(IMAGE_BACKGROUND, MF_BKG_X, MF_BKG_Y, 0, 100);
 
   // --- Caption back panel (20% opacity on top of CSG background) ---
   GUI_EnableAlpha(1);
-  GUI_SetAlpha(MF_CAP_ALPHA);
-  GUI_SetColor(MF_CAP_COLOR);
-  GUI_FillRect(MF_CAP_X, MF_CAP_Y,
-               MF_CAP_X + MF_CAP_W - 1, MF_CAP_Y + MF_CAP_H - 1);
+//  GUI_SetAlpha(MF_CAP_ALPHA);
+//  GUI_SetColor(MF_CAP_COLOR);
+//  GUI_FillRect(MF_CAP_X, MF_CAP_Y,
+//               MF_CAP_X + MF_CAP_W - 1, MF_CAP_Y + MF_CAP_H - 1);
 
   // Caption divider (15% opacity)
   GUI_SetAlpha(MF_SEP_ALPHA);
@@ -591,14 +651,14 @@ static GUI_COLOR _TempColor(float rTemp)
 {
   if (rTemp > MF_TEMP_HIGH) return MF_TEMP_COLOR_HI;
   if (rTemp > MF_TEMP_LOW)  return MF_TEMP_COLOR_OK;
-  return MF_TEMP_COLOR_HI;
+  return MF_TEMP_COLOR_LO;
 }
 
 // ---- Threshold-based colour: battery (>80% green, >50% cyan, else orange) ----
 static GUI_COLOR _BatColor(float rLevel)
 {
   if (rLevel > MF_BAT_HIGH) return MF_BAT_COLOR_HI;
-  if (rLevel > MF_BAT_MID)  return MF_BAT_COLOR_MID;
+  if (rLevel > MF_BAT_LOW)  return MF_BAT_COLOR_MID;
   return MF_BAT_COLOR_LO;
 }
 
@@ -625,7 +685,7 @@ static void _UpdateStatValues(bool bForce)
   char  szBuf[16];
   float rVal;
 
-  rVal = _GetRealReg(REG_RL_RTC_TEMP);
+  rVal = _GetRealReg(REG_RL_BAT_TEMPERATRUE); //REG_RL_RTC_TEMP);
   if (bForce || rVal != m_State.rLastTemp) {
     m_State.rLastTemp = rVal;
     _FmtTemp(szBuf, sizeof(szBuf), rVal);
@@ -648,29 +708,37 @@ static void _UpdateStatValues(bool bForce)
 // Drawing — Layer1: status connection wires
 //   These are opaque rectangles; drawn directly over whatever is underneath.
 //=============================================================================
+static void _DrawWireHighlightH( int x, int y, int w, int h, int pct )
+{
+
+    int const kHalfW = 7;
+    int cx = x + (int)(w * pct / 100);
+    int x1 = max(x, cx - kHalfW);
+    int x2 = min(x + w, cx + kHalfW) - 1;
+
+    GUI_DrawGradientH(x1, y, cx, y + h - 1,
+        MF_WIRE_GRAD_C, MF_WIRE_GRAD_M);
+    GUI_DrawGradientH(cx + 1, y, x2, y + h - 1,
+        MF_WIRE_GRAD_M, MF_WIRE_GRAD_C);
+}
 
 // ---- Draw horizontal connection wire ----
 // rVolt < 30V: solid gray;  rVolt ≥ 30V: cyan base + animated gradient highlight
 // iHLPct: highlight centre position as % of wire width (20→80 one-way, then resets)
 static void _DrawWireH(int x, int y, int w, int h, float rVolt, int iHLPct)
 {
-  if (rVolt < MF_VOLT_THRESHOLD) {
+  if (MF_VOLT_THRESHOLD > rVolt) {
     GUI_SetColor(MF_WIRE_GRAY);
     GUI_FillRect(x, y, x + w - 1, y + h - 1);
   } else {
     GUI_SetColor(MF_WIRE_GRAD_C);
     GUI_FillRect(x, y, x + w - 1, y + h - 1);
 
-    // Animated highlight: rHLPct is % of wire width from left edge (20→80)
-    int cx = x + (int)(w * iHLPct / 100);
-    int const kHalfW = 9;
-    if (cx - kHalfW < x)        cx = x + kHalfW;
-    if (cx + kHalfW > x + w - 1) cx = x + w - 1 - kHalfW;
+    // Animated highlight: iHLPct is % of wire width from left edge (10→90)
+    _DrawWireHighlightH(x, y, w, h, iHLPct);
 
-    GUI_DrawGradientH(cx - kHalfW, y, cx, y + h - 1,
-                      MF_WIRE_GRAD_C, MF_WIRE_GRAD_M);
-    GUI_DrawGradientH(cx + 1, y, cx + kHalfW + 1, y + h - 1,
-                      MF_WIRE_GRAD_M, MF_WIRE_GRAD_C);
+    if (60 < iHLPct)
+        _DrawWireHighlightH(x, y, w, h, iHLPct - 50);
   }
 }
 
@@ -717,13 +785,13 @@ static void _UpdateWires(bool bForce)
   float rUin  = _GetRealReg(REG_RL_Uin);
   float rUout = _GetRealReg(REG_RL_Uout);
 
-  // Animate wire highlight: moves 20%→80% one-way, then resets to 20%
+  // Animate wire highlight: moves 10%→90% one-way, then resets to 10%
   // Animate only when at least one wire is "live" (voltage ≥ threshold)
   bool bLive = (rUin >= MF_VOLT_THRESHOLD || rUout >= MF_VOLT_THRESHOLD);
-  if (bLive) {
+  if (true == bLive) {
     m_State.uWireHLPct += 5;  // 10% per tick (1 s)
-    if (m_State.uWireHLPct > 80) {
-      m_State.uWireHLPct = 20;  // reset to start
+    if (90 < m_State.uWireHLPct) {
+      m_State.uWireHLPct -= 50;  // reset to start
     }
   }
 
@@ -748,7 +816,78 @@ static void _UpdateWires(bool bForce)
 // Drawing — Layer1: status icons
 //   GUI_DrawPicture draws opaque pixels; saturation handles dim/bright.
 //=============================================================================
+// update Controller LED state (3 × 13px) from IO state registers
+static void _UpdateCtrlLEDs(bool bForce)
+{
+    TStateReg stPassby = _GetIOStateReg(REG_stPassby);
+    uint8_t stLED[3];
 
+    // If in Passby mode, force LED1 & LED3 on, LED2 off; else update from voltage & IO state
+    if (STATE_TRUE == stPassby) {
+        stLED[0] = MF_ICON_SAT_ON;  // Passby LED on
+        stLED[1] = MF_ICON_SAT_OFF; 
+        stLED[2] = MF_ICON_SAT_ON;
+    } else  {
+        // Update LED state from voltage thresholds and IO state
+        for (int i = 0; i < 3; ++i) {
+            stLED[i]  = m_State.stCrtlLED[i];
+        }
+
+        // Update LED1 (AC input) & LED3 (Breaker Power) from voltage thresholds, LED2 (Inverter output) from IO state
+        float rUin  = _GetRealReg(REG_RL_Uin);
+        float rUout = _GetRealReg(REG_RL_Uout);
+        TStateReg stInvertorOk = _GetIOStateReg(REG_stInvertorOk);
+
+        // LED1: AC input LED on if voltage > threshold, off if < threshold
+        if (MF_ICON_SAT_ON != stLED[0] && MF_VOLT_THRESHOLD * 1.1 < rUin) {
+            stLED[0] = MF_ICON_SAT_ON; // ACin LED on
+        } else if (MF_ICON_SAT_OFF != stLED[0] && MF_VOLT_THRESHOLD * 0.9 > rUin) {
+            stLED[0] = MF_ICON_SAT_OFF; // ACin LED off
+        }
+
+        // LED3: Breaker Power LED on if voltage > threshold, off if < threshold
+        if (MF_ICON_SAT_ON != stLED[2] && MF_VOLT_THRESHOLD * 1.1 < rUout) {
+            stLED[2] = MF_ICON_SAT_ON;  // Breaker Power LED on
+        } else if (MF_ICON_SAT_OFF != stLED[2] && MF_VOLT_THRESHOLD * 0.9 > rUout) {
+            stLED[2] = MF_ICON_SAT_OFF; // Breaker Power LED off
+        }
+
+        // LED2: Inverter output LED on if IO state is true, off if false
+        if( STATE_TRUE == stInvertorOk ) {
+            stLED[1] = MF_ICON_SAT_ON;  // Inverter output LED on
+        } else {
+            stLED[1] = MF_ICON_SAT_OFF;  // Inverter output LED off
+        }
+    }
+
+    // No change in LED state, skip redraw
+    if ( false == bForce &&
+         stLED[0] == m_State.stCrtlLED[0] && 
+         stLED[1] == m_State.stCrtlLED[1] && 
+         stLED[2] == m_State.stCrtlLED[2] )
+        return;
+
+    // Erase old controller icon (background + 3 LEDs) and redraw new one
+    GUI_DrawPicture(&picMAUAtlascsg, MF_ICON_CTRL_X, MF_ICON_CTRL_Y, picIdxMA_CtrlG80x62Cyan);
+
+    // Draw 3 LEDs (red) if on, else leave green LEDs (part of controller icon) visible
+    if (MF_ICON_SAT_ON == stLED[0]) {
+        GUI_DrawPicture(&picMAUAtlascsg, MF_ICON_LED1_X, MF_ICON_LED1_Y, MF_ICON_RLED_IDX);
+    }
+
+    if (MF_ICON_SAT_ON == stLED[1]) {
+        GUI_DrawPicture(&picMAUAtlascsg, MF_ICON_LED2_X, MF_ICON_LED2_Y, MF_ICON_RLED_IDX);
+    }
+    
+    if (MF_ICON_SAT_ON == stLED[2]) {
+        GUI_DrawPicture(&picMAUAtlascsg, MF_ICON_LED3_X, MF_ICON_LED3_Y, MF_ICON_RLED_IDX);
+    }
+
+    // update cached LED state
+    for (int i = 0; i < 3; ++i) {
+       m_State.stCrtlLED[i] = stLED[i];
+    }
+}
 // ---- Update 6 status icons (AC input, controller, breaker, battery, heater, fan) ----
 // Saturation dims/brightens based on voltage, IO state, or battery level
 static void _UpdateIcons(bool bForce)
@@ -758,36 +897,37 @@ static void _UpdateIcons(bool bForce)
   float rBat = _GetRealReg(REG_RL_BCHRG_Level);
 
   // AC input — saturation depends on voltage
-  int iAcSat = (rUin > MF_VOLT_THRESHOLD) ? MF_ICON_SAT_ON : MF_ICON_SAT_OFF;
-  if (bForce || iAcSat != m_State.iLastAcSat) {
-    m_State.iLastAcSat = iAcSat;
-    GUI_DrawPicture(&picMAUAtlascsg, MF_ICON_AC_X, MF_ICON_AC_Y,
-                    MF_ICON_AC_IDX, iAcSat);
+  // 1. iAcSat  = m_State.iLastAcSat
+  // 2. If Uin > MF_VOLT_THRESHOLD * 1.1 and m_State.iLastAcSat == MF_ICON_SAT_OFF then
+  //    iAcSat = MF_ICON_SAT_ON (bright)
+  // 3. If Uin < MF_VOLT_THRESHOLD * 0.9 and m_State.iLastAcSat == MF_ICON_SAT_ON then
+  //    iAcSat = MF_ICON_SAT_OFF (dim)
+  // 4. if( iAcSat != m_State.iLastAcSat ) then redraw AC input icon with new saturation
+  int iAcSat = m_State.iLastAcSat;
+  if (rUin > MF_VOLT_THRESHOLD * 1.1f && MF_ICON_SAT_ON != iAcSat) {
+      iAcSat = MF_ICON_SAT_ON; // bright
+  } else if (rUin < MF_VOLT_THRESHOLD * 0.9f && MF_ICON_SAT_OFF != iAcSat) {
+      iAcSat = MF_ICON_SAT_OFF; // dim
   }
 
-  // Controller — Passby / Active state from IO state
-  uint32_t uCtrlOutMode = 0;
-  if( STATE_TRUE == _GetIOStateReg(REG_stPassby) )
-    uCtrlOutMode = MF_ICON_CTRL_PSBY;
-  else if( STATE_TRUE == _GetIOStateReg(REG_stInvertorOk) )
-    uCtrlOutMode = MF_ICON_CTRL_KON;
-  else 
-    uCtrlOutMode = MF_ICON_CTRL_KOF;
-  if (bForce || uCtrlOutMode != m_State.stCtrlOutMode) {
-    m_State.stCtrlOutMode = uCtrlOutMode;
-    GUI_DrawPicture(&picMAUAtlascsg, MF_ICON_CTRL_X, MF_ICON_CTRL_Y,
-                    uCtrlOutMode, 100);
+  if (iAcSat != m_State.iLastAcSat || true == bForce) {
+      m_State.iLastAcSat = iAcSat;
+      GUI_DrawPicture(&picMAUAtlascsg, MF_ICON_AC_X, MF_ICON_AC_Y,
+          MF_ICON_AC_IDX, iAcSat);
   }
+
+  // Controller
+  _UpdateCtrlLEDs(bForce);
  
   // Breaker — always 100 %
-  if (bForce)
+  if (true == bForce)
     GUI_DrawPicture(&picMAUAtlascsg, MF_ICON_BRKR_X, MF_ICON_BRKR_Y,
                     MF_ICON_BRKR_IDX, 100);
 
   // Battery — index + saturation from charge level
   int iBatIdx = _GetBatteryIconIdx(rBat);
   int iBatSat = (rBat > 10.0f) ? MF_ICON_SAT_ON : MF_ICON_SAT_OFF;
-  if (bForce || iBatIdx != m_State.iLastBatIconIdx || iBatSat != m_State.iLastBatSat) {
+  if (true == bForce || iBatIdx != m_State.iLastBatIconIdx || iBatSat != m_State.iLastBatSat) {
     m_State.iLastBatIconIdx = iBatIdx;
     m_State.iLastBatSat     = iBatSat;
     GUI_DrawPicture(&picMAUAtlascsg, MF_ICON_BAT_X, MF_ICON_BAT_Y, iBatIdx, iBatSat);
@@ -795,18 +935,18 @@ static void _UpdateIcons(bool bForce)
 
   // Heater — on/off from IO state
   TStateReg uHt = _GetIOStateReg(REG_stHeater);
-  if (bForce || uHt != m_State.stLastHeaterSt) {
+  if (true == bForce || uHt != m_State.stLastHeaterSt) {
     m_State.stLastHeaterSt = uHt;
-    int iSat = (uHt == STATE_TRUE) ? MF_ICON_SAT_ON : MF_ICON_SAT_OFF;
+    int iSat = (STATE_TRUE == uHt) ? MF_ICON_SAT_ON : MF_ICON_SAT_OFF;
     GUI_DrawPicture(&picMAUAtlascsg, MF_ICON_HEAT_X, MF_ICON_HEAT_Y,
                     MF_ICON_HEAT_IDX, iSat);
   }
 
   // Fan — on/off from IO state
   TStateReg uFn = _GetIOStateReg(REG_stFan);
-  if (bForce || uFn != m_State.stLastFanSt) {
+  if (true == bForce || uFn != m_State.stLastFanSt) {
     m_State.stLastFanSt = uFn;
-    int iSat = (uFn == STATE_TRUE) ? MF_ICON_SAT_ON : MF_ICON_SAT_OFF;
+    int iSat = (STATE_TRUE == uFn) ? MF_ICON_SAT_ON : MF_ICON_SAT_OFF;
     GUI_DrawPicture(&picMAUAtlascsg, MF_ICON_FAN_X, MF_ICON_FAN_Y,
                     MF_ICON_FAN_IDX, iSat);
   }
@@ -936,33 +1076,58 @@ static void _UpdateClock(bool bForce)
 static void _UpdateAll(bool bForce)
 {
   
-#ifdef __vmSIMULATOR__
+//#ifdef __vmSIMULATOR__
+  static auto fLevle = 5.5f, fTemp = -38.5f;
   // Debug only: inject fake measurement values for Sim visual development
   _SetRealReg(REG_RL_Uin,  228.12);
   _SetRealReg(REG_RL_Uout, 229.87);
   _SetRealReg(REG_RL_BCHRG_Ibus, 10.69);
   _SetRealReg(REG_RL_BTOUT_Ibus, 32.52);
-#endif
+//#endif
   
   uint32_t uNow = GUI_GetTime();
 
+  // Update clock at 1 s interval (or bForce)
   if (bForce || uNow - m_State.uLastClockTick >= UPDATE_CLOCK_MS) {
     m_State.uLastClockTick = uNow;
     _UpdateClock(bForce);
   }
+  
+  // Update measurement values at same interval (1 s) to keep highlight animation in sync
   if (bForce || uNow - m_State.uLastMeasTick >= UPDATE_MEAS_MS) {
     m_State.uLastMeasTick = uNow;
     _UpdateMeasValues(bForce);
   }
+  
+  // Update temperature + battery status values at same interval (1 s) to keep highlight animation in sync
   if (bForce || uNow - m_State.uLastStatTick >= UPDATE_STAT_MS) {
+    // Debug only
+    _SetRealReg(REG_RL_BCHRG_Level, fLevle); 
+    static auto iChrgInc = 1.5f;
+    fLevle += iChrgInc; 
+    if (fLevle > 100) {
+        iChrgInc = -1.5f;
+    } else if (fLevle < 5.0f) {
+       iChrgInc = 1.5f;
+    }
+
+    _SetRealReg(REG_RL_BAT_TEMPERATRUE, fTemp);
+    fTemp += 0.5;
+    if (fTemp > 45) {
+       fTemp -= 83;
+    }
+
     m_State.uLastStatTick = uNow;
     _UpdateStatValues(bForce);
-  }
+    }
+
+  // Update wires + icons at same interval (1 s) to keep highlight animation in sync
   if (bForce || uNow - m_State.uLastGraphicTick >= UPDATE_GRAPHIC_MS) {
     m_State.uLastGraphicTick = uNow;
     _UpdateWires(bForce);
     _UpdateIcons(bForce);
   }
+  
   // if (bForce || uNow - m_State.uLastTextTick >= UPDATE_TEXT_MS) {
   //   m_State.uLastTextTick = uNow;
   //   _UpdateStatText(bForce);
@@ -986,8 +1151,8 @@ static void _Show(const void* argument)
 {
   (void)argument;
 
-  GUI_SetBkColor(GUI_BLACK);
-  GUI_Clear();
+  //GUI_SetBkColor(GUI_BLACK);
+  //GUI_Clear();
 
   // Draw Layer0 once to screen
   _DrawLayer0();

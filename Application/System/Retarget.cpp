@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------
 /*
  File        : Retarget.cpp
- Version     : V1.01
+ Version     : V1.02
  By          : Wey. Silver Grid
 
  Description : Semihosting disable + C runtime syscall stubs.
@@ -13,7 +13,8 @@
                  ee-nav.com/4954.html — semihosting analysis
                  ARM Compiler 6 — __use_no_semihosting
 
- Date       : 2026.07.01 (V1.01 — fixed _sys_open return valid handle for :tt)
+ Date       : 2026.07.02 (V1.02 — Yoda-style + brace-style compliance)
+              2026.07.01 (V1.01 — fixed _sys_open return valid handle for :tt)
               2026.07.01 (V1.00 — initial implementation)
 */
 //-----------------------------------------------------------------------------
@@ -43,7 +44,9 @@ extern "C" {
 void _sys_exit(int return_code)
 {
   (void)return_code;
-  while (1) { __asm("nop"); }
+  while (1) {
+    __asm("nop");
+  }
 }
 
 /// Called by CRT startup to open stdin/stdout/stderr (":tt" magic name).
@@ -52,7 +55,7 @@ void _sys_exit(int return_code)
 /// We track the call count and return the matching fd number.
 int _sys_open(const char* name, int openmode)
 {
-  if (name != 0 && name[0] == ':') {
+  if (nullptr != name && ':' == name[0]) {
     // Standard stream open — return fd = 1 (stdout) for all.
     // A single dummy handle is sufficient since _sys_write discards all output.
     return 1;   // non-negative = success, CRT proceeds
@@ -65,7 +68,9 @@ int _sys_open(const char* name, int openmode)
 int _sys_close(int fh)
 {
   // Standard streams never really close
-  if (fh == 0 || fh == 1 || fh == 2) return 0;
+  if (0 == fh || 1 == fh || 2 == fh) {
+    return 0;
+  }
   return -1;
 }
 

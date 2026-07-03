@@ -54,8 +54,8 @@
 #define SP_MODEL_X         10
 #define SP_MODEL_Y         64
 #define SP_MODEL_W         300
-#define SP_MODEL_H         24
-#define SP_MODEL_FONT      GUI_FONT_24LTH_CHN
+#define SP_MODEL_H         26
+#define SP_MODEL_FONT      GUI_FONT_DIGCAP24B
 #define SP_MODEL_COLOR     0x00B5F2
 #define SP_MODEL_ALIGN     (GUI_TA_HCENTER | GUI_TA_VCENTER)
 #define SP_MODEL_TEXT      idGPDevFamiry
@@ -75,19 +75,19 @@
 #define SP_ENG_Y           128
 #define SP_ENG_W           300
 #define SP_ENG_H           17
-#define SP_ENG_FONT        GUI_FONT_AA4_ASCII16B
 #define SP_ENG_COLOR       0x00B5F2
 #define SP_ENG_ALIGN       (GUI_TA_HCENTER | GUI_TA_VCENTER)
 #define SP_ENG_TEXT        "Undervoltage Trip Controller"
+#define SP_ENG_FONT        GUI_FONT_ASCII16B
 
 // Copyright line
 #define SP_COPY_X          10
 #define SP_COPY_Y          219
 #define SP_COPY_W          300
 #define SP_COPY_H          16
-#define SP_COPY_FONT       GUI_FONT_AA4_ASCII16B
 #define SP_COPY_COLOR      0x00B5F2
 #define SP_COPY_ALIGN      (GUI_TA_HCENTER | GUI_TA_VCENTER)
+#define SP_COPY_FONT       GUI_FONT_ASCII16B
 
 // Timeout
 #define SP_TIMEOUT_MS      30000     // 30 seconds idle timeout
@@ -123,7 +123,7 @@ static void _MakeRect(GUI_RECT* pR, int x, int y, int w, int h)
 static void _DrawBackground(void)
 {
 
-  GUI_DrawPicture(&picbkg320x240Lcsg, SP_BKG_X, SP_BKG_Y, 0);
+  GUI_DrawPicture(IMAGE_BACKGROUND, SP_BKG_X, SP_BKG_Y, 0);
 }
 
 //-----------------------------------------------------------------------------
@@ -195,12 +195,14 @@ static void _DrawOverlay(void)
 static void _Redraw(void)
 {
   
-  GUI_SetBkColor(GUI_BLACK);
-  GUI_Clear();
+  //GUI_SetBkColor(GUI_BLACK);
+  //GUI_Clear();
 
   _DrawBackground();
 
   _DrawOverlay();
+
+  GUI_DrawPicture(&picMAUAtlascsg, 120, 180, picIdxMA_Logo80x20Cyan, 100);
 
   //GUI_DrawPicture(&picMAUAtlascsg,  10, 10, picIdxMU_Item32x32_01, 100);
   //GUI_DrawPicture(&picMAUAtlascsg,  60, 10, picIdxMU_Item32x32_02, 100);
