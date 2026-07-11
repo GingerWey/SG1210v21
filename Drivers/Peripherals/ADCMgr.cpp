@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 /*
  File        : ADCMgr.c
  Version     : V1.10
@@ -531,7 +531,7 @@ void ADCMDR_ReadBatChargerMeasure(void)
     else
       ClrMLEDState(RMLED_Charged);
 
-    _SetRealReg( REG_RL_BCHRG_Level, fValue);
+    _SetRealReg( REG_RL_BAT_CAPLevel, fValue);
     }
   else
     {
@@ -619,7 +619,7 @@ void ADCMDR_ReadRTCMeasure(void)
   iRes = SD3077_ReadBVol( &iValue );
   if( 0 == iRes )
     {
-    _SetRealReg( REG_RL_RTC_Vbat, (float)iValue / 10.0 );
+    _SetRealReg( REG_RL_RTC_Vbat, (float)iValue / 100.0 );
     }
 }
 //-----------------------------------------------------------------------------

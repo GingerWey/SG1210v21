@@ -956,34 +956,34 @@
           <GroupName>GUI/Form</GroupName>
           <Files>
             <File>
-              <FileName>GPSplashForm.cpp</FileName>
+              <FileName>GSplashForm.cpp</FileName>
               <FileType>8</FileType>
-              <FilePath>..\Application\GUI\GPSplashForm.cpp</FilePath>
+              <FilePath>..\Application\GUI\GSplashForm.cpp</FilePath>
             </File>
             <File>
-              <FileName>GPMainForm.cpp</FileName>
+              <FileName>GMainForm.cpp</FileName>
               <FileType>8</FileType>
-              <FilePath>..\Application\GUI\GPMainForm.cpp</FilePath>
+              <FilePath>..\Application\GUI\GMainForm.cpp</FilePath>
             </File>
             <File>
-              <FileName>GPMenuForm.cpp</FileName>
+              <FileName>GMenuForm.cpp</FileName>
               <FileType>8</FileType>
-              <FilePath>..\Application\GUI\GPMenuForm.cpp</FilePath>
+              <FilePath>..\Application\GUI\GMenuForm.cpp</FilePath>
             </File>
             <File>
-              <FileName>GPDataListForm.cpp</FileName>
+              <FileName>GDataListForm.cpp</FileName>
               <FileType>8</FileType>
-              <FilePath>..\Application\GUI\GPDataListForm.cpp</FilePath>
+              <FilePath>..\Application\GUI\GDataListForm.cpp</FilePath>
             </File>
             <File>
-              <FileName>GPLogListForm.cpp</FileName>
+              <FileName>GLogListForm.cpp</FileName>
               <FileType>8</FileType>
-              <FilePath>..\Application\GUI\GPLogListForm.cpp</FilePath>
+              <FilePath>..\Application\GUI\GLogListForm.cpp</FilePath>
             </File>
             <File>
-              <FileName>GPDevInfoForm.cpp</FileName>
+              <FileName>GDevInfoForm.cpp</FileName>
               <FileType>8</FileType>
-              <FilePath>..\Application\GUI\GPDevInfoForm.cpp</FilePath>
+              <FilePath>..\Application\GUI\GDevInfoForm.cpp</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1037,24 +1037,24 @@
               </FileOption>
             </File>
             <File>
-              <FileName>GPGuageForm.cpp</FileName>
+              <FileName>GGuageForm.cpp</FileName>
               <FileType>8</FileType>
-              <FilePath>..\Application\GUI\GPGuageForm.cpp</FilePath>
+              <FilePath>..\Application\GUI\GGuageForm.cpp</FilePath>
             </File>
             <File>
-              <FileName>GPLoginDialog.cpp</FileName>
+              <FileName>GLoginDialog.cpp</FileName>
               <FileType>8</FileType>
-              <FilePath>..\Application\GUI\GPLoginDialog.cpp</FilePath>
+              <FilePath>..\Application\GUI\GLoginDialog.cpp</FilePath>
             </File>
             <File>
-              <FileName>GPTimeDialog.cpp</FileName>
+              <FileName>GTimeDialog.cpp</FileName>
               <FileType>8</FileType>
-              <FilePath>..\Application\GUI\GPTimeDialog.cpp</FilePath>
+              <FilePath>..\Application\GUI\GTimeDialog.cpp</FilePath>
             </File>
             <File>
-              <FileName>GPMessageForm.cpp</FileName>
+              <FileName>GMessageForm.cpp</FileName>
               <FileType>8</FileType>
-              <FilePath>..\Application\GUI\GPMessageForm.cpp</FilePath>
+              <FilePath>..\Application\GUI\GMessageForm.cpp</FilePath>
             </File>
             <File>
               <FileName>GUICtrlConfigDialog.cpp</FileName>
@@ -1067,9 +1067,9 @@
               <FilePath>..\Application\GUI\GUIUARTConfigDialog.cpp</FilePath>
             </File>
             <File>
-              <FileName>GPFatalForm.cpp</FileName>
+              <FileName>GFatalForm.cpp</FileName>
               <FileType>8</FileType>
-              <FilePath>..\Application\GUI\GPFatalForm.cpp</FilePath>
+              <FilePath>..\Application\GUI\GFatalForm.cpp</FilePath>
             </File>
           </Files>
         </Group>

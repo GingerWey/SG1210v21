@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 /*
  File        : proModbusRTUSlave.cpp
  Version     : V1.10
@@ -177,7 +177,7 @@ constexpr TCOMRegInfo _criAIList[] =
    .UpLimit = 5000
    }
   ,{
-   .RegNum  = REG_RL_BCHRG_Level,
+   .RegNum  = REG_RL_BAT_CAPLevel,
    .Scale   = 1,
    .UpLimit = 100
    }

@@ -832,8 +832,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Application\GUI\GPSplashForm.cpp</PathWithFileName>
-      <FilenameWithoutPath>GPSplashForm.cpp</FilenameWithoutPath>
+      <PathWithFileName>..\Application\GUI\GSplashForm.cpp</PathWithFileName>
+      <FilenameWithoutPath>GSplashForm.cpp</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -844,8 +844,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Application\GUI\GPMainForm.cpp</PathWithFileName>
-      <FilenameWithoutPath>GPMainForm.cpp</FilenameWithoutPath>
+      <PathWithFileName>..\Application\GUI\GMainForm.cpp</PathWithFileName>
+      <FilenameWithoutPath>GMainForm.cpp</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -856,8 +856,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Application\GUI\GPMenuForm.cpp</PathWithFileName>
-      <FilenameWithoutPath>GPMenuForm.cpp</FilenameWithoutPath>
+      <PathWithFileName>..\Application\GUI\GMenuForm.cpp</PathWithFileName>
+      <FilenameWithoutPath>GMenuForm.cpp</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -868,8 +868,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Application\GUI\GPDataListForm.cpp</PathWithFileName>
-      <FilenameWithoutPath>GPDataListForm.cpp</FilenameWithoutPath>
+      <PathWithFileName>..\Application\GUI\GDataListForm.cpp</PathWithFileName>
+      <FilenameWithoutPath>GDataListForm.cpp</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -880,8 +880,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Application\GUI\GPLogListForm.cpp</PathWithFileName>
-      <FilenameWithoutPath>GPLogListForm.cpp</FilenameWithoutPath>
+      <PathWithFileName>..\Application\GUI\GLogListForm.cpp</PathWithFileName>
+      <FilenameWithoutPath>GLogListForm.cpp</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -892,8 +892,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Application\GUI\GPDevInfoForm.cpp</PathWithFileName>
-      <FilenameWithoutPath>GPDevInfoForm.cpp</FilenameWithoutPath>
+      <PathWithFileName>..\Application\GUI\GDevInfoForm.cpp</PathWithFileName>
+      <FilenameWithoutPath>GDevInfoForm.cpp</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -904,8 +904,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Application\GUI\GPGuageForm.cpp</PathWithFileName>
-      <FilenameWithoutPath>GPGuageForm.cpp</FilenameWithoutPath>
+      <PathWithFileName>..\Application\GUI\GGuageForm.cpp</PathWithFileName>
+      <FilenameWithoutPath>GGuageForm.cpp</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -916,8 +916,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Application\GUI\GPLoginDialog.cpp</PathWithFileName>
-      <FilenameWithoutPath>GPLoginDialog.cpp</FilenameWithoutPath>
+      <PathWithFileName>..\Application\GUI\GLoginDialog.cpp</PathWithFileName>
+      <FilenameWithoutPath>GLoginDialog.cpp</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -928,8 +928,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Application\GUI\GPTimeDialog.cpp</PathWithFileName>
-      <FilenameWithoutPath>GPTimeDialog.cpp</FilenameWithoutPath>
+      <PathWithFileName>..\Application\GUI\GTimeDialog.cpp</PathWithFileName>
+      <FilenameWithoutPath>GTimeDialog.cpp</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -940,8 +940,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Application\GUI\GPMessageForm.cpp</PathWithFileName>
-      <FilenameWithoutPath>GPMessageForm.cpp</FilenameWithoutPath>
+      <PathWithFileName>..\Application\GUI\GMessageForm.cpp</PathWithFileName>
+      <FilenameWithoutPath>GMessageForm.cpp</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -976,8 +976,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Application\GUI\GPFatalForm.cpp</PathWithFileName>
-      <FilenameWithoutPath>GPFatalForm.cpp</FilenameWithoutPath>
+      <PathWithFileName>..\Application\GUI\GFatalForm.cpp</PathWithFileName>
+      <FilenameWithoutPath>GFatalForm.cpp</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1425,7 +1425,7 @@
 
   <Group>
     <GroupName>Drivers/Peripherals</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
