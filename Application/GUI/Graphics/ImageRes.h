@@ -7,7 +7,7 @@
    Encoder version: 1.7.2627
 
    By Wey.   Silver Grid 2026
-   Time: 2026-07-04 15:47:33
+   Time: 2026-07-13 08:11:19
 */
 // ------------------------------------------------------------
 #ifndef ImageRes_H
@@ -28,13 +28,13 @@ extern const TGUIPicture picbkg320x240csg;
 //===============================================================
 /*
 CSG atlas: picMAUAtlascsg
-   No. Image                      resolution     size  CRM       CRN  CAS          Size   ratio  
+   No. Image                      resolution     size  CRM       CRN  CAS          Size   ratio
  ------------------------------------------------------------------------------------------------
-   1.  MA_Logo78x18Green.png         78x18       2134  RGB565     8  DEFLATE        648   30.37%
-   2.  MA_Logo80x20Cyan.png          90x20       2189  RGB565     8  DEFLATE        772   35.27%
+   1.  MA_Logo78x18Green.png         78x18       2134  RGB565     8  None           560   26.24%
+   2.  MA_Logo80x20Cyan.png          90x20       2189  RGB565     8  None           708   32.34%
    3.  MA_ACPow32x59Cyan.png         32x59       4510  RGB565     8  MiniLZ77       276    6.12%
    4.  MA_CtrlG80x62Cyan.png         80x62       7635  RGB565    16  DEFLATE       1132   14.83%
-   5.  MA_CtrlLED13x13Red.png        13x13        280  RGB565     8  RLE            100   35.71%
+   5.  MA_CtrlLED13x13Red.png        13x13        280  RGB565     8  None            96   34.29%
    6.  MA_Brkr56x60Cyan.png          56x60       8300  RGB565    16  DEFLATE       1564   18.84%
    7.  MA_Battery32x20C1.png         32x20       1132  RGB565    16  RLE            208   18.37%
    8.  MA_Battery32x20C2.png         32x20       1171  RGB565    16  RLE            220   18.79%
@@ -43,27 +43,42 @@ CSG atlas: picMAUAtlascsg
   11.  MA_Battery32x20C5.png         32x20       1086  RGB565    16  RLE            184   16.94%
   12.  MA_BatCharge11X13.png         11x13        309  RGB565     8  RLE             84   27.18%
   13.  MA_Menu20x20Cyan.png          20x20        701  RGB565     4  MiniLZ77       112   15.98%
-  14.  MA_Fan16x16Cyan.png           16x16        662  RGB565     4  MiniLZ77       116   17.52%
+  14.  MA_Fan16x16Cyan.png           16x16        662  RGB565     4  None            88   13.29%
   15.  MA_Fire16x16.png              16x16        672  RGB565    16  RLE            160   23.81%
-  16.  MU_Home24x22.png              24x22        868  RGB565     4  MiniLZ77       156   17.97%
-  17.  MU_Item32x32_01.png           32x32       1887  RGB565     4  MiniLZ77       308   16.32%
+  16.  MU_Home24x22.png              24x22        868  RGB565     4  None           156   17.97%
+  17.  MU_Item32x32_01.png           32x32       1887  RGB565     4  None           280   14.84%
   18.  MU_Item32x32_02.png           32x32       1364  RGB565     4  MiniLZ77       232   17.01%
   19.  MU_Item32x32_03.png           32x32       1592  RGB565     4  MiniLZ77       248   15.58%
-  20.  MU_Item32x32_04.png           32x32       1533  RGB565     4  MiniLZ77       296   19.31%
+  20.  MU_Item32x32_04.png           32x32       1533  RGB565     4  None           280   18.26%
   21.  MU_Item32x32_05.png           32x32       1235  RGB565     4  MiniLZ77       200   16.19%
-  22.  MU_Item32x32_06.png           32x32       1755  RGB565     4  MiniLZ77       268   15.27%
-  23.  MU_Item32x32_07.png           32x32       2025  RGB565     4  MiniLZ77       296   14.62%
-  24.  MU_Item32x32_08.png           32x32       1935  RGB565     4  MiniLZ77       288   14.88%
+  22.  MU_Item32x32_06.png           32x32       1755  RGB565     4  None           280   15.95%
+  23.  MU_Item32x32_07.png           32x32       2025  RGB565     4  None           280   13.83%
+  24.  MU_Item32x32_08.png           32x32       1935  RGB565     4  None           280   14.47%
   25.  MU_Item32x32_09.png           32x32       1299  RGB565     4  MiniLZ77       184   14.16%
-  26.  MU_Item32x32_10.png           32x32       1903  RGB565     4  MiniLZ77       284   14.92%
-  27.  LV_CheckMark16x16Red.png      16x16        494  RGB565     8  MiniLZ77       132   26.72%
-  28.  LV_CrossMark16x16Green.png    16x16        980  RGB565     8  MiniLZ77       140   14.29%
+  26.  MU_Item32x32_10.png           32x32       1903  RGB565     4  None           280   14.71%
+  27.  DL_GroupA20x16Cyan.png        20x16        846  RGB565     4  None           104   12.29%
+  28.  DL_GroupB20x16Cyan.png        20x16        459  RGB565     4  None           104   22.66%
+  29.  DL_GroupC20x16Cyan.png        20x16        869  RGB565     4  None           104   11.97%
+  30.  DL_GroupD20x16Cyan.png        20x16        731  RGB565     4  None           104   14.23%
+  31.  DL_GroupE20x16Cyan.png        20x16        386  RGB565     4  MiniLZ77        88   22.80%
+  32.  LV_CheckMark16x16Red.png      16x16        494  RGB565     8  RLE            116   23.48%
+  33.  LV_CrossMark16x16Green.png    16x16        980  RGB565     8  None           128   13.06%
+  34.  LV_SwitchON32x16Cyan.png      32x14       1050  RGB565     4  None           136   12.95%
+  35.  LV_SwitchOFF32x16Red.png      32x14       1107  RGB565     4  None           136   12.29%
+  36.  LV_LogA20x20Cyan.png          20x20        922  RGB565     4  None           124   13.45%
+  37.  LV_LogB20x20Cyan.png          20x20        712  RGB565     4  None           124   17.42%
+  38.  LV_LogC20x20Cyan.png          20x20        873  RGB565     4  None           124   14.20%
+  39.  CF_Edit20x20Cyan.png          20x20       1141  RGB565     4  None           124   10.87%
+  40.  CF_Logic16x16Cyan.png         16x16       1056  RGB565     4  None            88    8.33%
+  41.  CF_Device16x16Cyan.png        16x16       1163  RGB565     4  None            88    7.57%
+  42.  CF_Serial16x16Cyan.png        16x16       1138  RGB565     4  None            88    7.73%
+  43.  CF_Ethernet16x16Cyan.png      16x16        618  RGB565     4  None            88   14.24%
  ------------------------------------------------------------------------------------------------
-   Total                                        52008                              9068   17.44%
+   Total                                        65079                             10420   16.01%
 */
 // CSG Atlas: MAUAtlas object
 extern const TGUIPicture picMAUAtlascsg;
-#define CSG_MAUATLAS   (&picMAUAtlascsg)
+#define CSG_MAUATLAS (&picMAUAtlascsg)
 
 // CSG Atlas: MAUAtlas picture index constants
 constexpr int picIdxMA_Logo78x18Green      = 0;
@@ -92,8 +107,23 @@ constexpr int picIdxMU_Item32x32_07        = 22;
 constexpr int picIdxMU_Item32x32_08        = 23;
 constexpr int picIdxMU_Item32x32_09        = 24;
 constexpr int picIdxMU_Item32x32_10        = 25;
-constexpr int picIdxLV_CheckMark16x16Red   = 26;
-constexpr int picIdxLV_CrossMark16x16Green = 27;
+constexpr int picIdxDL_GroupA20x16Cyan     = 26;
+constexpr int picIdxDL_GroupB20x16Cyan     = 27;
+constexpr int picIdxDL_GroupC20x16Cyan     = 28;
+constexpr int picIdxDL_GroupD20x16Cyan     = 29;
+constexpr int picIdxDL_GroupE20x16Cyan     = 30;
+constexpr int picIdxLV_CheckMark16x16Red   = 31;
+constexpr int picIdxLV_CrossMark16x16Green = 32;
+constexpr int picIdxLV_SwitchON32x16Cyan   = 33;
+constexpr int picIdxLV_SwitchOFF32x16Red   = 34;
+constexpr int picIdxLV_LogA20x20Cyan       = 35;
+constexpr int picIdxLV_LogB20x20Cyan       = 36;
+constexpr int picIdxLV_LogC20x20Cyan       = 37;
+constexpr int picIdxCF_Edit20x20Cyan       = 38;
+constexpr int picIdxCF_Logic16x16Cyan      = 39;
+constexpr int picIdxCF_Device16x16Cyan     = 40;
+constexpr int picIdxCF_Serial16x16Cyan     = 41;
+constexpr int picIdxCF_Ethernet16x16Cyan   = 42; 
 //===============================================================
 #ifdef __cplusplus
 }

@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 /*
  File        : TextStrs.h
  Version     : V1.01
@@ -424,354 +424,364 @@ extern "C" {
 #define idEventEmpty          0x1A89    //
 #define idEvtDataEmpty        0x1A8A    //
 
-// 设备配置
-#define idDevOptName01        0x2000    //
-#define idDevOptName02        0x2001    //
-#define idDevOptName03        0x2002    //
-#define idDevOptName04        0x2003    //
+//_______________________
+#define idCfgGroup01          0x2000
+#define idCfgGroup02          0x2001
+#define idCfgGroup03          0x2002
+#define idCfgGroup04          0x2003
 
-#define idVoltMode0           0x2010    //
-#define idVoltMode1           0x2011    //
-//主终端
-#define idMain_Terminal0      0x2012
-#define idMain_Terminal1      0x2013
-//重合闸次数
-#define idReclose_cnt0        0x2015
-#define idReclose_cnt1        0x2016
-#define idReclose_cnt2        0x2017
-//关联方向
-#define idSwitch_Direction0   0x2018
-#define idSwitch_Direction1   0x2019
-//运行模式
-#define idRun_Mode0           0x2020
-#define idRun_Mode1           0x2021
-#define idRun_Mode2           0x2022
-//FA运行模式
-#define idFARun_Mode0         0x2023
-#define idFARun_Mode1         0x2024
-//重合闸次数
-#define idReclose_typ0        0x2025
-#define idReclose_typ1        0x2026
-#define idReclose_typ2        0x2027
-//开关组别
-#define idSwitch_Kind0        0x2028
-#define idSwitch_Kind1        0x2029
-#define idSwitch_Kind2        0x202A
+// 设备配置
+#define idDevOptName01        0x2800    //
+#define idDevOptName02        0x2801    //
+#define idDevOptName03        0x2802    //
+#define idDevOptName04        0x2803    //
+
+//#define idVoltMode0           0x2810    //
+//#define idVoltMode1           0x2811    //
+////主终端
+//#define idMain_Terminal0      0x2812
+//#define idMain_Terminal1      0x2813
+////重合闸次数
+//#define idReclose_cnt0        0x2815
+//#define idReclose_cnt1        0x2816
+//#define idReclose_cnt2        0x2817
+////关联方向
+//#define idSwitch_Direction0   0x2818
+//#define idSwitch_Direction1   0x2819
+////运行模式
+//#define idRun_Mode0           0x2820
+//#define idRun_Mode1           0x2821
+//#define idRun_Mode2           0x2822
+////FA运行模式
+//#define idFARun_Mode0         0x2823
+//#define idFARun_Mode1         0x2824
+////重合闸次数
+//#define idReclose_typ0        0x2825
+//#define idReclose_typ1        0x2826
+//#define idReclose_typ2        0x2827
+////开关组别
+//#define idSwitch_Kind0        0x2828
+//#define idSwitch_Kind1        0x2829
+//#define idSwitch_Kind2        0x282A
 
 //// PT变比
-//#define idPTRatio01           0x2031
-//#define idPTRatio02           0x2032
-//#define idPTRatio03           0x2033
-//#define idPTRatio04           0x2034
-//#define idPTRatio05           0x2035
-//#define idPTRatio06           0x2036
-//#define idPTRatio07           0x2037
-//#define idPTRatio08           0x2038
-//#define idPTRatio09           0x2039
-//#define idPTRatio10           0x2030
-//#define idPTRatio11           0x203A
-//#define idPTRatio12           0x203B
+//#define idPTRatio01           0x2831
+//#define idPTRatio02           0x2832
+//#define idPTRatio03           0x2833
+//#define idPTRatio04           0x2834
+//#define idPTRatio05           0x2835
+//#define idPTRatio06           0x2836
+//#define idPTRatio07           0x2837
+//#define idPTRatio08           0x2838
+//#define idPTRatio09           0x2839
+//#define idPTRatio10           0x2830
+//#define idPTRatio11           0x283A
+//#define idPTRatio12           0x283B
 
 //// CT输入
-//#define idCTRatio01           0x2040
-//#define idCTRatio02           0x2041
+//#define idCTRatio01           0x2840
+//#define idCTRatio02           0x2841
 
-//#define idCTNum01             0x2042
-//#define idCTNum02             0x2043
+//#define idCTNum01             0x2842
+//#define idCTNum02             0x2843
 
 // 设备参数
-#define idDevCfgName01        0x2100    //
-#define idDevCfgName02        0x2101    //
-#define idDevCfgName03        0x2102    //
-#define idDevCfgName04        0x2103    //
-#define idDevCfgName05        0x2104    //
-#define idDevCfgName06        0x2105    //
-#define idDevCfgName07        0x2106    //
-#define idDevCfgName08        0x2107    //
-#define idDevCfgName09        0x2108    //
-#define idDevCfgName10        0x2109    //
-#define idDevCfgName11        0x210A    //
-#define idDevCfgName12        0x210B    //
-#define idDevCfgName13        0x210C    //
-#define idDevCfgName14        0x210D    //
-#define idDevCfgName15        0x210E    //
-#define idDevCfgName16        0x210F    //
-#define idDevCfgName17        0x2110    //
-#define idDevCfgName18        0x2111    //
-#define idDevCfgName19        0x2112    //
-#define idDevCfgName20        0x2113    //
+//#define idDevCfgName01          0x28A0    //
+//#define idDevCfgName02          0x28A1    //
+//#define idDevCfgName03          0x28A2    //
+//#define idDevCfgName04          0x28A3    //
+//#define idDevCfgName05          0x28A4    //
+#define idDevCfgName06          0x28A5    //
+#define idDevCfgName07          0x28A6    //
+#define idDevCfgName08          0x28A7    //
+#define idDevCfgName09          0x28A8    //
+#define idDevCfgName10          0x28A9    //
+#define idDevCfgName11          0x28AA    //
+#define idDevCfgName12          0x28AB    //
+#define idDevCfgName13          0x28AC    //
+#define idDevCfgName14          0x28AD    //
+#define idDevCfgName15          0x28AE    //
+#define idDevCfgName16          0x28AF    //
+#define idDevCfgName17          0x28B0    //
+#define idDevCfgName18          0x28B1    //
+#define idDevCfgName19          0x28B2    //
+#define idDevCfgName20          0x28B3    //
 
 // 日期时间
-#define idDateTimeName01      0x2200    //
-#define idDateTimeName02      0x2201    //
-#define idDateTimeName03      0x2202    //
-#define idDateTimeName04      0x2203    //
-#define idDateTimeName05      0x2204    //
-#define idDateTimeName06      0x2205    //
-#define idDateTimeName07      0x2206    //
-#define idDateTimeName08      0x2207    //
-#define idDateTimeName09      0x2208    //
+#define idDateTimeName01        0x28C0    //
+#define idDateTimeName02        0x28C1    //
+#define idDateTimeName03        0x28C2    //
+#define idDateTimeName04        0x28C3    //
+#define idDateTimeName05        0x28C4    //
+#define idDateTimeName06        0x28C5    //
+#define idDateTimeName07        0x28C6    //
+#define idDateTimeName08        0x28C7    //
+#define idDateTimeName09        0x28C8    //
 
 // 规约名称列表
-//#define idProtocolName01      0x2300    //
-//#define idProtocolName02      0x2301    //
-//#define idProtocolName03      0x2302    //
-//#define idProtocolName04      0x2303    //
-//#define idProtocolName05      0x2304    //
-//#define idProtocolName06      0x2305    //
+//#define idProtocolName01      0x2A00    //
+//#define idProtocolName02      0x2A01    //
+//#define idProtocolName03      0x2A02    //
+//#define idProtocolName04      0x2A03    //
+//#define idProtocolName05      0x2A04    //
+//#define idProtocolName06      0x2A05    //
 
-// 通信口
-//#define idNET1Name            0x2330    //
-//#define idNET2Name            0x2331    //
-//#define idNET3Name            0x2332    //
-//#define idNET4Name            0x2333    //
+#define idBoolFalse             0x2A10
+#define idBoolTrue              0x2A11
 
-#define idUART1Name           0x2338    //
-#define idUART2Name           0x2339    //
+#define idVolt220               0x2A14
+#define idVolt380               0x2A15
 
-//#define idSocket1Name         0x2340    //
-//#define idSocket2Name         0x2341    //
-//#define idSocket3Name         0x2342    //
-//#define idSocket4Name         0x2343    //
-//#define idSocket5Name         0x2344    //
-//#define idSocket6Name         0x2345    //
-//#define idSocket7Name         0x2346    //
-//#define idSocket8Name         0x2347    //
-
-//// 网口
-//#define idNICCfgName01        0x2350    //
-//#define idNICCfgName02        0x2351    //
-//#define idNICCfgName03        0x2352    //
-//#define idNICCfgName04        0x2353    //
-//#define idNICCfgName05        0x2354    //
-//#define idNICCfgName06        0x2355    //
-//#define idNICCfgName07        0x2356    //
-//#define idNICCfgName08        0x2357    //
-
-//#define idNICCfg01            0x2360    // idNICNo(1) szNICCfgName01
-//#define idNICCfg02            0x2361    // idNICNo(1) szNICAddr(1)
-//#define idNICCfg03            0x2362    // idNICNo(1) szNICAddr(2)
-//#define idNICCfg04            0x2363    // idNICNo(1) szNICAddr(3)
-//#define idNICCfg05            0x2364    // idNICNo(1) szNICAddr(4)
-//#define idNICCfg06            0x2365    // idNICNo(1) szNICCfgName02
-//#define idNICCfg07            0x2366    // idNICNo(1) szNetMask(1)
-//#define idNICCfg08            0x2367    // idNICNo(1) szNetMask(2)
-//#define idNICCfg09            0x2368    // idNICNo(1) szNetMask(3)
-//#define idNICCfg10            0x2369    // idNICNo(1) szNetMask(4)
-//#define idNICCfg11            0x236A    // idNICNo(1) szNICCfgName03
-//#define idNICCfg12            0x236B    // idNICNo(1) szNetGate(1)
-//#define idNICCfg13            0x236C    // idNICNo(1) szNetGate(2)
-//#define idNICCfg14            0x236D    // idNICNo(1) szNetGate(3)
-//#define idNICCfg15            0x236E    // idNICNo(1) szNetGate(4)
-//#define idNICCfg16            0x236F    // idNICNo(1) szNICCfgName04
-//#define idNICCfg17            0x2370    // idNICNo(1) szNetMAC(1)
-//#define idNICCfg18            0x2371    // idNICNo(1) szNetMAC(2)
-//#define idNICCfg19            0x2372    // idNICNo(1) szNetMAC(3)
-//#define idNICCfg20            0x2373    // idNICNo(1) szNetMAC(4)
-//#define idNICCfg21            0x2374    // idNICNo(1) szNetMAC(5)
-//#define idNICCfg22            0x2375    // idNICNo(1) szNetMAC(6)
-
-//#define idSocketCfg01         0x2380    // idSocketNo(1) szNICCfgName05
-//#define idSocketCfg02         0x2381    // idSocketNo(1) szSktAddr(1)
-//#define idSocketCfg03         0x2382    // idSocketNo(1) szSktAddr(2)
-//#define idSocketCfg04         0x2383    // idSocketNo(1) szSktAddr(3)
-//#define idSocketCfg05         0x2384    // idSocketNo(1) szSktAddr(4)
-//#define idSocketCfg06         0x2385    // idSocketNo(1) szNICCfgName06
-//#define idSocketCfg07         0x2386    // idSocketNo(1) szNICCfgName07
-//#define idSocketCfg08         0x2387    // idSocketNo(1) szNICCfgName08
-//#define idSocketCfg09         0x2388    // idSocketNo(2) szNICCfgName05
-//#define idSocketCfg10         0x2389    // idSocketNo(2) szSktAddr(1)
-//#define idSocketCfg11         0x238A    // idSocketNo(2) szSktAddr(2)
-//#define idSocketCfg12         0x238B    // idSocketNo(2) szSktAddr(3)
-//#define idSocketCfg13         0x238C    // idSocketNo(2) szSktAddr(4)
-//#define idSocketCfg14         0x238D    // idSocketNo(2) szNICCfgName06
-//#define idSocketCfg15         0x238E    // idSocketNo(2) szNICCfgName07
-//#define idSocketCfg16         0x238F    // idSocketNo(2) szNICCfgName08
-//#define idSocketCfg17         0x2390    // idSocketNo(3) szNICCfgName05
-//#define idSocketCfg18         0x2391    // idSocketNo(3) szSktAddr(1)
-//#define idSocketCfg19         0x2392    // idSocketNo(3) szSktAddr(2)
-//#define idSocketCfg20         0x2393    // idSocketNo(3) szSktAddr(3)
-//#define idSocketCfg21         0x2394    // idSocketNo(3) szSktAddr(4)
-//#define idSocketCfg22         0x2395    // idSocketNo(3) szNICCfgName06
-//#define idSocketCfg23         0x2396    // idSocketNo(3) szNICCfgName07
-//#define idSocketCfg24         0x2397    // idSocketNo(3) szNICCfgName08
-//#define idSocketCfg25         0x2398    // idSocketNo(4) szNICCfgName05
-//#define idSocketCfg26         0x2399    // idSocketNo(4) szSktAddr(1)
-//#define idSocketCfg27         0x239A    // idSocketNo(4) szSktAddr(2)
-//#define idSocketCfg28         0x239B    // idSocketNo(4) szSktAddr(3)
-//#define idSocketCfg29         0x239C    // idSocketNo(4) szSktAddr(4)
-//#define idSocketCfg30         0x239D    // idSocketNo(4) szNICCfgName06
-//#define idSocketCfg31         0x239E    // idSocketNo(4) szNICCfgName07
-//#define idSocketCfg32         0x239F    // idSocketNo(4) szNICCfgName08
-//#define idSocketCfg33         0x23A0    // idSocketNo(5) szNICCfgName05
-//#define idSocketCfg34         0x23A1    // idSocketNo(5) szSktAddr(1)
-//#define idSocketCfg35         0x23A2    // idSocketNo(5) szSktAddr(2)
-//#define idSocketCfg36         0x23A3    // idSocketNo(5) szSktAddr(3)
-//#define idSocketCfg37         0x23A4    // idSocketNo(5) szSktAddr(4)
-//#define idSocketCfg38         0x23A5    // idSocketNo(5) szNICCfgName06
-//#define idSocketCfg39         0x23A6    // idSocketNo(5) szNICCfgName07
-//#define idSocketCfg40         0x23A7    // idSocketNo(5) szNICCfgName08
-//#define idSocketCfg41         0x23A8    // idSocketNo(6) szNICCfgName05
-//#define idSocketCfg42         0x23A9    // idSocketNo(6) szSktAddr(1)
-//#define idSocketCfg43         0x23AA    // idSocketNo(6) szSktAddr(2)
-//#define idSocketCfg44         0x23AB    // idSocketNo(6) szSktAddr(3)
-//#define idSocketCfg45         0x23AC    // idSocketNo(6) szSktAddr(4)
-//#define idSocketCfg46         0x23AD    // idSocketNo(6) szNICCfgName06
-//#define idSocketCfg47         0x23AE    // idSocketNo(6) szNICCfgName07
-//#define idSocketCfg48         0x23AF    // idSocketNo(6) szNICCfgName08
-
-////
-//#define idSocketMode01        0x23C0    //
-//#define idSocketMode02        0x23C1    //
-//#define idSocketMode03        0x23C2    //
-//#define idSocketMode04        0x23C3    //
 
 // 串口
-#define idUARTCfgName01       0x2490    //
-#define idUARTCfgName02       0x2491    //
-#define idUARTCfgName03       0x2492    //
-#define idUARTCfgName04       0x2493    //
-#define idUARTCfgName05       0x2494    //
-// 检验
-#define idUartParity0         0x2498    //
-#define idUartParity1         0x2499    //
-#define idUartParity2         0x249A    //
-// 速率
-#define idUartBaud01          0x24A0    //
-#define idUartBaud02          0x24A1    //
-#define idUartBaud03          0x24A2    //
-#define idUartBaud04          0x24A3    //
-#define idUartBaud05          0x24A4    //
+#define idUARTCfgName01         0x2A90 //
+#define idUARTCfgName02         0x2A91 //
+#define idUARTCfgName03         0x2A92 //
+#define idUARTCfgName04         0x2A93 //
+#define idUARTCfgName05         0x2A94 //
+// 校验									        
+#define idUartParity0           0x2A98 //
+#define idUartParity1           0x2A99 //
+#define idUartParity2           0x2A9A //
+// 速率									        
+#define idUartBaud01            0x2AA0 //
+#define idUartBaud02            0x2AA1 //
+#define idUartBaud03            0x2AA2 //
+#define idUartBaud04            0x2AA3 //
+#define idUartBaud05            0x2AA4 //
+										            
+#define idUartUnit01            0x2AA6 //
+#define idUartUnit02            0x2AA7 //
+										            
+#define idCtrlUnit01            0x2AAA //
+#define idCtrlUnit02            0x2AAB //
+#define idCtrlUnit03            0x2AAC //
+#define idCtrlUnit04            0x2AAD //
 
-#define idUartUnit01          0x24A6    //
-#define idUartUnit02          0x24A7    //
+// #define idUartCfg0             0x2AB0    // idUartName(1) szUARTCfgName01
+// #define idUartCfg1             0x2AB1    // idUartName(1) szUARTCfgName02
+// #define idUartCfg2             0x2AB2    // idUartName(1) szUARTCfgName03
+// #define idUartCfg3             0x2AB3    // idUartName(1) szUARTCfgName04
+// #define idUartCfg4             0x2AB4    // idUartName(1) szUARTCfgName05
+// #define idUartCfg5             0x2AB5    // idUartName(2) szUARTCfgName01
+// #define idUartCfg6             0x2AB6    // idUartName(2) szUARTCfgName02
+// #define idUartCfg7             0x2AB7    // idUartName(2) szUARTCfgName03
+// #define idUartCfg8             0x2AB8    // idUartName(2) szUARTCfgName04
+// #define idUartCfg9             0x2AB9    // idUartName(2) szUARTCfgName05
 
-#define idCtrlUnit01          0x24AA    //
-#define idCtrlUnit02          0x24AB    //
-#define idCtrlUnit03          0x24AC    //
-#define idCtrlUnit04          0x24AD    //
-
-//#define idUartCfg0             0x24B0    // idUartName(1) szUARTCfgName01
-//#define idUartCfg1             0x24B1    // idUartName(1) szUARTCfgName02
-//#define idUartCfg2             0x24B2    // idUartName(1) szUARTCfgName03
-//#define idUartCfg3             0x24B3    // idUartName(1) szUARTCfgName04
-//#define idUartCfg4             0x24B4    // idUartName(1) szUARTCfgName05
-//#define idUartCfg5             0x24B5    // idUartName(2) szUARTCfgName01
-//#define idUartCfg6             0x24B6    // idUartName(2) szUARTCfgName02
-//#define idUartCfg7             0x24B7    // idUartName(2) szUARTCfgName03
-//#define idUartCfg8             0x24B8    // idUartName(2) szUARTCfgName04
-//#define idUartCfg9             0x24B9    // idUartName(2) szUARTCfgName05
+// 通信口
+//#define idNET1Name              0x2B30    //
+//#define idNET2Name              0x2B31    //
+//#define idNET3Name              0x2B32    //
+//#define idNET4Name              0x2B33    //
+																  
+//#define idSocket1Name           0x2B40    //
+//#define idSocket2Name           0x2B41    //
+//#define idSocket3Name           0x2B42    //
+//#define idSocket4Name           0x2B43    //
+//#define idSocket5Name           0x2B44    //
+//#define idSocket6Name           0x2B45    //
+//#define idSocket7Name           0x2B46    //
+//#define idSocket8Name           0x2B47    //
+																  
+//// 网口												  
+//#define idNICCfgName01          0x2B50    //
+//#define idNICCfgName02          0x2B51    //
+//#define idNICCfgName03          0x2B52    //
+//#define idNICCfgName04          0x2B53    //
+//#define idNICCfgName05          0x2B54    //
+//#define idNICCfgName06          0x2B55    //
+//#define idNICCfgName07          0x2B56    //
+//#define idNICCfgName08          0x2B57    //
+																  
+//#define idNICCfg01              0x2B60    // idNICNo(1) szNICCfgName01
+//#define idNICCfg02              0x2B61    // idNICNo(1) szNICAddr(1)
+//#define idNICCfg03              0x2B62    // idNICNo(1) szNICAddr(2)
+//#define idNICCfg04              0x2B63    // idNICNo(1) szNICAddr(3)
+//#define idNICCfg05              0x2B64    // idNICNo(1) szNICAddr(4)
+//#define idNICCfg06              0x2B65    // idNICNo(1) szNICCfgName02
+//#define idNICCfg07              0x2B66    // idNICNo(1) szNetMask(1)
+//#define idNICCfg08              0x2B67    // idNICNo(1) szNetMask(2)
+//#define idNICCfg09              0x2B68    // idNICNo(1) szNetMask(3)
+//#define idNICCfg10              0x2B69    // idNICNo(1) szNetMask(4)
+//#define idNICCfg11              0x2B6A    // idNICNo(1) szNICCfgName03
+//#define idNICCfg12              0x2B6B    // idNICNo(1) szNetGate(1)
+//#define idNICCfg13              0x2B6C    // idNICNo(1) szNetGate(2)
+//#define idNICCfg14              0x2B6D    // idNICNo(1) szNetGate(3)
+//#define idNICCfg15              0x2B6E    // idNICNo(1) szNetGate(4)
+//#define idNICCfg16              0x2B6F    // idNICNo(1) szNICCfgName04
+//#define idNICCfg17              0x2B70    // idNICNo(1) szNetMAC(1)
+//#define idNICCfg18              0x2B71    // idNICNo(1) szNetMAC(2)
+//#define idNICCfg19              0x2B72    // idNICNo(1) szNetMAC(3)
+//#define idNICCfg20              0x2B73    // idNICNo(1) szNetMAC(4)
+//#define idNICCfg21              0x2B74    // idNICNo(1) szNetMAC(5)
+//#define idNICCfg22              0x2B75    // idNICNo(1) szNetMAC(6)
+																  
+//#define idSocketCfg01           0x2B80    // idSocketNo(1) szNICCfgName05
+//#define idSocketCfg02           0x2B81    // idSocketNo(1) szSktAddr(1)
+//#define idSocketCfg03           0x2B82    // idSocketNo(1) szSktAddr(2)
+//#define idSocketCfg04           0x2B83    // idSocketNo(1) szSktAddr(3)
+//#define idSocketCfg05           0x2B84    // idSocketNo(1) szSktAddr(4)
+//#define idSocketCfg06           0x2B85    // idSocketNo(1) szNICCfgName06
+//#define idSocketCfg07           0x2B86    // idSocketNo(1) szNICCfgName07
+//#define idSocketCfg08           0x2B87    // idSocketNo(1) szNICCfgName08
+//#define idSocketCfg09           0x2B88    // idSocketNo(2) szNICCfgName05
+//#define idSocketCfg10           0x2B89    // idSocketNo(2) szSktAddr(1)
+//#define idSocketCfg11           0x2B8A    // idSocketNo(2) szSktAddr(2)
+//#define idSocketCfg12           0x2B8B    // idSocketNo(2) szSktAddr(3)
+//#define idSocketCfg13           0x2B8C    // idSocketNo(2) szSktAddr(4)
+//#define idSocketCfg14           0x2B8D    // idSocketNo(2) szNICCfgName06
+//#define idSocketCfg15           0x2B8E    // idSocketNo(2) szNICCfgName07
+//#define idSocketCfg16           0x2B8F    // idSocketNo(2) szNICCfgName08
+//#define idSocketCfg17           0x2B90    // idSocketNo(3) szNICCfgName05
+//#define idSocketCfg18           0x2B91    // idSocketNo(3) szSktAddr(1)
+//#define idSocketCfg19           0x2B92    // idSocketNo(3) szSktAddr(2)
+//#define idSocketCfg20           0x2B93    // idSocketNo(3) szSktAddr(3)
+//#define idSocketCfg21           0x2B94    // idSocketNo(3) szSktAddr(4)
+//#define idSocketCfg22           0x2B95    // idSocketNo(3) szNICCfgName06
+//#define idSocketCfg23           0x2B96    // idSocketNo(3) szNICCfgName07
+//#define idSocketCfg24           0x2B97    // idSocketNo(3) szNICCfgName08
+//#define idSocketCfg25           0x2B98    // idSocketNo(4) szNICCfgName05
+//#define idSocketCfg26           0x2B99    // idSocketNo(4) szSktAddr(1)
+//#define idSocketCfg27           0x2B9A    // idSocketNo(4) szSktAddr(2)
+//#define idSocketCfg28           0x2B9B    // idSocketNo(4) szSktAddr(3)
+//#define idSocketCfg29           0x2B9C    // idSocketNo(4) szSktAddr(4)
+//#define idSocketCfg30           0x2B9D    // idSocketNo(4) szNICCfgName06
+//#define idSocketCfg31           0x2B9E    // idSocketNo(4) szNICCfgName07
+//#define idSocketCfg32           0x2B9F    // idSocketNo(4) szNICCfgName08
+//#define idSocketCfg33           0x2BA0    // idSocketNo(5) szNICCfgName05
+//#define idSocketCfg34           0x2BA1    // idSocketNo(5) szSktAddr(1)
+//#define idSocketCfg35           0x2BA2    // idSocketNo(5) szSktAddr(2)
+//#define idSocketCfg36           0x2BA3    // idSocketNo(5) szSktAddr(3)
+//#define idSocketCfg37           0x2BA4    // idSocketNo(5) szSktAddr(4)
+//#define idSocketCfg38           0x2BA5    // idSocketNo(5) szNICCfgName06
+//#define idSocketCfg39           0x2BA6    // idSocketNo(5) szNICCfgName07
+//#define idSocketCfg40           0x2BA7    // idSocketNo(5) szNICCfgName08
+//#define idSocketCfg41           0x2BA8    // idSocketNo(6) szNICCfgName05
+//#define idSocketCfg42           0x2BA9    // idSocketNo(6) szSktAddr(1)
+//#define idSocketCfg43           0x2BAA    // idSocketNo(6) szSktAddr(2)
+//#define idSocketCfg44           0x2BAB    // idSocketNo(6) szSktAddr(3)
+//#define idSocketCfg45           0x2BAC    // idSocketNo(6) szSktAddr(4)
+//#define idSocketCfg46           0x2BAD    // idSocketNo(6) szNICCfgName06
+//#define idSocketCfg47           0x2BAE    // idSocketNo(6) szNICCfgName07
+//#define idSocketCfg48           0x2BAF    // idSocketNo(6) szNICCfgName08
+																  
+////														  
+//#define idSocketMode01          0x2BC0    //
+//#define idSocketMode02          0x2BC1    //
+//#define idSocketMode03          0x2BC2    //
+//#define idSocketMode04          0x2BC3    //
 
 // 以太网配置
-#define idEthNetCfg01         0x2500    //
-#define idEthNetCfg02         0x2501    //
-#define idEthNetCfg03         0x2502    //
-#define idEthNetCfg04         0x2503    //
-#define idEthNetCfg05         0x2504    //
-#define idEthNetCfg06         0x2505    //
-#define idEthNetCfg07         0x2506    //
-#define idEthNetCfg08         0x2507    //
-#define idEthNetCfg09         0x2508    //
-#define idEthNetCfg10         0x2509    //
-#define idEthNetCfg11         0x250A    //
-#define idEthNetCfg12         0x250B    //
-#define idEthNetCfg13         0x250C    //
-#define idEthNetCfg14         0x250D    //
-#define idEthNetCfg15         0x250E    //
-#define idEthNetCfg16         0x250F    //
+#define idEthNetCfg01           0x2E00    //
+#define idEthNetCfg02           0x2E01    //
+#define idEthNetCfg03           0x2E02    //
+#define idEthNetCfg04           0x2E03    //
+#define idEthNetCfg05           0x2E04    //
+#define idEthNetCfg06           0x2E05    //
+#define idEthNetCfg07           0x2E06    //
+#define idEthNetCfg08           0x2E07    //
+#define idEthNetCfg09           0x2E08    //
+#define idEthNetCfg10           0x2E09    //
+#define idEthNetCfg11           0x2E0A    //
+#define idEthNetCfg12           0x2E0B    //
+#define idEthNetCfg13           0x2E0C    //
+#define idEthNetCfg14           0x2E0D    //
+#define idEthNetCfg15           0x2E0E    //
+#define idEthNetCfg16           0x2E0F    //
 
-//#define idEthNetCfg21         0x2520    //
-//#define idEthNetCfg22         0x2521    //
-//#define idEthNetCfg23         0x2522    //
-//#define idEthNetCfg24         0x2523    //
-//#define idEthNetCfg25         0x2524    //
-//#define idEthNetCfg26         0x2525    //
-//#define idEthNetCfg27         0x2526    //
-//#define idEthNetCfg28         0x2527    //
-//#define idEthNetCfg29         0x2528    //
-//#define idEthNetCfg30         0x2529    //
-//#define idEthNetCfg31         0x252A    //
-//#define idEthNetCfg32         0x252B    //
-//#define idEthNetCfg33         0x252C    //
-//#define idEthNetCfg34         0x252D    //
-//#define idEthNetCfg35         0x252E    //
-//#define idEthNetCfg36         0x252F    //
+//#define idEthNetCfg21         0x2E20    //
+//#define idEthNetCfg22         0x2E21    //
+//#define idEthNetCfg23         0x2E22    //
+//#define idEthNetCfg24         0x2E23    //
+//#define idEthNetCfg25         0x2E24    //
+//#define idEthNetCfg26         0x2E25    //
+//#define idEthNetCfg27         0x2E26    //
+//#define idEthNetCfg28         0x2E27    //
+//#define idEthNetCfg29         0x2E28    //
+//#define idEthNetCfg30         0x2E29    //
+//#define idEthNetCfg31         0x2E2A    //
+//#define idEthNetCfg32         0x2E2B    //
+//#define idEthNetCfg33         0x2E2C    //
+//#define idEthNetCfg34         0x2E2D    //
+//#define idEthNetCfg35         0x2E2E    //
+//#define idEthNetCfg36         0x2E2F    //
 
-//#define idEthNetCfg41         0x2540    //
-//#define idEthNetCfg42         0x2541    //
-//#define idEthNetCfg43         0x2542    //
-//#define idEthNetCfg44         0x2543    //
-//#define idEthNetCfg45         0x2544    //
-//#define idEthNetCfg46         0x2545    //
-//#define idEthNetCfg47         0x2546    //
-//#define idEthNetCfg48         0x2547    //
-//#define idEthNetCfg49         0x2548    //
-//#define idEthNetCfg50         0x2549    //
-//#define idEthNetCfg51         0x254A    //
-//#define idEthNetCfg52         0x254B    //
-//#define idEthNetCfg53         0x254C    //
-//#define idEthNetCfg54         0x254D    //
-//#define idEthNetCfg55         0x254E    //
-//#define idEthNetCfg56         0x254F    //
+//#define idEthNetCfg41         0x2E40    //
+//#define idEthNetCfg42         0x2E41    //
+//#define idEthNetCfg43         0x2E42    //
+//#define idEthNetCfg44         0x2E43    //
+//#define idEthNetCfg45         0x2E44    //
+//#define idEthNetCfg46         0x2E45    //
+//#define idEthNetCfg47         0x2E46    //
+//#define idEthNetCfg48         0x2E47    //
+//#define idEthNetCfg49         0x2E48    //
+//#define idEthNetCfg50         0x2E49    //
+//#define idEthNetCfg51         0x2E4A    //
+//#define idEthNetCfg52         0x2E4B    //
+//#define idEthNetCfg53         0x2E4C    //
+//#define idEthNetCfg54         0x2E4D    //
+//#define idEthNetCfg55         0x2E4E    //
+//#define idEthNetCfg56         0x2E4F    //
 
-//#define idEthNetCfg61         0x2560    //
-//#define idEthNetCfg62         0x2561    //
-//#define idEthNetCfg63         0x2562    //
-//#define idEthNetCfg64         0x2563    //
-//#define idEthNetCfg65         0x2564    //
-//#define idEthNetCfg66         0x2565    //
-//#define idEthNetCfg67         0x2566    //
-//#define idEthNetCfg68         0x2567    //
-//#define idEthNetCfg69         0x2568    //
-//#define idEthNetCfg70         0x2569    //
-//#define idEthNetCfg71         0x256A    //
-//#define idEthNetCfg72         0x256B    //
-//#define idEthNetCfg73         0x256C    //
-//#define idEthNetCfg74         0x256D    //
-//#define idEthNetCfg75         0x256E    //
-//#define idEthNetCfg76         0x256F    //
+//#define idEthNetCfg61         0x2E60    //
+//#define idEthNetCfg62         0x2E61    //
+//#define idEthNetCfg63         0x2E62    //
+//#define idEthNetCfg64         0x2E63    //
+//#define idEthNetCfg65         0x2E64    //
+//#define idEthNetCfg66         0x2E65    //
+//#define idEthNetCfg67         0x2E66    //
+//#define idEthNetCfg68         0x2E67    //
+//#define idEthNetCfg69         0x2E68    //
+//#define idEthNetCfg70         0x2E69    //
+//#define idEthNetCfg71         0x2E6A    //
+//#define idEthNetCfg72         0x2E6B    //
+//#define idEthNetCfg73         0x2E6C    //
+//#define idEthNetCfg74         0x2E6D    //
+//#define idEthNetCfg75         0x2E6E    //
+//#define idEthNetCfg76         0x2E6F    //
 
 //// GOOSE 配置
-//#define idGOOSEPub01           0x2580    //
-//#define idGOOSEPub02           0x2581    //
-//#define idGOOSEPub03           0x2582    //
-//#define idGOOSEPub04           0x2583    //
-//#define idGOOSEPub05           0x2584    //
-//#define idGOOSEPub06           0x2585    //
-//#define idGOOSEPub07           0x2586    //
-//#define idGOOSEPub10           0x2590    //
-//#define idGOOSEPub11           0x2591    //
-//#define idGOOSEPub12           0x2592    //
-//#define idGOOSEPub13           0x2593    //
-//#define idGOOSEPub14           0x2594    //
-//#define idGOOSEPub15           0x2595    //
-//#define idGOOSEPub16           0x2596    //
-//#define idGOOSEPub17           0x2597    //
-//#define idGOOSEPub18           0x2598    //
-//#define idGOOSEPub19           0x2599    //
-//#define idGOOSEPub20           0x259A    //
-//#define idGOOSEPub21           0x259B    //
-//#define idGOOSEPub22           0x259C    //
-//#define idGOOSEPub23           0x259D    //
-//#define idGOOSEPub24           0x259E    //
-//#define idGOOSEPub25           0x259F    //
+//#define idGOOSEPub01           0x2E80    //
+//#define idGOOSEPub02           0x2E81    //
+//#define idGOOSEPub03           0x2E82    //
+//#define idGOOSEPub04           0x2E83    //
+//#define idGOOSEPub05           0x2E84    //
+//#define idGOOSEPub06           0x2E85    //
+//#define idGOOSEPub07           0x2E86    //
+//#define idGOOSEPub10           0x2E90    //
+//#define idGOOSEPub11           0x2E91    //
+//#define idGOOSEPub12           0x2E92    //
+//#define idGOOSEPub13           0x2E93    //
+//#define idGOOSEPub14           0x2E94    //
+//#define idGOOSEPub15           0x2E95    //
+//#define idGOOSEPub16           0x2E96    //
+//#define idGOOSEPub17           0x2E97    //
+//#define idGOOSEPub18           0x2E98    //
+//#define idGOOSEPub19           0x2E99    //
+//#define idGOOSEPub20           0x2E9A    //
+//#define idGOOSEPub21           0x2E9B    //
+//#define idGOOSEPub22           0x2E9C    //
+//#define idGOOSEPub23           0x2E9D    //
+//#define idGOOSEPub24           0x2E9E    //
+//#define idGOOSEPub25           0x2E9F    //
 
-//#define idGOOSESub01           0x25B0    //
-//#define idGOOSESub02           0x25B1    //
-//#define idGOOSESub03           0x25B2    //
-//#define idGOOSESub04           0x25B3    //
-//#define idGOOSESub05           0x25B4    //
-//#define idGOOSESub06           0x25B5    //
-//#define idGOOSESub07           0x25B6    //
-//#define idGOOSESub08           0x25B7    //
-//#define idGOOSESub09           0x25B8    //
-//#define idGOOSESub10          0x25B9    //
-//#define idGOOSESub11          0x25BA    //
-//#define idGOOSESub12          0x25BB    //
-//#define idGOOSESub13          0x25BC    //
-//#define idGOOSESub14           0x25BD    //
-//#define idGOOSESub15           0x25BE    //
-//#define idGOOSESub16           0x25BF    //
+//#define idGOOSESub01           0x2EB0    //
+//#define idGOOSESub02           0x2EB1    //
+//#define idGOOSESub03           0x2EB2    //
+//#define idGOOSESub04           0x2EB3    //
+//#define idGOOSESub05           0x2EB4    //
+//#define idGOOSESub06           0x2EB5    //
+//#define idGOOSESub07           0x2EB6    //
+//#define idGOOSESub08           0x2EB7    //
+//#define idGOOSESub09           0x2EB8    //
+//#define idGOOSESub10           0x2EB9    //
+//#define idGOOSESub11           0x2EBA    //
+//#define idGOOSESub12           0x2EBB    //
+//#define idGOOSESub13           0x2EBC    //
+//#define idGOOSESub14           0x2EBD    //
+//#define idGOOSESub15           0x2EBE    //
+//#define idGOOSESub16           0x2EBF    //
 
 // 事件描述
 #define idEventName00         0x3000    //
@@ -779,7 +789,7 @@ extern "C" {
 #define idEventName02         0x3002    //
 #define idEventName03         0x3003    //
 #define idEventName04         0x3004    //
-#define idEventName05         0x3005    //
+//#define idEventName05         0x3005    //
 //#define idEventName06         0x3006    //
 //#define idEventName07         0x3007    //
 #define idEventName08         0x3008    //

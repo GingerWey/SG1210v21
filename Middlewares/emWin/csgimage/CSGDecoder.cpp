@@ -2,14 +2,16 @@
 //-----------------------------------------------------------------------------
 /*
  File        : CSGDecoder.cpp
- Version     : V1.53
+ Version     : V1.54
  By          : Wey. Silver Grid
 
  Description : CSG streaming decoder (MCU-safe).  CAS 0/1/2/3 dispatch.
                MiniLZ77 circular window, RLE cross-batch DPS/ZRC/CPS/CPL pending,
                DEFLATE Huffman→MiniLZ77 pipeline, GUI_ALLOC buffer management.
 
- Date        : 2026.07.02 (V1.53 — Yoda conditions & mandatory braces for if/for/while)
+ Date        : 2026.07.13 (V1.54 — fixed bitCount init for CAS=0 indexed color 4-column
+                          misalignment; replaced magic number 3 with CompressAlgorithm enum)
+              2026.07.02 (V1.53 — Yoda conditions & mandatory braces for if/for/while)
               2026.06.26 (V1.52 — DPS cross-batch pending fix, origCount guard
                           raised to kCsgMaxWidth*kCsgMaxHeight)
               2026.06.26 (V1.51 — streaming CAS 0/1/2/3, RLE pendRle, MiniLZ77
@@ -356,7 +358,12 @@ CSG_ErrCode CsgDecodeInit(CSGDecoderState* state,
     state->cas     = static_cast<int>(pic->GetCompressAlgorithm());
     state->pixelsDecoded = 0;
     state->bitBuf   = 0;
-    state->bitCount = 8;
+    // bitCount semantics differ by codec:
+    //   CAS=0 (None) bit-unpack: 0 = empty buffer (will refill on first access)
+    //   CAS=3 (MiniLZ77): 8 = "read new ctrl byte" sentinel
+    //   CAS=1 (RLE): 0 = empty buffer
+    //   CAS=2 (DEFLATE): managed by Huffman, not used here
+    state->bitCount = (static_cast<int>(CompressAlgorithm::kMiniLZ77) == state->cas) ? 8 : 0;
     state->linePos  = 0;
     state->rowCount = 0;
     state->windowPos = 0;
@@ -865,7 +872,7 @@ CSG_ErrCode CsgDecodePixels(CSGDecoderState* state,
 
     // For CAS=3 (MiniLZ77), use the battle-tested inline path (no helper).
     // For CAS=0/1/2, dispatch to new streaming decoders.
-    if (3 == state->cas) {
+    if (static_cast<int>(CompressAlgorithm::kMiniLZ77) == state->cas) {
         // === Inline MiniLZ77 — with pending-match carry-over ===
         const uint8_t* input = state->stream;
         const uint8_t* pal   = state->palette;
@@ -972,13 +979,13 @@ CSG_ErrCode CsgDecodePixels(CSGDecoderState* state,
     // Dispatch CAS=0/1/2 to new streaming helpers
     CSG_ErrCode err;
     switch (state->cas) {
-    case 0:
+    case static_cast<int>(CompressAlgorithm::kNone):
         err = DecodeNone(state, output, toDecode);
         break;
-    case 1:
+    case static_cast<int>(CompressAlgorithm::kRLE):
         err = DecodeRLE(state, output, toDecode);
         break;
-    case 2:
+    case static_cast<int>(CompressAlgorithm::kDEFLATE):
         err = DecodeDEFLATE(state, output, toDecode);
         break;
     default:

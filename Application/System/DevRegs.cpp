@@ -70,9 +70,9 @@ static uint32_t _ReadFuncRegs(uint32_t uRegNum)
     {
     // Device Options
     case REG_FN_PROTECT_EN:
-    case REG_FN_SOE_AUTORET:
-    case REG_FN_CT_1A:
-    case REG_FN_VOLTAGE_MODE:
+    //case REG_FN_SOE_AUTORET:
+    //case REG_FN_CT_1A:
+    //case REG_FN_VOLTAGE_MODE:
       {
       uint32_t uMask = (1 << (uRegNum - REG_FUNCTION));
       if( 0 != (DevCfgForEdit.Options & uMask) )
@@ -236,6 +236,55 @@ static uint32_t _ReadFuncRegs(uint32_t uRegNum)
 //        uRes |= 0xFFFF0000;
 //      break;
 //      }
+    case REG_FN_DEV_ADDR: {
+      uRes = DevCfgForEdit.Configs[(REG_DEV_ADDR)-REG_DEVCONFIG];
+      break;
+    }
+
+    case REG_FN_AUTOCTRL_EN: {
+      uRes = DevCfgForEdit.Configs[(REG_AUTOCTRL_EN)-REG_DEVCONFIG];
+      break;
+    }
+    case REG_FN_AUTO_TURNOFF: {
+      uRes = DevCfgForEdit.Configs[(REG_AUTO_TURNOFF)-REG_DEVCONFIG];
+      break;
+    }
+    case REG_FN_AUTO_BREAKER_ON: {
+      uRes = DevCfgForEdit.Configs[(REG_AUTO_BREAKER_ON)-REG_DEVCONFIG];
+      break;
+    }
+    case REG_FN_PASSBY_EN: {
+      uRes = DevCfgForEdit.Configs[(REG_PASSBY_EN)-REG_DEVCONFIG];
+      break;
+    }
+    case REG_FN_ACTION_VOLTAGE: {
+      uRes = DevCfgForEdit.Configs[(REG_ACTION_VOLTAGE)-REG_DEVCONFIG];
+      break;
+    }
+    case REG_FN_COIL_VOLTAGE: {
+      uRes = DevCfgForEdit.Configs[(REG_COIL_VOLTAGE)-REG_DEVCONFIG];
+      break;
+    }
+    case REG_FN_PWRON_TIME: {
+      uRes = DevCfgForEdit.Configs[(REG_PWRON_TIME)-REG_DEVCONFIG];
+      break;
+    }
+    case REG_FN_PWROFF_TIME: {
+      uRes = DevCfgForEdit.Configs[(REG_PWROFF_TIME)-REG_DEVCONFIG];
+      break;
+    }
+    case REG_FN_SHUTDOWN_TIME: {
+      uRes = DevCfgForEdit.Configs[(REG_SHUTDOWN_TIME)-REG_DEVCONFIG];
+      break;
+    }
+    case REG_FN_RELAY_DELAY: {
+      uRes = DevCfgForEdit.Configs[(REG_RELAY_DELAY)-REG_DEVCONFIG];
+      break;
+    }
+    case REG_FN_RELAY_TIME: {
+      uRes = DevCfgForEdit.Configs[(REG_RELAY_TIME)-REG_DEVCONFIG];
+      break;
+    }
 
 #ifndef __vmSIMULATOR__
     // 日期时间
@@ -1094,9 +1143,9 @@ static void _WriteFuncRegs(uint32_t uRegNum, uint32_t uValue)
     {
     // Device Options
     case REG_FN_PROTECT_EN:
-    case REG_FN_SOE_AUTORET:
-    case REG_FN_CT_1A:
-    case REG_FN_VOLTAGE_MODE:
+    //case REG_FN_SOE_AUTORET:
+    //case REG_FN_CT_1A:
+    //case REG_FN_VOLTAGE_MODE:
       {
       uint32_t uMask = (1 << (uRegNum - REG_FN_DEV_OPTION));
       if( STATE_TRUE == uValue )
@@ -1318,6 +1367,68 @@ static void _WriteFuncRegs(uint32_t uRegNum, uint32_t uValue)
 //        }
 //      break;
 //      }
+
+    case REG_FN_DEV_ADDR: {
+          DevCfgForEdit.Configs[(REG_DEV_ADDR)-REG_DEVCONFIG] = uValue;
+          SetEditState(REM_CFG_MODIFIED);
+          break;
+      }
+
+      case REG_FN_AUTOCTRL_EN: {
+          DevCfgForEdit.Configs[(REG_AUTOCTRL_EN)-REG_DEVCONFIG] = uValue;
+          SetEditState(REM_CFG_MODIFIED);
+          break;
+      }
+      case REG_FN_AUTO_TURNOFF: {
+          DevCfgForEdit.Configs[(REG_AUTO_TURNOFF)-REG_DEVCONFIG] = uValue;
+          SetEditState(REM_CFG_MODIFIED);
+          break;
+      }
+      case REG_FN_AUTO_BREAKER_ON: {
+          DevCfgForEdit.Configs[(REG_AUTO_BREAKER_ON)-REG_DEVCONFIG] = uValue;
+          SetEditState(REM_CFG_MODIFIED);
+          break;
+      }
+      case REG_FN_PASSBY_EN: {
+          DevCfgForEdit.Configs[(REG_PASSBY_EN)-REG_DEVCONFIG] = uValue;
+          SetEditState(REM_CFG_MODIFIED);
+          break;
+      }
+      case REG_FN_ACTION_VOLTAGE: {
+          DevCfgForEdit.Configs[(REG_ACTION_VOLTAGE)-REG_DEVCONFIG] = uValue;
+          SetEditState(REM_CFG_MODIFIED);
+          break;
+      }
+      case REG_FN_COIL_VOLTAGE: {
+          DevCfgForEdit.Configs[(REG_COIL_VOLTAGE)-REG_DEVCONFIG] = uValue;
+          SetEditState(REM_CFG_MODIFIED);
+          break;
+      }
+      case REG_FN_PWRON_TIME: {
+          DevCfgForEdit.Configs[(REG_PWRON_TIME)-REG_DEVCONFIG] = uValue;
+          SetEditState(REM_CFG_MODIFIED);
+          break;
+      }
+      case REG_FN_PWROFF_TIME: {
+          DevCfgForEdit.Configs[(REG_PWROFF_TIME)-REG_DEVCONFIG] = uValue;
+          SetEditState(REM_CFG_MODIFIED);
+          break;
+      }
+      case REG_FN_SHUTDOWN_TIME: {
+          DevCfgForEdit.Configs[(REG_SHUTDOWN_TIME)-REG_DEVCONFIG] = uValue;
+          SetEditState(REM_CFG_MODIFIED);
+          break;
+      }
+      case REG_FN_RELAY_DELAY: {
+          DevCfgForEdit.Configs[(REG_RELAY_DELAY)-REG_DEVCONFIG] = uValue;
+          SetEditState(REM_CFG_MODIFIED);
+          break;
+      }
+      case REG_FN_RELAY_TIME: {
+          DevCfgForEdit.Configs[(REG_RELAY_TIME)-REG_DEVCONFIG] = uValue;
+          SetEditState(REM_CFG_MODIFIED);
+          break;
+      }
 
 #ifndef __vmSIMULATOR__
     // 日期时间

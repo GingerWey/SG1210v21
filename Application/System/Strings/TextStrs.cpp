@@ -149,8 +149,8 @@ constexpr TMultiLangStrings listMultiStrings[] =
   ,{ idMenuName5,         "调试",                   "Test",            }
   ,{ idMenuDesp5,         "装置传动试验",           "Device trip test" }
 
-  ,{ idMenuName6,         "逻辑",                   "Logic",       }
-  ,{ idMenuDesp6,         "配置装置保护参数",       "Config protection logic" }
+  ,{ idMenuName6,         "定值",                   "Logic",       }
+  ,{ idMenuDesp6,         "配置装置保护定值和压板", "Config protection logic" }
 
   ,{ idMenuName7,         "装置",                   "Device",       }
   ,{ idMenuDesp7,         "配置装置工作参数",       "Config device" }
@@ -161,8 +161,8 @@ constexpr TMultiLangStrings listMultiStrings[] =
   ,{ idMenuName9,         "网口",                   "Ethernet",       }
   ,{ idMenuDesp9,         "配置以太口工作参数",     "Config ethernet" }
 
-  ,{ idMenuName10,         "关于",                  "About",       }
-  ,{ idMenuDesp10,         "查看装置版本信息",      "Device information" }
+  ,{ idMenuName10,        "关于",                  "About",       }
+  ,{ idMenuDesp10,        "查看装置版本信息",      "Device information" }
 
 //// 恢复默认值
 //  ,{ idMenuRstSetting,    szMenuRstSetting,              szEngMenuRstSetting     }
@@ -287,13 +287,26 @@ constexpr TMultiLangStrings listMultiStrings[] =
   ,{ idEventEmpty,        "无记录",                      "No Record"                         }
   ,{ idEvtDataEmpty,      "无数据",                      "No Data"                           }
 
-  
-// 设备参数
-  ,{ idDevCfgName01,      "功能类型：",                "Device Type"         }
-  ,{ idDevCfgName02,      "界面语言：",                "Language"            }
-  ,{ idDevCfgName03,      "操作口令：",                "Operator Password"   }
-  ,{ idDevCfgName04,      "动态口令：",                "Dynamic Password"    }
-  ,{ idDevCfgName05,      "超级口令：",                "Supper Password"     }
+//--------------------- 
+// 配置窗体
+// 配置项分类
+  ,{ idCfgGroup01,       "定值和压板",                "Logic Settings" }
+  ,{ idCfgGroup02,       "设备参数",                  "Device Parameters" }
+  ,{ idCfgGroup03,       "串行口配置",                "UART Configuration" }
+  ,{ idCfgGroup04,       "以太网配置",                "Ethernet Configuration" }
+
+// 
+  ,{ idDevOptName01,     "保护总压板",                "Logic total enable" }
+  //,{ idDevOptName02,     "自动复归",                  "Automatic return" }
+  //,{ idDevOptName03,     "",                "" }
+  //,{ idDevOptName04,     "",                "" }
+
+    // 设备参数
+  //,{ idDevCfgName01,      "功能类型：",                "Device Type"         }
+  //,{ idDevCfgName02,      "界面语言：",                "Language"            }
+  //,{ idDevCfgName03,      "操作口令：",                "Operator Password"   }
+  //,{ idDevCfgName04,      "动态口令：",                "Dynamic Password"    }
+  //,{ idDevCfgName05,      "超级口令：",                "Supper Password"     }
     
   ,{ idDevCfgName06,      "装置地址：",                "Device Address"      }
   ,{ idDevCfgName07,      "自动控制：",                "Control Enable"      }
@@ -308,7 +321,14 @@ constexpr TMultiLangStrings listMultiStrings[] =
   ,{ idDevCfgName16,      "继电器启动延时：",          "Relay delay"         }
   ,{ idDevCfgName17,      "继电器持续时间：",          "Relay Active timer"  }
 
-// 串口 
+// Enum
+  ,{ idBoolFalse,         "禁止",                      "Disabled" }
+  ,{ idBoolTrue,          "允许",                      "Enabled"  }
+
+  ,{ idVolt220,           "220 V",                      "220 V"     }
+  ,{ idVolt380,           "380 V",                      "380 V"     }
+
+    // 串口 
   ,{ idUARTCfgName01,     "串行口配置",                "COM1 Config"         }
   ,{ idUARTCfgName02,     "装置地址：",                "Slave Address"       }
   ,{ idUARTCfgName03,     "通信速率：",                "Baudrate"            }
@@ -327,10 +347,10 @@ constexpr TMultiLangStrings listMultiStrings[] =
   ,{ idUartUnit01,        "bps",                       "bps"                }
   ,{ idUartUnit02,        "位",                        "bits"               }
 
-  ,{ idCtrlUnit01,        "%",                         "%"                  }
-  ,{ idCtrlUnit02,        "V",                         "V"                  }
-  ,{ idCtrlUnit03,        "秒",                        "Sec"                }
-  ,{ idCtrlUnit04,        "分",                        "Min"                }
+  //,{ idCtrlUnit01,        "%",                         "%"                  }
+  //,{ idCtrlUnit02,        "V",                         "V"                  }
+  //,{ idCtrlUnit03,        "秒",                        "Sec"                }
+  //,{ idCtrlUnit04,        "分",                        "Min"                }
 
 //  ,{ idUartCfg0,     szUartName(1) szUARTCfgName01, szEngUartName(1) szEngUARTCfgName01 }
 //  ,{ idUartCfg1,     szUartName(1) szUARTCfgName02, szEngUartName(1) szEngUARTCfgName02 }
@@ -342,13 +362,14 @@ constexpr TMultiLangStrings listMultiStrings[] =
 //  ,{ idUartCfg7,     szUartName(2) szUARTCfgName03, szEngUartName(2) szEngUARTCfgName03 }
 //  ,{ idUartCfg8,     szUartName(2) szUARTCfgName04, szEngUartName(2) szEngUARTCfgName04 }
 //  ,{ idUartCfg9,     szUartName(2) szUARTCfgName05, szEngUartName(2) szEngUARTCfgName05 }
+//-------------------------------------------
 // 事件描述
   ,{ idEventName00,       szEventName00,           szEngEventName00         }
   ,{ idEventName01,       szEventName01,           szEngEventName01         }
   ,{ idEventName02,       szEventName02,           szEngEventName02         }
   ,{ idEventName03,       szEventName03,           szEngEventName03         }
   ,{ idEventName04,       szEventName04,           szEngEventName04         }
-  ,{ idEventName05,       szEventName05,           szEngEventName05         }
+//  ,{ idEventName05,       szEventName05,           szEngEventName05         }
 //  ,{ idEventName06,       szEventName06,           szEngEventName06         }
 //  ,{ idEventName07,       "",                      ""                       }
   ,{ idEventName08,       "看门狗启动",           "WDG active"               }

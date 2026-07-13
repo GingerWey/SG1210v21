@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 /*
  File        : DevRegInfoList.cpp
  Version     : V1.01
@@ -103,8 +103,8 @@ static constexpr TDevRegInfoItem pDevOptionRegInfos[] =
    // Ident          Name  RegNum            RegProp    Misc  Property
    { idDevOptName01, 0,    REG_PROTECT_EN,   RIP_OPTION, 0,  SIT_DevOption | SIT_VAT_BIN }
   ,{ idDevOptName02, 0,    REG_SRLY_AUTORET, RIP_OPTION, 0,  SIT_DevOption | SIT_VAT_BIN }
-  ,{ idDevOptName03, 0,    REG_CT_1A,        RIP_OPTION, 0,  SIT_DevOption | SIT_DIM_A | SIT_VAT_ENUM }
-  ,{ idDevOptName04, 0,    REG_VOLTAGE_33,   RIP_OPTION, 0,  SIT_DevOption | SIT_VAT_ENUM }
+//  ,{ idDevOptName03, 0,    REG_CT_1A,        RIP_OPTION, 0,  SIT_DevOption | SIT_DIM_A | SIT_VAT_ENUM }
+//  ,{ idDevOptName04, 0,    REG_VOLTAGE_33,   RIP_OPTION, 0,  SIT_DevOption | SIT_VAT_ENUM }
 };
 #define NUM_DevOpitonRegInfos         (NUM_Elements(pDevOptionRegInfos))
 //-----------------------------------------------------------------------------
@@ -122,19 +122,19 @@ const TDevRegInfoList DevOptionRegInfoList =
 //-----------------------------------------------------------------------------
 static constexpr TDevRegInfoItem pDevConfigRegInfos[] =
 {
-   // Ident          Name   RegNum              RefReg DefValue  Min   Max  Step Scale  Width Dec Evt Misc Property
-   { idDevCfgName06,  0,   REG_DEV_ADDR,         0,     0xA5,     1,  0xA5,  0xA5,  1,    1,   0,  0,  0,  SIT_DevConfig | SIT_VAT_ENUM }
-  ,{ idDevCfgName07,  0,   REG_AUTOCTRL_EN,      0,     0xA5,     0,  0xA5,  0xA5,  1,    1,   0,  0,  0,  SIT_DevConfig | SIT_VAT_ENUM }
-  ,{ idDevCfgName08,  0,   REG_AUTO_TURNOFF,     0,     0xA5,     0,  0xA5,  0xA5,  1,    1,   0,  0,  0,  SIT_DevConfig | SIT_VAT_ENUM }
-  ,{ idDevCfgName09,  0,   REG_AUTO_BREAKER_ON,  0,     0xA5,     0,  0xA5,  0xA5,  1,    1,   0,  0,  0,  SIT_DevConfig | SIT_VAT_ENUM }
-  ,{ idDevCfgName10,  0,   REG_PASSBY_EN,        0,     0xA5,     0,  0xA5,  0xA5,  1,    1,   0,  0,  0,  SIT_DevConfig | SIT_VAT_ENUM }
-  ,{ idDevCfgName11,  0,   REG_ACTION_VOLTAGE,   0,       70,    50,    95,     1,  1,    3,   0,  0,  0,  SIT_DevConfig | SIT_DIM_V    }
-  ,{ idDevCfgName12,  0,   REG_COIL_VOLTAGE,     0,      220,   200,   400,    20,  1,    4,   0,  0,  0,  SIT_DevConfig | SIT_DIM_V    }
-  ,{ idDevCfgName13,  0,   REG_PWRON_TIME,       0,       10,     1,    60,     1,  1,    5,   0,  0,  0,  SIT_DevConfig | SIT_DIM_Min  }
-  ,{ idDevCfgName14,  0,   REG_PWROFF_TIME,      0,       10,     1,    60,     1,  1,    5,   0,  0,  0,  SIT_DevConfig | SIT_DIM_Min  }
-  ,{ idDevCfgName15,  0,   REG_SHUTDOWN_TIME,    0,        1,     1,    60,     1,  1,    4,   0,  0,  0,  SIT_DevConfig | SIT_DIM_Sec  }
-  ,{ idDevCfgName16,  0,   REG_RELAY_DELAY,      0,        5,     5,   600,     1,  1,    4,   0,  0,  0,  SIT_DevConfig | SIT_DIM_Sec  }
-  ,{ idDevCfgName17,  0,   REG_RELAY_TIME,       0,        2,     5,   600,     1,  1,    4,   0,  0,  0,  SIT_DevConfig | SIT_DIM_Sec  }
+   // Ident          Name   RegNum              RefReg DefValue  Min   Max   Step Scale  Width Dec Evt Misc Property
+   { idDevCfgName06,  0,   REG_DEV_ADDR,         0,        1,     1,   247,     1,  1,    1,   0,  0,  0,  SIT_DevConfig | SIT_RDOnly | SIT_VAT_INT  }
+  ,{ idDevCfgName07,  0,   REG_AUTOCTRL_EN,      0,     0xA5,     0,  0xA5,  0xA5,  1,    1,   0,  0,  0,  SIT_DevConfig | SIT_RDOnly | SIT_VAT_ENUM }
+  ,{ idDevCfgName08,  0,   REG_AUTO_TURNOFF,     0,     0xA5,     0,  0xA5,  0xA5,  1,    1,   0,  0,  0,  SIT_DevConfig | SIT_RDOnly | SIT_VAT_ENUM }
+  ,{ idDevCfgName09,  0,   REG_AUTO_BREAKER_ON,  0,     0xA5,     0,  0xA5,  0xA5,  1,    1,   0,  0,  0,  SIT_DevConfig | SIT_RDOnly | SIT_VAT_ENUM }
+  ,{ idDevCfgName10,  0,   REG_PASSBY_EN,        0,     0xA5,     0,  0xA5,  0xA5,  1,    1,   0,  0,  0,  SIT_DevConfig | SIT_RDOnly | SIT_VAT_ENUM }
+  ,{ idDevCfgName11,  0,   REG_ACTION_VOLTAGE,   0,       70,    50,    95,     1,  1,    3,   0,  0,  0,  SIT_DevConfig | SIT_RDOnly | SIT_VAT_INT | SIT_DIM_Perc }
+  ,{ idDevCfgName12,  0,   REG_COIL_VOLTAGE,     0,      220,   200,   400,    20,  1,    3,   0,  0,  0,  SIT_DevConfig | SIT_RDOnly | SIT_VAT_INT | SIT_DIM_V    }
+  ,{ idDevCfgName13,  0,   REG_PWRON_TIME,       0,       10,     1,    60,     1,  1,    3,   0,  0,  0,  SIT_DevConfig | SIT_RDOnly | SIT_VAT_INT | SIT_DIM_Min  }
+  ,{ idDevCfgName14,  0,   REG_PWROFF_TIME,      0,       10,     1,    60,     1,  1,    3,   0,  0,  0,  SIT_DevConfig | SIT_RDOnly | SIT_VAT_INT | SIT_DIM_Min  }
+  ,{ idDevCfgName15,  0,   REG_SHUTDOWN_TIME,    0,        1,     1,    60,     1,  1,    3,   0,  0,  0,  SIT_DevConfig | SIT_RDOnly | SIT_VAT_INT | SIT_DIM_Sec  }
+  ,{ idDevCfgName16,  0,   REG_RELAY_DELAY,      0,        5,     5,   600,     1,  1,    3,   0,  0,  0,  SIT_DevConfig | SIT_RDOnly | SIT_VAT_INT | SIT_DIM_Sec  }
+  ,{ idDevCfgName17,  0,   REG_RELAY_TIME,       0,        2,     5,   600,     1,  1,    3,   0,  0,  0,  SIT_DevConfig | SIT_RDOnly | SIT_VAT_INT | SIT_DIM_Sec  }
 };
 #define NUM_DevConfigRegInfos         (NUM_Elements(pDevConfigRegInfos))
 //-----------------------------------------------------------------------------
@@ -280,25 +280,38 @@ const TDevRegInfoList EventReportRegInfoList =
 //-----------------------------------------------------------------------------
 static constexpr TDevRegInfoItem pDevFunctionRegInfos[] =
 {  // 只有功能寄存RefReg配置为REG_DEVOPTION/REG_DEVCONFIG，才会被填写默认参数。
-   // Ident            Name   RegNum             RefReg        DefValue Min Max  Step Scale Width Dec Evt Misc Property
-   { idDevOptName01,     0,  REG_FN_PROTECT_EN,    0,               0,   0,  1,    1,   1,    1,    0,  0,  0,  SIT_DevConfig | SIT_VAT_BIN  }
-//  ,{ idDevOptName02,     0,  REG_FN_SOE_AUTORET,   0,               0,   0,  1,    1,   1,    1,    0,  0,  0,  SIT_DevConfig | SIT_VAT_BIN  }
-//  ,{ idDevOptName03,     0,  REG_FN_CT_1A,         0,               0,   0,  1,    1,   1,    1,    0,  0,  0,  SIT_DevConfig | SIT_VAT_ENUM }
-//  ,{ idDevOptName04,     0,  REG_FN_VOLTAGE_MODE,  0,               0,   0,  1,    1,   1,    1,    0,  0,  0,  SIT_DevConfig | SIT_VAT_ENUM }
+   // Ident            Name   RegNum             RefReg   DefValue  Min    Max   Step Scale Width Dec Evt Misc Property
+   { idDevOptName01,     0,  REG_FN_PROTECT_EN,    0,         0,     0,     1,     1,  1,    1,   0,  0,  0,  SIT_DevConfig | SIT_VAT_BIN  }
+//  ,{ idDevOptName02,     0,  REG_FN_SOE_AUTORET,   0,         0,     0,     1,     1,  1,    1,   0,  0,  0,  SIT_DevConfig | SIT_VAT_BIN  }
+//  ,{ idDevOptName03,     0,  REG_FN_CT_1A,         0,         0,     0,     1,     1,  1,    1,   0,  0,  0,  SIT_DevConfig | SIT_VAT_ENUM }
+//  ,{ idDevOptName04,     0,  REG_FN_VOLTAGE_MODE,  0,         0,     0,     1,     1,  1,    1,   0,  0,  0,  SIT_DevConfig | SIT_VAT_ENUM }
 
-//  ,{ idDateTimeName01,   0,  REG_FN_DATETIME,       0,              0,    0,  0,    0,   0,    4,    0,  0,  0,  STI_Type_Time }
-//  ,{ idDateTimeName02,   0,  REG_DATE_YEAR,         0,           2025,  2010, 2100, 1,   1,    4,    0,  0,  0,  STI_Type_Time }
-//  ,{ idDateTimeName03,   0,  REG_DATE_MONTH,        0,              1,    1,  12,   1,   1,    2,    0,  0,  0,  STI_Type_Time }
-//  ,{ idDateTimeName04,   0,  REG_DATE_DAY,          0,              1,    1,  31,   1,   1,    2,    0,  0,  0,  STI_Type_Time }
-//  ,{ idDateTimeName06,   0,  REG_TIME_HOUR,         0,              0,    0,  23,   1,   1,    2,    0,  0,  0,  STI_Type_Time }
-//  ,{ idDateTimeName07,   0,  REG_TIME_MINUTE,       0,              0,    0,  59,   1,   1,    2,    0,  0,  0,  STI_Type_Time }
-//  ,{ idDateTimeName08,   0,  REG_TIME_SECOND,       0,              0,    0,  59,   1,   1,    2,    0,  0,  0,  STI_Type_Time }
-//  ,{ idDateTimeName09,   0,  REG_TIME_MSECOND,      0,              0,    0, 999,   1,   1,    3,    0,  0,  0,  STI_Type_Time }
+  ,{ idDevCfgName06,  0,   REG_FN_DEV_ADDR,         0,        1,     1,   247,     1,  1,    1,   0,  0,  0,  SIT_DevConfig | SIT_VAT_INT  }
+  ,{ idDevCfgName07,  0,   REG_FN_AUTOCTRL_EN,      0,        0,     0,  0xA5,  0xA5,  1,    1,   0,  0,  0,  SIT_DevConfig | SIT_VAT_BIN }
+  ,{ idDevCfgName08,  0,   REG_FN_AUTO_TURNOFF,     0,     0xA5,     0,  0xA5,  0xA5,  1,    1,   0,  0,  0,  SIT_DevConfig | SIT_VAT_BIN }
+  ,{ idDevCfgName09,  0,   REG_FN_AUTO_BREAKER_ON,  0,     0xA5,     0,  0xA5,  0xA5,  1,    1,   0,  0,  0,  SIT_DevConfig | SIT_VAT_BIN }
+  ,{ idDevCfgName10,  0,   REG_FN_PASSBY_EN,        0,     0xA5,     0,  0xA5,  0xA5,  1,    1,   0,  0,  0,  SIT_DevConfig | SIT_VAT_BIN }
+  ,{ idDevCfgName11,  0,   REG_FN_ACTION_VOLTAGE,   0,       70,    50,    95,     1,  1,    3,   0,  0,  0,  SIT_DevConfig | SIT_VAT_INT | SIT_DIM_Perc }
+  ,{ idDevCfgName12,  0,   REG_FN_COIL_VOLTAGE,     0,      220,   110,   400,    10,  1,    3,   0,  0,  0,  SIT_DevConfig | SIT_VAT_INT | SIT_DIM_V    }
+  ,{ idDevCfgName13,  0,   REG_FN_PWRON_TIME,       0,       10,     1,   120,     1,  1,    3,   0,  0,  0,  SIT_DevConfig | SIT_VAT_INT | SIT_DIM_Min  }
+  ,{ idDevCfgName14,  0,   REG_FN_PWROFF_TIME,      0,       10,     1,   120,     1,  1,    3,   0,  0,  0,  SIT_DevConfig | SIT_VAT_INT | SIT_DIM_Min  }
+  ,{ idDevCfgName15,  0,   REG_FN_SHUTDOWN_TIME,    0,        1,     1,   120,     1,  1,    3,   0,  0,  0,  SIT_DevConfig | SIT_VAT_INT | SIT_DIM_Sec  }
+  ,{ idDevCfgName16,  0,   REG_FN_RELAY_DELAY,      0,        5,     5, 24000,     1,  1,    3,   0,  0,  0,  SIT_DevConfig | SIT_VAT_INT | SIT_DIM_Sec  }
+  ,{ idDevCfgName17,  0,   REG_FN_RELAY_TIME,       0,        2,     5, 24000,     1,  1,    3,   0,  0,  0,  SIT_DevConfig | SIT_VAT_INT | SIT_DIM_Sec  }
 
+//  ,{ idDateTimeName01,   0,  REG_FN_DATETIME,       0,        0,    0,    0,      0,   0,    4,   0,  0,  0,  STI_Type_Time }
+//  ,{ idDateTimeName02,   0,  REG_DATE_YEAR,         0,     2025,  2010,   2100,   1,   1,    4,   0,  0,  0,  STI_Type_Time }
+//  ,{ idDateTimeName03,   0,  REG_DATE_MONTH,        0,        1,    1,    12,     1,   1,    2,   0,  0,  0,  STI_Type_Time }
+//  ,{ idDateTimeName04,   0,  REG_DATE_DAY,          0,        1,    1,    31,     1,   1,    2,   0,  0,  0,  STI_Type_Time }
+//  ,{ idDateTimeName06,   0,  REG_TIME_HOUR,         0,        0,    0,    23,     1,   1,    2,   0,  0,  0,  STI_Type_Time }
+//  ,{ idDateTimeName07,   0,  REG_TIME_MINUTE,       0,        0,    0,    59,     1,   1,    2,   0,  0,  0,  STI_Type_Time }
+//  ,{ idDateTimeName08,   0,  REG_TIME_SECOND,       0,        0,    0,    59,     1,   1,    2,   0,  0,  0,  STI_Type_Time }
+//  ,{ idDateTimeName09,   0,  REG_TIME_MSECOND,      0,        0,    0,   999,     1,   1,    3,   0,  0,  0,  STI_Type_Time }
+                                                                                  
   // 串口配置
-  ,{ idUARTCfgName01,    0,  REG_UART1_CFG,         0,              0,    0,  0,    1,   1,    3,    0,  0,  0,  SIT_DevConfig | SIT_VAT_UART }
+  ,{ idUARTCfgName01,    0,  REG_UART1_CFG,         0,              0,    0,  0,    1,   1,    3,    0,  0,  0,  SIT_DevConfig }
   ,{ idUARTCfgName02,    0,  REG_UART1_ADDR,        REG_DEVCONFIG,  252,  1,  247,  1,   1,    3,    0,  0,  0,  SIT_DevConfig }
-  ,{ idUARTCfgName03,    0,  REG_UART1_BAUDRATE,    REG_DEVCONFIG,  3,    0,  7,    1,   1,    5,    0,  0,  0,  SIT_DevConfig | SIT_VAT_ENUM }
+  ,{ idUARTCfgName03,    0,  REG_UART1_BAUDRATE,    REG_DEVCONFIG,  3,    0,  7,    1,   1,    5,    0,  0,  0,  SIT_DevConfig | SIT_VAT_ENUM | SIT_DIM_BPS }
   ,{ idUARTCfgName04,    0,  REG_UART1_PARITY,      REG_DEVCONFIG,  0,    0,  2,    1,   1,    1,    0,  0,  0,  SIT_DevConfig | SIT_VAT_ENUM }
 //  ,{ idUARTCfgName05,    0, REG_UART1_STOPBITS,  REG_DEVCONFIG,     0,    0,  1,    1,   1,    1,    0,  0,  0,  SIT_DevConfig | SIT_VAT_ENUM }
 };                                                            

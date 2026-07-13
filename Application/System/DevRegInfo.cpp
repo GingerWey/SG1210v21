@@ -46,8 +46,10 @@ static const char *plistDIMName[] =
   "`C",
   "#",      // Ω 
   "% ",
+  "Min",
   "S ",
-  "ms",  
+  "ms", 
+  "bps",
   "/100",
   "/220",
   "/380"

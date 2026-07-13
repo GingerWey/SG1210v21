@@ -62,11 +62,12 @@ extern "C" {
 #define SIT_DIM_Min       (0x0E << 5)   // 分
 #define SIT_DIM_Sec       (0x0F << 5)   // 秒
 #define SIT_DIM_MSec      (0x10 << 5)   // 毫秒
-#define SIT_DIM_PT100     (0x11 << 5)   //
-#define SIT_DIM_PT220     (0x12 << 5)   //
-#define SIT_DIM_PT380     (0x13 << 5)   //
-#define SIT_DIM_CT        (0x14 << 5)   //
-#define SIT_DIM_4_20TW    (0x15 << 5)   // 4~20mA自动切换温度、湿度
+#define SIT_DIM_BPS       (0x11 << 5) // bit/s
+#define SIT_DIM_PT100     (0x12 << 5)   //
+#define SIT_DIM_PT220     (0x13 << 5)   //
+#define SIT_DIM_PT380     (0x14 << 5)   //
+#define SIT_DIM_CT        (0x15 << 5)   //
+#define SIT_DIM_4_20TW    (0x16 << 5)   // 4~20mA自动切换温度、湿度
 
 #define SIT_GetDim(x)     ((x) & SIT_MASK_DIM)
 #define SIT_GetDimVal(x)  (((x) & SIT_MASK_DIM) >> 5)
@@ -129,16 +130,14 @@ extern "C" {
 // 显示和编辑类型
 #define SIT_VAT_SHIFT     25
 #define SIT_VAT_MASK      (0x0F << SIT_VAT_SHIFT)
-#define SIT_VAT_REAL      (0x00 << SIT_VAT_SHIFT)  // 实数
-#define SIT_VAT_BIN       (0x01 << SIT_VAT_SHIFT)  // 二值状态
-#define SIT_VAT_HEX       (0x02 << SIT_VAT_SHIFT)  // 16进制
-#define SIT_VAT_ENUM      (0x03 << SIT_VAT_SHIFT)  // 枚举
-#define SIT_VAT_IPADDR    (0x04 << SIT_VAT_SHIFT)  // 以太网地址
-#define SIT_VAT_MACADDR   (0x05 << SIT_VAT_SHIFT)  // 以太网物理地址
-#define SIT_VAT_SOCKET    (0x07 << SIT_VAT_SHIFT)  // 以太网接口
-#define SIT_VAT_UART      (0x08 << SIT_VAT_SHIFT)  // 串口配置
-#define SIT_VAT_DATE      (0x09 << SIT_VAT_SHIFT)  // 日期
-#define SIT_VAT_TIME      (0x0A << SIT_VAT_SHIFT)  // 时间
+#define SIT_VAT_INT       (0x00 << SIT_VAT_SHIFT)  // 整数
+#define SIT_VAT_HEX       (0x01 << SIT_VAT_SHIFT)  // 16进制
+#define SIT_VAT_REAL      (0x03 << SIT_VAT_SHIFT)  // 实数
+#define SIT_VAT_BIN       (0x03 << SIT_VAT_SHIFT)  // 二值状态
+#define SIT_VAT_ENUM      (0x04 << SIT_VAT_SHIFT)  // 枚举
+#define SIT_VAT_DATETIME  (0x05 << SIT_VAT_SHIFT)  // 日期时间
+#define SIT_VAT_PASSWORD  (0x06 << SIT_VAT_SHIFT)  // 密码
+#define SIT_VAT_IPADDRv4  (0x07 << SIT_VAT_SHIFT)  // IPv4地址
 #define SIT_GetVType(x)   ((x) & SIT_VAT_MASK)
 // 访问
 #define SIT_RDOnly        (0x80000000)  // 只读

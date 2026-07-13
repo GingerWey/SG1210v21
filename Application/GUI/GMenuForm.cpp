@@ -42,6 +42,7 @@
 #include "GWinTypes.h"
 #include "GFormCentraRegistrar.h"
 #include "GUICntr.h"
+#include "GConfigForm.h"  // TConfigType (cgtLogic/cgtDevice/cgtSerial/cgtEthernet)
 
 #include "FontSGRes.h"
 #include "GUIPicture.h"
@@ -146,10 +147,10 @@ static const TMenuItem kMenuItems[MU_ITEM_COUNT] =
   { 210, 72,  picIdxMU_Item32x32_04, 210, 107, 33, 17, idMenuName4,  idMenuDesp4,  WID_WLGListForm,     nullptr },
   { 272, 72,  picIdxMU_Item32x32_05, 272, 107, 33, 17, idMenuName5,  idMenuDesp5,  WID_DeviceTestForm,  nullptr },
   // Row 2
-  {  24, 145, picIdxMU_Item32x32_06,  24, 180, 33, 17, idMenuName6,  idMenuDesp6,  WID_CTRLConfigForm,  nullptr },
-  {  86, 145, picIdxMU_Item32x32_07,  86, 180, 32, 17, idMenuName7,  idMenuDesp7,  WID_ConfigForm,      nullptr },
-  { 148, 145, picIdxMU_Item32x32_08, 148, 180, 33, 17, idMenuName8,  idMenuDesp8,  WID_UARTConfigForm,  nullptr },
-  { 210, 145, picIdxMU_Item32x32_09, 210, 180, 33, 17, idMenuName9,  idMenuDesp9,  WID_EthernetConfigForm, nullptr },
+  {  24, 145, picIdxMU_Item32x32_06,  24, 180, 33, 17, idMenuName6,  idMenuDesp6,  WID_ConfigForm,  (const void*)cgtLogic    },
+  {  86, 145, picIdxMU_Item32x32_07,  86, 180, 32, 17, idMenuName7,  idMenuDesp7,  WID_ConfigForm,  (const void*)cgtDevice   },
+  { 148, 145, picIdxMU_Item32x32_08, 148, 180, 33, 17, idMenuName8,  idMenuDesp8,  WID_ConfigForm,  (const void*)cgtSerial   },
+  { 210, 145, picIdxMU_Item32x32_09, 210, 180, 33, 17, idMenuName9,  idMenuDesp9,  WID_ConfigForm,  (const void*)cgtEthernet },
   { 272, 145, picIdxMU_Item32x32_10, 272, 180, 33, 17, idMenuName10, idMenuDesp10, WID_AboutForm,       nullptr },
 };
 

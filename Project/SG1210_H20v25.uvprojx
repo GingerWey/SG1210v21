@@ -981,6 +981,11 @@
               <FilePath>..\Application\GUI\GLogListForm.cpp</FilePath>
             </File>
             <File>
+              <FileName>GConfigForm.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\Application\GUI\GConfigForm.cpp</FilePath>
+            </File>
+            <File>
               <FileName>GDevInfoForm.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\Application\GUI\GDevInfoForm.cpp</FilePath>
@@ -1560,6 +1565,11 @@
               <FileName>ImageRes.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Application\GUI\Graphics\ImageRes.h</FilePath>
+            </File>
+            <File>
+              <FileName>FontASCII16.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\Middlewares\emWin\fonts\FontASCII16.cpp</FilePath>
             </File>
           </Files>
         </Group>

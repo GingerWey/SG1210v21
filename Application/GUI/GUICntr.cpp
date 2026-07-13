@@ -50,6 +50,7 @@
 #include "GMainForm.h"
 #include "GLogListForm.h"
 #include "GDataListForm.h"
+#include "GConfigForm.h"
 #include "GFatalForm.h"  // used by GUIShowFatalMessage
 
 // MCU-only forms (require FreeRTOS / STM32 HAL / rtc.h)
@@ -58,7 +59,6 @@
 #include "GMessageForm.h"
 #include "GUICtrlConfigDialog.h"
 #include "GUIUARTConfigDialog.h"
-//#include "GConfigForm.h"
 #include "GGuageForm.h"
 #include "GLoginDialog.h"
 #include "GTimeDialog.h"
@@ -110,6 +110,7 @@ static constexpr FormEntry s_formTableSim[] = {
     { WID_MainForm,         &FMainForm,           "Main"           },
     { WID_DataListForm,     &FDataListForm,       "DataList"       },
     { WID_LogListForm,      &FLogListForm,        "LogList"        },
+    { WID_ConfigForm,       &FConfigForm,         "Config"         },
 };
 
 #ifndef __vmSIMULATOR__
@@ -118,7 +119,6 @@ static constexpr FormEntry s_formTableMcu[] = {
     { WID_UARTConfigForm,   &FUARTConfigForm,     "UARTConfig"     },
     { WID_DevInfoForm,      &FDevInfoForm,        "DevInfo"        },
     { WID_MessageForm,      &FMessageForm,        "Message"        },
-//    { WID_ConfigForm,       &FConfigForm,         "Config"         },
     { WID_GuageForm,        &FGuageForm,          "Guage"          },
     { WID_LoginDialog,      &FLoginDialog,        "Login"          },
     { WID_TimeDialog,       &FTimeDialog,         "Time"           },

@@ -163,13 +163,13 @@ struct Row {
 
 static const Row s_rows[] = {
   // Group 1 — AC measure (idDVGroup01)
-  { kGroup, idDVGroup01, 0 },
+  { kGroup, idDVGroup01, picIdxDL_GroupA20x16Cyan },
   { kReg,   0, REG_RL_Uin  },
   { kReg,   0, REG_RL_Uout },
   { kReg,   0, REG_RL_ACFreq },
   { kReg,   0, REG_RL_VOFreq },
   // Group 2 — Battery (idDVGroup02)
-  { kGroup, idDVGroup02, 0 },
+  { kGroup, idDVGroup02, picIdxDL_GroupB20x16Cyan },
   { kReg,   0, REG_RL_BCHRG_Pbus },
   { kReg,   0, REG_RL_BCHRG_Ibus },
   { kReg,   0, REG_RL_BCHRG_Ibus_Max },
@@ -179,11 +179,11 @@ static const Row s_rows[] = {
   { kReg,   0, REG_RL_BAT_CAPLevel },
   { kReg,   0, REG_RL_BAT_TEMPERATRUE },
   // Group 3 — Realtime clock (idDVGroup03)
-  { kGroup, idDVGroup03, 0 },
+  { kGroup, idDVGroup03, picIdxDL_GroupC20x16Cyan },
   { kReg,   0, REG_RL_RTC_TEMP },
   { kReg,   0, REG_RL_RTC_Vbat },
   // Group 4 — Status signals (idDVGroup04)
-  { kGroup, idDVGroup04, 0 },
+  { kGroup, idDVGroup04, picIdxDL_GroupD20x16Cyan },
   { kReg,   0, REG_DI0 },
   { kReg,   0, REG_DI1 },
   { kReg,   0, REG_DI2 },
@@ -193,7 +193,7 @@ static const Row s_rows[] = {
   { kReg,   0, REG_DI6 },
   { kReg,   0, REG_DI7 },
   // Group 5 — Control signals (idDVGroup05)
-  { kGroup, idDVGroup05, 0 },
+  { kGroup, idDVGroup05, picIdxDL_GroupE20x16Cyan },
   { kReg,   0, REG_RELAY0 },
   { kReg,   0, REG_RELAY1 },
   { kReg,   0, REG_RELAY2 },
@@ -449,11 +449,18 @@ static void _DrawRow(uint16_t uIdx)
   GUI_FillRect(rRow.x0, rRow.y0, rRow.x1, rRow.y1);
 
   if (kGroup == pRow->kind) {
+      if (pRow->regNum != 0) {
+          // Draw the group icon (20x16) at the left margin, vertically centered
+          int ix = rRow.x0 + DL_MARGIN;
+          int iy = rRow.y0 + (DL_ROW_H - 16) / 2;
+          GUI_DrawPicture(&picMAUAtlascsg, ix, iy, pRow->regNum, 100);
+      }
+
     // Group header: cyan name + thin separator line beneath
     const char* pStr = GetMultiLangString(pRow->strId);
     if (nullptr != pStr) {
       GUI_RECT rTxt;
-      _MakeRect(&rTxt, rRow.x0 + DL_MARGIN, rRow.y0,
+      _MakeRect(&rTxt, rRow.x0 + DL_MARGIN + 24, rRow.y0,
                 (rRow.x1 - DL_MARGIN) - (rRow.x0 + DL_MARGIN) + 1, DL_ROW_H);
       GUI_SetFont(ftItemName);
       GUI_SetColor(crAccent);

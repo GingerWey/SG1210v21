@@ -99,28 +99,23 @@ extern "C" {
 // [设备参数]可以读，但不可以通过寄存器写
 // 编辑[设备参数]应从对应的REG_FN_xxx寄存器访问
 #define REG_DEV_ADDR              (REG_DEVCONFIG + 0)     // 装置地址
-#define REG_DEV_LANGUAGE          (REG_DEVCONFIG + 1)     // 界面语言
-#define REG_DEV_PASSWORD          (REG_DEVCONFIG + 2)     // 操作口令
-#define REG_WAVELOG_PRE           (REG_DEVCONFIG + 3)     // 录波器预录周期
+#define REG_WAVELOG_PRE           (REG_DEVCONFIG + 1)     // 录波器预录周期
 
-#define REG_AUTOCTRL_EN           (REG_DEVCONFIG + 6)     // 允许自动控制
-#define REG_AUTO_TURNOFF          (REG_DEVCONFIG + 7)     // 自动关机
-#define REG_AUTO_BREAKER_ON       (REG_DEVCONFIG + 8)     // 允许自动合闸
-#define REG_PASSBY_EN             (REG_DEVCONFIG + 9)     // 允许旁路运行
-#define REG_ACTION_VOLTAGE        (REG_DEVCONFIG + 16)    // 线圈投入的电压阀值%
-#define REG_COIL_VOLTAGE          (REG_DEVCONFIG + 17)    // 线圈供电电压
-#define REG_PWRON_TIME            (REG_DEVCONFIG + 20)    // 得电待持时间s
-#define REG_PWROFF_TIME           (REG_DEVCONFIG + 21)    // 失电持续时间s
-#define REG_SHUTDOWN_TIME         (REG_DEVCONFIG + 22)    // 自动关机时间s
-#define REG_RELAY_DELAY           (REG_DEVCONFIG + 23)    // CK1继电器启动延时s
-#define REG_RELAY_TIME            (REG_DEVCONFIG + 24)    // CK1继电器动作时间s
+#define REG_AUTOCTRL_EN           (REG_DEVCONFIG + 3)     // 允许自动控制
+#define REG_AUTO_TURNOFF          (REG_DEVCONFIG + 4)     // 自动关机
+#define REG_AUTO_BREAKER_ON       (REG_DEVCONFIG + 5)     // 允许自动合闸
+#define REG_PASSBY_EN             (REG_DEVCONFIG + 6)     // 允许旁路运行
+#define REG_ACTION_VOLTAGE        (REG_DEVCONFIG + 8)    // 线圈投入的电压阀值%
+#define REG_COIL_VOLTAGE          (REG_DEVCONFIG + 9)    // 线圈供电电压
+
+#define REG_PWRON_TIME            (REG_DEVCONFIG + 10)    // 得电待持时间s
+#define REG_PWROFF_TIME           (REG_DEVCONFIG + 11)    // 失电持续时间s
+#define REG_SHUTDOWN_TIME         (REG_DEVCONFIG + 12)    // 自动关机时间s
+#define REG_RELAY_DELAY           (REG_DEVCONFIG + 14)    // CK1继电器启动延时s
+#define REG_RELAY_TIME            (REG_DEVCONFIG + 15)    // CK1继电器动作时间s
 
 // 用户可自行定义的寄存器
-#ifdef  REG_DCDEF
- #define REG_DEVCFG_USER           (REG_DCDEF + 25)          //
-#else
- #define REG_DEVCFG_USER           (REG_DEVCONFIG + 25)      // 25
-#endif
+#define REG_DEVCFG_USER           (REG_DEVCONFIG + 25)      // 25
 //-----------------------------------------------------------------------------
 // 工作参数
 #define REG_TESTPARAM              (REG_DEVCFG_USER + 0)
@@ -655,9 +650,9 @@ extern "C" {
 // [设备配置]编辑
 #define REG_FN_DEV_OPTION         (REG_FUNCTION +  0)
 #define REG_FN_PROTECT_EN         (REG_FN_DEV_OPTION + 0) // 保护总压板
-#define REG_FN_SOE_AUTORET        (REG_FN_DEV_OPTION + 1) // SOE自动复归
-#define REG_FN_CT_1A              (REG_FN_DEV_OPTION + 2) // 1A CT
-#define REG_FN_VOLTAGE_MODE       (REG_FN_DEV_OPTION + 3) // 电压接线方式
+//#define REG_FN_SOE_AUTORET        (REG_FN_DEV_OPTION + 1) // SOE自动复归
+//#define REG_FN_CT_1A              (REG_FN_DEV_OPTION + 2) // 1A CT
+//#define REG_FN_VOLTAGE_MODE       (REG_FN_DEV_OPTION + 3) // 电压接线方式
 
 // [设备参数]编辑
 #define REG_FN_DEV_CONFIG         (REG_FN_DEV_OPTION + 10)                 // 10
@@ -675,31 +670,45 @@ extern "C" {
 //#define REG_DISTRIBUTOR           (REG_FN_DEV_CONFIG + 7) // 产品供应商
 //#define REG_FN_Distributor        (REG_FN_DEV_CONFIG + 8) // 产品供应商(用于编辑)
 
-#define REG_LANGUAGE              (REG_FN_DEV_CONFIG + 9) // 界面语言
-#define REG_FN_Language           (REG_FN_DEV_CONFIG + 10)// 界面语言(用于编辑)
+#define REG_LANGUAGE              (REG_FN_DEV_CONFIG + 9)  // 界面语言
+#define REG_FN_Language           (REG_FN_DEV_CONFIG + 10) // 界面语言(用于编辑)
 
-#define REG_PASSWORD              (REG_FN_DEV_CONFIG + 11)// 操作口令(写操作用于检验口令，结果在REG_Password1Ok)
-#define REG_FN_PASSWORD           (REG_FN_DEV_CONFIG + 12)// 操作口令(用于编辑)
+#define REG_PASSWORD              (REG_FN_DEV_CONFIG + 11) // 操作口令(写操作用于检验口令，结果在REG_Password1Ok)
+#define REG_FN_PASSWORD           (REG_FN_DEV_CONFIG + 12) // 操作口令(用于编辑)
 
-#define REG_PASSWORD2             (REG_FN_DEV_CONFIG + 13)// 配置口令
-#define REG_FN_PASSWORD2          (REG_FN_DEV_CONFIG + 14)// 配置口令(用于编辑)
+#define REG_PASSWORD2             (REG_FN_DEV_CONFIG + 13) // 配置口令
+#define REG_FN_PASSWORD2          (REG_FN_DEV_CONFIG + 14) // 配置口令(用于编辑)
 
-#define REG_PASSWORDx             (REG_FN_DEV_CONFIG + 15)// 动态口令
+#define REG_PASSWORDx             (REG_FN_DEV_CONFIG + 15) // 动态口令
 
 // 
-#define REG_FN_DEVADDR            (REG_FN_DEV_CONFIG + 20)// 装置地址             30
+#define REG_FN_DEV_ADDR           (REG_FN_DEV_CONFIG + 20) // 装置地址
+#define REG_FN_WAVELOG_PRE        (REG_FN_DEV_CONFIG + 21) // 录波器预录周期
 
-#define REG_FN_DATETIME           (REG_FN_DEV_CONFIG + 30)// 同时访问日期时间       40
-#define REG_DATE_YEAR             (REG_FN_DATETIME + 1)   // 年
-#define REG_DATE_MONTH            (REG_FN_DATETIME + 2)   // 月
-#define REG_DATE_DAY              (REG_FN_DATETIME + 3)   // 日
-#define REG_TIME_HOUR             (REG_FN_DATETIME + 4)   // 时
-#define REG_TIME_MINUTE           (REG_FN_DATETIME + 5)   // 分
-#define REG_TIME_SECOND           (REG_FN_DATETIME + 6)   // 秒
-#define REG_TIME_MSECOND          (REG_FN_DATETIME + 7)   // 毫秒
+#define REG_FN_AUTOCTRL_EN        (REG_FN_DEV_CONFIG + 24) // 允许自动控制
+#define REG_FN_AUTO_TURNOFF       (REG_FN_DEV_CONFIG + 25) // 自动关机
+#define REG_FN_AUTO_BREAKER_ON    (REG_FN_DEV_CONFIG + 26) // 允许自动合闸
+#define REG_FN_PASSBY_EN          (REG_FN_DEV_CONFIG + 27) // 允许旁路运行
+
+#define REG_FN_ACTION_VOLTAGE     (REG_FN_DEV_CONFIG + 30) // 线圈投入的电压阀值%
+#define REG_FN_COIL_VOLTAGE       (REG_FN_DEV_CONFIG + 31) // 线圈供电电压
+#define REG_FN_PWRON_TIME         (REG_FN_DEV_CONFIG + 32) // 得电待持时间s
+#define REG_FN_PWROFF_TIME        (REG_FN_DEV_CONFIG + 33) // 失电持续时间s
+#define REG_FN_SHUTDOWN_TIME      (REG_FN_DEV_CONFIG + 34) // 自动关机时间s
+#define REG_FN_RELAY_DELAY        (REG_FN_DEV_CONFIG + 35) // CK1继电器启动延时s
+#define REG_FN_RELAY_TIME         (REG_FN_DEV_CONFIG + 36) // CK1继电器动作时间s
+
+#define REG_FN_DATETIME           (REG_FN_DEV_CONFIG + 40) // 同时访问日期时间       40
+#define REG_DATE_YEAR             (REG_FN_DATETIME + 1)    // 年
+#define REG_DATE_MONTH            (REG_FN_DATETIME + 2)    // 月
+#define REG_DATE_DAY              (REG_FN_DATETIME + 3)    // 日
+#define REG_TIME_HOUR             (REG_FN_DATETIME + 4)    // 时
+#define REG_TIME_MINUTE           (REG_FN_DATETIME + 5)    // 分
+#define REG_TIME_SECOND           (REG_FN_DATETIME + 6)    // 秒
+#define REG_TIME_MSECOND          (REG_FN_DATETIME + 7)    // 毫秒
 
 // 串口1配置
-#define REG_UART1_CFG             (REG_FN_DEV_CONFIG + 40)    // 可读回TUARTConfig指针 210
+#define REG_UART1_CFG             (REG_FN_DEV_CONFIG + 50)    // 可读回TUARTConfig指针 210
 #define REG_UART1_ADDR            (REG_UART1_CFG + 1)       //
 #define REG_UART1_BAUDRATE        (REG_UART1_CFG + 2)       //
 #define REG_UART1_PARITY          (REG_UART1_CFG + 3)       //
