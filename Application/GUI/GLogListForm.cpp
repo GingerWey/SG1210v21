@@ -1,7 +1,7 @@
-﻿//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 /*
- File        : GPLogListForm.cpp
- Version     : V1.00
+ File        : GLogListForm.cpp
+ Version     : V1.03
  By          : Wey. Silver Grid
 
  Description : LogList form — log query form.
@@ -19,9 +19,20 @@
                  - RIGHT / left-swipe-beyond-Event -> prev category or GWavelogForm.
                    (swipe cycles mltDeviceLog<->mltDevStatus<->mltAutoCtrl; beyond the ends
                    it switches forms per spec V.5.1)
-                 - 1s refresh re-fetches the visible log page.
+                 - Static display: load on entry, reload on category switch.
+                 - LEFT/RIGHT respond to initial keydown only (no key-repeat)
+                   to avoid rapid category cycling while key is held.
 
- Date        : 2026.07.10 (V1.00 — initial implementation)
+ Date        : 2026.07.13 (V1.03 — Caption left edge: add 4px gap from frame border
+              (LL_CAP_ICON_LEFT_GAP); scrollbar: when items don't exceed visible rows,
+              clear scrollbar lane with panel color and redraw outer frame to hide
+              stale thumb)
+              2026.07.11 (V1.02 — fix category switch: clear stale rows beyond
+              item count in _UpdateList; LEFT/RIGHT ignore key-repeat (bRepeat)
+              to prevent fast-cycling; _RedrawCaption inset to avoid outer-frame
+              border conflict/flicker, no outer-frame redraw)
+              2026.07.11 (V1.01 — optimize category switch: partial redraw only, add _RedrawCaption)
+              2026.07.10 (V1.00 — initial implementation)
 */
 //-----------------------------------------------------------------------------
 #include "GLogListForm.h"
@@ -81,6 +92,7 @@
 
 // Inner frame (row table). Below caption; right edge before scrollbar gap.
 #define LL_FRAME_GAP       4
+#define LL_CAP_ICON_LEFT_GAP  4
 #define LL_INNER_X         (LL_LIST_X + LL_FRAME_GAP)               // 19
 #define LL_INNER_Y         (LL_CAP_SEP + 1 + LL_FRAME_GAP)          // 31
 #define LL_INNER_X1        (LL_SCRL_X0 - LL_SCRL_GAP - 1)           // 292
@@ -117,7 +129,7 @@ constexpr auto ftItem        = GUI_FONT_16LTH_CHN;
 //=============================================================================
 // Log categories (cycle order per spec V.5.1)
 //=============================================================================
-static const TEventLogType kLogCats[] = { mltDeviceLog, mltDevStatus, mltAutoCtrl };
+static const TEventLogType kLogCats[] = { mltAutoCtrl, mltDevStatus, mltDeviceLog };
 #define LL_CAT_COUNT  (sizeof(kLogCats) / sizeof(kLogCats[0]))
 
 static uint8_t _CatIndex(TEventLogType t)
@@ -209,6 +221,9 @@ static void _ChangeType(TEventLogType newType)
   s_pState->uCount  = EVTMGR_GetEventCount(newType);
   s_pState->uTopItem = 0;
   s_pState->uCurItem = 0;
+  // Clear key repeat state on category change
+  s_pState->uKeyRepeat = 0;
+  s_pState->uLastKeyTick = 0;
 }
 
 //=============================================================================
@@ -222,18 +237,33 @@ static void _DrawOuterFrame(void)
 
 static void _DrawCaption(void)
 {
-  uint32_t uCapId = 0;
+  uint32_t uCapId = 0, uIconId = 0;
   switch (s_pState->eType) {
-  case mltDeviceLog: uCapId = idEventCatalog1; break;
-  case mltDevStatus: uCapId = idEventCatalog2; break;
-  case mltAutoCtrl:  uCapId = idEventCatalog3; break;
+  case mltDeviceLog:
+      uCapId = idEventCatalog1;
+      uIconId = picIdxLV_LogC20x20Cyan;
+      break;
+  case mltDevStatus:
+      uCapId = idEventCatalog2;
+      uIconId = picIdxLV_LogB20x20Cyan;
+      break;
+  case mltAutoCtrl:
+      uCapId = idEventCatalog3;
+      uIconId = picIdxLV_LogA20x20Cyan;
+      break;
   default: break;
   }
+
+  int iconX0 = LL_LIST_X + LL_FRAME_GAP + LL_CAP_ICON_LEFT_GAP;
+  GUI_DrawPicture(&picMAUAtlascsg, iconX0, LL_CAP_ICON_Y0,
+      uIconId, 100);
+
   const char* pStr = GetMultiLangString(uCapId);
   if (nullptr != pStr) {
     GUI_RECT r;
+
     // Leave room for the menu icon on the right
-    int capTextX0 = LL_LIST_X + LL_FRAME_GAP;
+    int capTextX0 = LL_LIST_X + LL_FRAME_GAP + LL_CAP_ICON_LEFT_GAP + 24;
     int capTextW  = LL_CAP_ICON_X0 - capTextX0;
     _MakeRect(&r, capTextX0, LL_CAP_Y0, capTextW, LL_CAP_H);
     GUI_SetFont(ftItem);
@@ -251,11 +281,33 @@ static void _DrawCaption(void)
   GUI_DrawHLine(LL_CAP_SEP, LL_LIST_X + LL_FRAME_GAP, LL_INNER_X1);
 }
 
+/// Redraw Caption area only (inset to avoid outer frame border)
+static void _RedrawCaption(void)
+{
+  // Clear caption background only (inset from outer frame border by FRAME_GAP)
+  GUI_SetColor(crListPanel);
+  int capX0 = LL_LIST_X + LL_FRAME_GAP;     // 19 (inset from left border)
+  int capY0 = LL_LIST_Y + LL_FRAME_GAP;     // 8 (inset from top border)
+  int capX1 = LL_INNER_X1;                  // 292 (right boundary of inner frame)
+  int capY1 = LL_CAP_SEP - 1;               // 25 (just before separator)
+  GUI_FillRect(capX0, capY0, capX1, capY1);
+  _DrawCaption();
+}
+
 static void _DrawScrollbar(void)
 {
-  if (nullptr == s_pState || s_pState->uCount <= LL_VISIBLE) {
+  if (nullptr == s_pState) {
     return;
   }
+
+  // If items don't exceed visible rows, clear scrollbar lane (don't draw thumb)
+  if (s_pState->uCount <= LL_VISIBLE) {
+    GUI_SetColor(crListPanel);
+    GUI_FillRect(LL_SCRL_X0, LL_INNER_Y, LL_SCRL_X1, LL_INNER_Y1);
+    _DrawOuterFrame();
+    return;
+  }
+
   uint16_t maxTop = s_pState->uCount - LL_VISIBLE;
   int trackY0 = LL_INNER_Y;
   int trackY1 = LL_INNER_Y1;
@@ -405,9 +457,14 @@ static void _UpdateList(void)
   for (uint16_t i = 0; i < LL_VISIBLE; ++i) {
     uint16_t idx = s_pState->uTopItem + i;
     if (idx >= s_pState->uCount) {
-      break;
+      // Clear rows beyond item count (empty row)
+      GUI_RECT rRow;
+      _RowRect(&rRow, idx);
+      GUI_SetColor(crListPanel);
+      GUI_FillRect(rRow.x0, rRow.y0, rRow.x1, rRow.y1);
+    } else {
+      _DrawItem(idx);
     }
-    _DrawItem(idx);
   }
 }
 
@@ -453,7 +510,8 @@ static void _CycleNext(void)
   uint8_t idx = _CatIndex(s_pState->eType);
   idx = (idx + 1) % LL_CAT_COUNT;
   _ChangeType(kLogCats[idx]);
-  _FlushForm();
+  // Partial redraw: Caption + Row table + Scrollbar (no full screen flush)
+  _RedrawCaption();
   _UpdateList();
   _DrawScrollbar();
 }
@@ -464,7 +522,8 @@ static void _CyclePrev(void)
   uint8_t idx = _CatIndex(s_pState->eType);
   idx = (0 == idx) ? (LL_CAT_COUNT - 1) : (idx - 1);
   _ChangeType(kLogCats[idx]);
-  _FlushForm();
+  // Partial redraw: Caption + Row table + Scrollbar (no full screen flush)
+  _RedrawCaption();
   _UpdateList();
   _DrawScrollbar();
 }
@@ -534,10 +593,14 @@ static void _OnKey(uint16_t uwKey, bool bRepeat)
     break;
   }
   case KEY_LEFT:
-    _CyclePrev();
+    if (false == bRepeat) {
+      _CyclePrev();
+    }
     break;
   case KEY_RIGHT:
-    _CycleNext();
+    if (false == bRepeat) {
+      _CycleNext();
+    }
     break;
   default:
     break;
