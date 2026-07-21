@@ -191,7 +191,7 @@ static const GEditorPanel::GConfig s_numRegEditorPanelConfig = {
 
 // GNumRegDialog main config (exported)
 const GDialog::GDialogConfig g_numRegDialogConfig = {
-  4,  // labelCount
+  NUM_Elements(s_numRegLabels),  // labelCount
   s_numRegLabels,
   15, 150, 271, 145,  // kbdX, kbdY, kbdW, kbdH
   &s_commonKeyboardStyle,
@@ -262,13 +262,13 @@ static GEditor::GConfig s_loginEditors[4] = {
 // EditorPanel config for GLoginDialog
 static const GEditorPanel::GConfig s_loginEditorPanelConfig = {
   93, 60, 210, 32,  // x, y, w, h
-  4,
+  NUM_Elements(s_loginEditors),
   s_loginEditors
 };
 
 // GLoginDialog main config (exported)
 const GDialog::GDialogConfig g_loginDialogConfig = {
-  3,
+  NUM_Elements(s_loginLabels),
   s_loginLabels,
   15, 150, 271, 145,
   &s_commonKeyboardStyle,
@@ -308,12 +308,12 @@ static GEditor::GConfig s_ipEditors[4] = {
 
 static const GEditorPanel::GConfig s_ipEditorPanelConfig = {
   71, 60, 210, 32,  // x, y, w, h
-  4, s_ipEditors
+  NUM_Elements(s_ipEditors), s_ipEditors
 };
 
 // GIPAddressDialog main config (exported)
 const GDialog::GDialogConfig g_ipDialogConfig = {
-  2, s_ipLabels,
+  NUM_Elements(s_ipLabels), s_ipLabels,
   15, 150, 271, 145,
   &s_commonKeyboardStyle, &s_digitalKeyGrid,
   &s_commonEditorPanelStyle, &s_ipEditorPanelConfig
@@ -352,12 +352,12 @@ static GEditor::GConfig s_datetimeEditors[6] = {
 
 static const GEditorPanel::GConfig s_datetimeEditorPanelConfig = {
   71, 60, 270, 32,  // x, y, w, h
-  6, s_datetimeEditors
+  NUM_Elements(s_datetimeEditors), s_datetimeEditors
 };
 
 // GDatetimeDialog main config (exported)
 const GDialog::GDialogConfig g_datetimeDialogConfig = {
-  2, s_datetimeLabels,
+  NUM_Elements(s_datetimeLabels), s_datetimeLabels,
   15, 150, 271, 145,
   &s_commonKeyboardStyle, &s_digitalKeyGrid,
   &s_commonEditorPanelStyle, &s_datetimeEditorPanelConfig
