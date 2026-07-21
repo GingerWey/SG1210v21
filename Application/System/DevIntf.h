@@ -220,6 +220,14 @@ uint32_t DevIntf_DevCfgLoadDefault(uint32_t uToken);
 // 返回：(无)
 void DevIntf_getDateTime(TDateTimeType* pDateTime);
 //-----------------------------------------------------------------------------
+// 设置系统时间
+// 输入：
+//   pDateTime: 指向存贮当前时间的结构指针
+//    uToken：令牌
+// 输出：(无)
+// 返回：(无)
+void DevIntf_setDateTime(TDateTimeType *pDateTime, uint32_t uToken);
+//-----------------------------------------------------------------------------
 // 读取系统时间
 // 从SFC中读取读取当前时间
 // 输入：(无)

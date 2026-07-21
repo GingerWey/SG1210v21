@@ -19,6 +19,7 @@
 #include "DevRegs.h"
 #include "DevTypes.h"
 #include "Dev_Cfg.h"
+#include "DevDebug.h"
 
 #if WAVELOGGER_EN > 0
  #include "WaveLogger.h"
@@ -262,9 +263,7 @@ searchRegInfoList( const TDevRegInfoList *pRegList,
                                   uint32_t  uRegNum )
 {
 
-#ifdef USE_DEV_ASSERT
   DEV_ASSERT( nullptr == pRegList, GFC_ErrParam  );
-#endif
 
   // 用列表中的寄存器范围 粗判是否可能在此列表
   if( pRegList->RegBeg > uRegNum || pRegList->RegEnd < uRegNum )
@@ -329,9 +328,8 @@ const TDevRegInfoItem* DevIntf_GetRegInfo(uint32_t uRegNum)
 
   // 取当前功能类型接口
   const TDevFuncInterface *pInterface = DevFunc_CurFuncInterface();
-#ifdef USE_DEV_ASSERT
+
   DEV_ASSERT( nullptr == pInterface, GFC_ErrRegNum  );
-#endif
 
   const TDevRegInfoItem* pItem;
   // 在上次搜索成功的列表中搜索
@@ -375,14 +373,13 @@ const TDevRegInfoList* DevIntf_GetRegsList(TDevRegListClass regClass)
   const TDevFuncInterface *pFuncIntf = DevFunc_CurFuncInterface();
 
   uint32_t uRegClass = (uint32_t)regClass;
-#ifdef USE_DEV_ASSERT
+
   DEV_ASSERT( nullptr == pFuncIntf ||
               0       == pFuncIntf->InfoListsCount ||
               nullptr == pFuncIntf->InfoLists ||
               0       == uRegClass ||
               pFuncIntf->InfoListsCount < uRegClass,
               GFC_ErrParam  );
-#endif
 
   const TDevRegInfoList* pList   = pFuncIntf->InfoLists[ uRegClass - 1 ];
 
@@ -394,10 +391,10 @@ const TEventProperty* DevIntf_GetEvtProp(uint32_t uEvtType)
 {
 
   const TDevFuncInterface *pInterface = DevFunc_CurFuncInterface();
-#ifdef USE_DEV_ASSERT
+
   DEV_ASSERT( nullptr == pInterface || nullptr == pInterface->GetEventProperty,
               GFC_ErrParam );
-#endif
+
 
   return pInterface->GetEventProperty( uEvtType );
 }
@@ -890,10 +887,7 @@ uint32_t DevIntf_DevCfgLoadDefault(uint32_t uToken)
 void DevIntf_getDateTime(TDateTimeType *pDateTime)
 {
 
-#ifdef USE_DEV_ASSERT
    DEV_ASSERT( nullptr == pDateTime, GFC_ErrParam );
-#endif
-
 
 #ifndef __vmSIMULATOR__
    RTC_GetTime(pDateTime);
@@ -915,6 +909,41 @@ void DevIntf_getDateTime(TDateTimeType *pDateTime)
 #endif
 }
 //-----------------------------------------------------------------------------
+// 设置系统时间
+// 输入：
+//   pDateTime: 指向存贮当前时间的结构指针
+// 输出：(无)
+// 返回：(无)
+void DevIntf_setDateTime(TDateTimeType *pDateTime, uint32_t uToken)
+{
+
+   DEV_ASSERT( nullptr == pDateTime, GFC_ErrParam );
+
+#ifdef USE_DEV_ASSERT
+  DEV_ASSERT( TOKEN_INTF_OPERATE != uToken, GFC_ErrParam);
+#else
+  if( TOKEN_INTF_OPERATE != uToken )
+    return ;
+#endif
+
+#ifndef __vmSIMULATOR__
+   RTC_SetTime(pDateTime);
+#else
+    SYSTEMTIME stLocal;
+
+    stLocal.wYear         = pDateTime->Year;
+    stLocal.wMonth        = pDateTime->Month;
+    stLocal.wDay          = pDateTime->Day;
+    stLocal.wHour         = pDateTime->Hours;
+    stLocal.wMinute       = pDateTime->Minutes;
+    stLocal.wSecond       = pDateTime->Seconds;
+    stLocal.wMilliseconds = pDateTime->MilSeconds;
+
+    // 获取本地时间
+    SetLocalTime(&stLocal);
+#endif
+}
+//-----------------------------------------------------------------------------
 // 读取系统时间
 // 由vGUI调用
 // 从SFC中读取读取当前时间
@@ -925,10 +954,7 @@ void DevIntf_getDateTime(TDateTimeType *pDateTime)
 void DevIntf_ReadDateTime(uint16_t *puwTime)
 {
 
-#ifdef USE_DEV_ASSERT
    DEV_ASSERT( nullptr == puwTime, GFC_ErrParam );
-#endif
-
 
 #ifndef __vmSIMULATOR__
    TDateTimeType dt;

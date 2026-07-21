@@ -1088,29 +1088,30 @@ static void acceptEdit(void)
   uint32_t result = 0;
   uint16_t regNum = 0;
 
-  // Get register number from dialog
+  // Get register number and result based on dialog type
   switch (s_pState->dlgType) {
     case dtNumReg:
       regNum = static_cast<GNumRegDialog*>(s_pState->pDialog)->getRegNum();
       result = static_cast<GNumRegDialog*>(s_pState->pDialog)->getResult();
+      DevReg_Write(regNum, result);
       break;
+
     case dtIPAddress:
       regNum = static_cast<GIPAddressDialog*>(s_pState->pDialog)->getRegNum();
       result = static_cast<GIPAddressDialog*>(s_pState->pDialog)->getResult();
+      DevReg_Write(regNum, result);
       break;
+
     case dtDatetime:
-      regNum = static_cast<GDatetimeDialog*>(s_pState->pDialog)->getRegNum();
-      // Datetime returns TDateTimeType, need to handle differently
-      // For now, skip writing (TODO: implement proper datetime write)
-      destroyDialog();
-      _UpdateList();
-      return;
+      {
+        // Datetime uses special API: DevIntf_setDateTime
+        TDateTimeType dtResult = static_cast<GDatetimeDialog*>(s_pState->pDialog)->getResult();
+        DevIntf_setDateTime(&dtResult, TOKEN_INTF_OPERATE);
+      }
+      break;
+
     default:
       break;
-  }
-
-  if (regNum != 0) {
-    DevReg_Write(regNum, result);
   }
 
   // Cleanup and refresh
