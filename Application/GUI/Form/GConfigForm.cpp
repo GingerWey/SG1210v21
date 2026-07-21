@@ -841,6 +841,7 @@ static void _OnTouch(uint16_t action, int16_t x, int16_t y)
       int16_t adx = (0 <= dx) ? dx : (int16_t)(-dx);
       int16_t ady = (0 <= dy) ? dy : (int16_t)(-dy);
       if (CF_SWIPE_PX <= adx && ady < adx) {
+        // Horizontal swipe - cycle config type
         if (0 < dx) {
           _CycleNext();
         } else {
@@ -848,6 +849,25 @@ static void _OnTouch(uint16_t action, int16_t x, int16_t y)
         }
         if (nullptr == s_pState) {
           return;
+        }
+      } else if (adx < CF_SWIPE_PX && ady < CF_SWIPE_PX) {
+        // Phase 6: Tap (not swipe) in content area - trigger edit like ENTER key
+        if (x >= CF_CONTENT_X0 && x <= CF_CONTENT_X1 &&
+            y >= CF_CONTENT_Y0 && y < CF_CONTENT_Y0 + CF_VISIBLE * CF_ROW_H) {
+          uint16_t idx = s_pState->uTopItem +
+                         (uint16_t)((y - CF_CONTENT_Y0) / CF_ROW_H);
+          if (idx < s_pState->uCount) {
+            const CfgRow* pRow = _GetRow(idx);
+            if (nullptr != pRow) {
+              uint16_t regNum = (uint16_t)pRow->regNum;
+              // Check permission first
+              if (checkPermission(regNum)) {
+                // Permission granted, dispatch edit
+                dispatchEdit(regNum);
+              }
+              // If permission denied, checkPermission already created login dialog
+            }
+          }
         }
       }
       s_pState->touchActive = false;
