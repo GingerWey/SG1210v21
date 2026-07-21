@@ -894,24 +894,6 @@ static void _OnTick(uint32_t uNow)
 // Phase 6: Dialog Integration Helpers
 //=============================================================================
 
-// TODO: Move to DevIntf.h - temporary stubs for permission API
-static bool g_bPasswordOk = false;
-
-static bool GetPasswordOk(void)
-{
-  return g_bPasswordOk;
-}
-
-static void ClrPasswordOk(void)
-{
-  g_bPasswordOk = false;
-}
-
-static void SetPasswordOk(void)
-{
-  g_bPasswordOk = true;
-}
-
 /// Destroy active dialog and free resources
 static void destroyDialog(void)
 {
@@ -937,8 +919,9 @@ static void destroyDialog(void)
 /// Check if user has permission to edit (Phase 6: Permission gate)
 static bool checkPermission(uint16_t regNum)
 {
-  // Check if password is already validated
-  if (GetPasswordOk()) {
+  // Check if password is already validated (use Normal permission for now)
+  // TODO: Determine which permission level (Password1Ok vs Password2Ok) based on register
+  if (GetPassword1Ok) {
     return true;
   }
 
@@ -948,7 +931,7 @@ static bool checkPermission(uint16_t regNum)
 
   // Create login dialog based on user level
   // TODO: Determine login mode based on register or user level
-  // For now, use lmLoginNormal
+  // For now, use lmLoginNormal (Password1)
   GLoginDialog::GLoginMode mode = GLoginDialog::lmLoginNormal;
 
   // Create login dialog (no GDialogConfig needed for now - TODO: add resource)
@@ -1091,7 +1074,8 @@ static void acceptEdit(void)
     destroyDialog();
 
     // Check if password is now OK and we have pending edit
-    if (GetPasswordOk() && dtdEdit == s_pState->dlgTodo) {
+    // TODO: Check appropriate permission level based on login mode
+    if (GetPassword1Ok && dtdEdit == s_pState->dlgTodo) {
       uint16_t regNum = s_pState->pendingRegNum;
       s_pState->dlgTodo = dtdNone;
       s_pState->pendingRegNum = 0;
@@ -1176,8 +1160,9 @@ static void _Init(const void* argument)
   // Propare the device interface for config editing (spec 6.7.1).
   DevIntf_DevCfgEditPropare( TOKEN_INTF_OPERATE );
 
-  // Phase 6: Clear password permission on form entry
-  ClrPasswordOk();
+  // Phase 6: Clear password permissions on form entry
+  ClrPassword1Ok;
+  ClrPassword2Ok;
 }
 
 static void _Show(const void* argument)
@@ -1207,8 +1192,9 @@ static void _Close(const void* argument)
     s_pState = nullptr;
   }
 
-  // Phase 6: Clear password permission on form exit
-  ClrPasswordOk();
+  // Phase 6: Clear password permissions on form exit
+  ClrPassword1Ok;
+  ClrPassword2Ok;
 }
 
 static void _OnMessage(GM_MESSAGE* pMsg)
