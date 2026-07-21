@@ -988,6 +988,59 @@ static void createIPAddressDialog(uint16_t regNum)
   s_pState->dlgType = dtIPAddress;
 }
 
+/// Create listbox for enum register
+static void createListbox(uint16_t regNum)
+{
+  // Get enum option list via RINF_getRegEnumList
+  const uint16_t* pStrIds = nullptr;
+  int itemCount = RINF_getRegEnumList(regNum, pStrIds);
+
+  if (itemCount <= 0 || nullptr == pStrIds) {
+    // No enum list available, fallback to direct edit
+    return;
+  }
+
+  // Get current value
+  uint32_t curVal = DevReg_Read(regNum);
+  if (curVal >= (uint32_t)itemCount) {
+    curVal = 0;  // Clamp to valid range
+  }
+
+  // Allocate GListbox::GConfig
+  GListbox::GConfig* pCfg = static_cast<GListbox::GConfig*>(RAM_Malloc(sizeof(GListbox::GConfig)));
+  if (nullptr == pCfg) {
+    return;
+  }
+
+  // Fill config (position will be set by GListbox based on current selection)
+  pCfg->x = CF_CONTENT_X0;
+  pCfg->y = CF_CONTENT_Y0;
+  pCfg->w = CF_CONTENT_X1 - CF_CONTENT_X0 + 1;
+  pCfg->h = CF_VISIBLE * CF_ROW_H;
+  pCfg->margin = 2;
+  pCfg->drawMode = GUI_DRAWMODE_NORMAL;
+  pCfg->alignment = GUI_TA_LEFT | GUI_TA_VCENTER;
+  pCfg->ItemCount = (uint8_t)itemCount;
+  pCfg->pStrings = nullptr;
+  pCfg->pStrIds = pStrIds;
+
+  // TODO: Use proper GStyle from GDialogRes
+  // For now, use nullptr (GListbox should have default style)
+  GListbox* pListbox = static_cast<GListbox*>(RAM_Malloc(sizeof(GListbox)));
+  if (nullptr == pListbox) {
+    RAM_Free(pCfg);
+    return;
+  }
+
+  ::new (pListbox) GListbox(nullptr, pCfg, curVal);
+  pListbox->onShow();
+
+  s_pState->pDialog = pListbox;
+  s_pState->pDlgData = pCfg;
+  s_pState->dlgType = dtListbox;
+  s_pState->pendingRegNum = regNum;  // Store regNum for later write
+}
+
 /// Create datetime dialog
 static void createDatetimeDialog(uint16_t regNum)
 {
@@ -1035,8 +1088,8 @@ static void dispatchEdit(uint16_t regNum)
       break;
 
     case SIT_VAT_ENUM:
-      // TODO: Create listbox
-      // createListBox(regNum);
+      // Create listbox for enum selection
+      createListbox(regNum);
       break;
 
     case SIT_VAT_DATETIME:
@@ -1107,6 +1160,15 @@ static void acceptEdit(void)
         // Datetime uses special API: DevIntf_setDateTime
         TDateTimeType dtResult = static_cast<GDatetimeDialog*>(s_pState->pDialog)->getResult();
         DevIntf_setDateTime(&dtResult, TOKEN_INTF_OPERATE);
+      }
+      break;
+
+    case dtListbox:
+      {
+        // Listbox returns selected index
+        regNum = s_pState->pendingRegNum;
+        result = static_cast<GListbox*>(s_pState->pDialog)->getResult();
+        DevReg_Write(regNum, result);
       }
       break;
 
