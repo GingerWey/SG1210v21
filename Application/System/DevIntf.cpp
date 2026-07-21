@@ -677,9 +677,7 @@ uint32_t DevIntf_GetEditBlockNo(void)
 int DevIntf_ChangeEditHoldingBlock( uint32_t uToken, uint32_t uDest )
 {
 
-#ifdef USE_DEV_ASSERT
   DEV_ASSERT( NUM_HoldingBlocks <= uDest, GFC_ErrParam );
-#endif
 
 #ifdef USE_DEV_ASSERT
   DEV_ASSERT( TOKEN_INTF_OPERATE != uToken, GFC_ErrToken );
@@ -719,9 +717,7 @@ uint32_t DevIntf_GetActiveBlockNo(void)
 int DevIntf_ChangeActiveHoldingBlock( uint32_t uToken, uint32_t uDest )
 {
 
-#ifdef USE_DEV_ASSERT
   DEV_ASSERT( NUM_HoldingBlocks <= uDest, GFC_ErrParam );
-#endif
 
 #ifdef USE_DEV_ASSERT
   DEV_ASSERT( TOKEN_INTF_OPERATE != uToken, GFC_ErrToken );
@@ -792,10 +788,7 @@ uint32_t DevIntf_HoldingLoadDefault(uint32_t uToken)
 int DevIntf_HoldingCopyTo( uint32_t uToken, uint32_t uDest )
 {
 
-#ifdef USE_DEV_ASSERT
   DEV_ASSERT( NUM_HoldingBlocks <= uDest, GFC_ErrParam );
-    return -1;
-#endif
 
 #ifdef USE_DEV_ASSERT
   DEV_ASSERT( TOKEN_INTF_OPERATE != uToken, GFC_ErrToken );

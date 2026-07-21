@@ -139,31 +139,31 @@ static uint32_t _ReadFuncRegs(uint32_t uRegNum)
       break;
       }
 
-     case REG_PASSWORD:
+     case REG_CFG_PASSWORD:
       {
       uRes = DevConfig.Password;
       break;
       }
 
-    case REG_FN_PASSWORD:
+    case REG_FN_CFG_PASSWORD:
       {
       uRes = DevCfgForEdit.Password;
       break;
       }
 
-     case REG_PASSWORD2:
+     case REG_ADM_PASSWORD:
       {
       uRes = DevConfig.Password2;
       break;
       }
 
-    case REG_FN_PASSWORD2:
+    case REG_FN_ADM_PASSWORD:
       {
       uRes = DevCfgForEdit.Password2;
       break;
       }
 
-//    case REG_PASSWORDx:
+//    case REG_DYNA_PASSWORD:
 //      {
 //      // 获取动态口令码
 //      uRes = DynaPswd_GetApplyCode();
@@ -286,64 +286,62 @@ static uint32_t _ReadFuncRegs(uint32_t uRegNum)
       break;
     }
 
-#ifndef __vmSIMULATOR__
     // 日期时间
     case REG_FN_DATETIME:
       {
-      RTC_GetTime( &DevCache.DateTime );
+      DevIntf_getDateTime( &DevCache.DateTime );
       uRes = (uint32_t)(&DevCache.DateTime);
       break;
       }
 
     case REG_DATE_YEAR:
       {
-      RTC_GetTime( &DevCache.DateTime );
+      DevIntf_getDateTime( &DevCache.DateTime );
       uRes = DevCache.DateTime.Year;
       break;
       }
 
     case REG_DATE_MONTH:
       {
-      RTC_GetTime( &DevCache.DateTime );
+      DevIntf_getDateTime( &DevCache.DateTime );
       uRes = DevCache.DateTime.Month;
       break;
       }
 
     case REG_DATE_DAY:
       {
-      RTC_GetTime( &DevCache.DateTime );
+      DevIntf_getDateTime( &DevCache.DateTime );
       uRes = DevCache.DateTime.Day;
       break;
       }
 
     case REG_TIME_HOUR:
       {
-      RTC_GetTime( &DevCache.DateTime );
+      DevIntf_getDateTime( &DevCache.DateTime );
       uRes = DevCache.DateTime.Hours;
       break;
       }
 
     case REG_TIME_MINUTE:
       {
-      RTC_GetTime( &DevCache.DateTime );
+      DevIntf_getDateTime( &DevCache.DateTime );
       uRes = DevCache.DateTime.Minutes;
       break;
       }
 
     case REG_TIME_SECOND:
       {
-      RTC_GetTime( &DevCache.DateTime );
+      DevIntf_getDateTime( &DevCache.DateTime );
       uRes = DevCache.DateTime.Seconds;
       break;
       }
 
     case REG_TIME_MSECOND:
       {
-      RTC_GetTime( &DevCache.DateTime );
+      DevIntf_getDateTime( &DevCache.DateTime );
       uRes = DevCache.DateTime.MilSeconds;
       break;
       }
-#endif
 
     //#ifndef __vmSIMULATOR__
 //    // 以太网1配置
@@ -1097,39 +1095,39 @@ static void _WriteFuncRegs(uint32_t uRegNum, uint32_t uValue)
   // 口令验证不需要权限
   switch( uRegNum )
     {
-     case REG_PASSWORD:
+     case REG_CFG_PASSWORD:
       {
       if( uValue == DevConfig.Password
 #ifdef SUPER_PASSWORD
           || SUPER_PASSWORD == uValue     // 后门
 #endif
          )
-        SetPassword1Ok;
+        SetCfgPermission ;
       else
-        ClrPassword1Ok;
+        ClrCfgPermission ;
       break;
       }
 
-     case REG_PASSWORD2:
+     case REG_ADM_PASSWORD:
       {
       if( uValue == DevConfig.Password2
 #ifdef SUPER_PASSWORD
           || SUPER_PASSWORD2 == uValue   // 后门
 #endif
         )
-        SetPassword2Ok;
+        SetAdmPermission ;
       else
-        ClrPassword2Ok;
+        ClrAdmPermission ;
       break;
       }
 
-//     case REG_PASSWORDx:
+//     case REG_DYNA_PASSWORD:
 //      {
 //      // 验证态口令
 //      if( DynaPswd_Verify( uValue >> 16, uValue & 0xFFFF ) == true )
-//        SetPasswordxOk;
+//        SetDynPermission;
 //      else
-//        ClrPasswordxOk;
+//        ClrDynPermission;
 
 //      break;
 //      }
@@ -1256,7 +1254,7 @@ static void _WriteFuncRegs(uint32_t uRegNum, uint32_t uValue)
       break;
       }
 
-    case REG_FN_PASSWORD:
+    case REG_FN_CFG_PASSWORD:
       {
       if( DevCfgForEdit.Password != uValue )
         {
@@ -1267,7 +1265,7 @@ static void _WriteFuncRegs(uint32_t uRegNum, uint32_t uValue)
       break;
       }
 
-    case REG_FN_PASSWORD2:
+    case REG_FN_ADM_PASSWORD:
       {
       if( DevCfgForEdit.Password2 != uValue )
         {
@@ -1430,15 +1428,14 @@ static void _WriteFuncRegs(uint32_t uRegNum, uint32_t uValue)
           break;
       }
 
-#ifndef __vmSIMULATOR__
+#if 0
     // 日期时间
     case REG_FN_DATETIME:
       {
-      RTC_SetTime( &DevCache.DateTime );
+      DevIntf_setDateTime( &DevCache.DateTime );
 
       break;
       }
-
     case REG_DATE_YEAR:
       {
       DevCache.DateTime.Year = uValue;

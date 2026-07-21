@@ -130,14 +130,14 @@ extern "C" {
 // 显示和编辑类型
 #define SIT_VAT_SHIFT     25
 #define SIT_VAT_MASK      (0x0F << SIT_VAT_SHIFT)
-#define SIT_VAT_INT       (0x00 << SIT_VAT_SHIFT)  // 整数
-#define SIT_VAT_HEX       (0x01 << SIT_VAT_SHIFT)  // 16进制
-#define SIT_VAT_REAL      (0x02 << SIT_VAT_SHIFT)  // 实数 2026.7.21
-#define SIT_VAT_BIN       (0x03 << SIT_VAT_SHIFT)  // 二值状态
-#define SIT_VAT_ENUM      (0x04 << SIT_VAT_SHIFT)  // 枚举
-#define SIT_VAT_DATETIME  (0x05 << SIT_VAT_SHIFT)  // 日期时间
-#define SIT_VAT_PASSWORD  (0x06 << SIT_VAT_SHIFT)  // 密码
-#define SIT_VAT_IPADDRv4  (0x07 << SIT_VAT_SHIFT)  // IPv4地址
+#define SIT_VAT_BIN       (0x01 << SIT_VAT_SHIFT)  // 二值状态
+#define SIT_VAT_ENUM      (0x02 << SIT_VAT_SHIFT)  // 枚举
+#define SIT_VAT_INT       (0x03 << SIT_VAT_SHIFT)  // 整数
+#define SIT_VAT_HEX       (0x04 << SIT_VAT_SHIFT)  // 16进制
+#define SIT_VAT_REAL      (0x05 << SIT_VAT_SHIFT)  // 实数 2026.7.21
+#define SIT_VAT_DATETIME  (0x06 << SIT_VAT_SHIFT)  // 日期时间
+#define SIT_VAT_PASSWORD  (0x07 << SIT_VAT_SHIFT)  // 密码
+#define SIT_VAT_IPADDRv4  (0x08 << SIT_VAT_SHIFT)  // IPv4地址
 #define SIT_GetVType(x)   ((x) & SIT_VAT_MASK)
 // 访问
 #define SIT_RDOnly        (0x80000000)  // 只读

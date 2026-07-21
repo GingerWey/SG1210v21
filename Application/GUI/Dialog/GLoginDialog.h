@@ -40,7 +40,7 @@ public:
   virtual const char* getTitle() const;
 
   // E-11 CLARIFIED: GLoginDialog has no getResult() - writes password
-  // to register in accept() for security; Form checks GetPassword1Ok flag
+  // to register in accept() for security; Form checks GetCfgPermission  flag
 
 protected:
   virtual void accept();

@@ -352,6 +352,9 @@ static constexpr TMultiLangStrings listMultiStrings[] =
   //,{ idCtrlUnit03,        "秒",                        "Sec"                }
   //,{ idCtrlUnit04,        "分",                        "Min"                }
 
+// DateTime
+  ,{ idDateTimeName01,    "日期时间",                   "Date & Time"         }
+
 //  ,{ idUartCfg0,     szUartName(1) szUARTCfgName01, szEngUartName(1) szEngUARTCfgName01 }
 //  ,{ idUartCfg1,     szUartName(1) szUARTCfgName02, szEngUartName(1) szEngUARTCfgName02 }
 //  ,{ idUartCfg2,     szUartName(1) szUARTCfgName03, szEngUartName(1) szEngUARTCfgName03 }

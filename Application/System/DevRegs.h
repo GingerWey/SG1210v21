@@ -370,20 +370,20 @@ extern "C" {
   #define ClrEditEnable           (DevCache.DeviceState[REG_EditEnable - REG_DEVSTATE] = STATE_FALSE)
   #define SetEditDisable          ClrEditEnable
 
-#define REG_Password1Ok           (REG_EDIT_STATE + 2)        // 口令1正确
-  #define GetPassword1Ok          (STATE_TRUE == DevCache.DeviceState[REG_Password1Ok - REG_DEVSTATE])
-  #define SetPassword1Ok          (DevCache.DeviceState[REG_Password1Ok - REG_DEVSTATE] = STATE_TRUE)
-  #define ClrPassword1Ok          (DevCache.DeviceState[REG_Password1Ok - REG_DEVSTATE] = STATE_FALSE)
+#define REG_CfgPermission           (REG_EDIT_STATE + 2)        // 配置授权
+  #define GetCfgPermission        (STATE_TRUE == DevCache.DeviceState[REG_CfgPermission - REG_DEVSTATE])
+  #define SetCfgPermission        (DevCache.DeviceState[REG_CfgPermission - REG_DEVSTATE] = STATE_TRUE)
+  #define ClrCfgPermission        (DevCache.DeviceState[REG_CfgPermission - REG_DEVSTATE] = STATE_FALSE)
 
-#define REG_Password2Ok           (REG_EDIT_STATE + 3)        // 口令2正确
-  #define GetPassword2Ok          (STATE_TRUE == DevCache.DeviceState[REG_Password2Ok - REG_DEVSTATE])
-  #define SetPassword2Ok          (DevCache.DeviceState[REG_Password2Ok - REG_DEVSTATE] = STATE_TRUE)
-  #define ClrPassword2Ok          (DevCache.DeviceState[REG_Password2Ok - REG_DEVSTATE] = STATE_FALSE)
+#define REG_AdmPermission         (REG_EDIT_STATE + 3)        // 管理授权
+  #define GetAdmPermission        (STATE_TRUE == DevCache.DeviceState[REG_AdmPermission - REG_DEVSTATE])
+  #define SetAdmPermission        (DevCache.DeviceState[REG_AdmPermission - REG_DEVSTATE] = STATE_TRUE)
+  #define ClrAdmPermission        (DevCache.DeviceState[REG_AdmPermission - REG_DEVSTATE] = STATE_FALSE)
 
-#define REG_PasswordxOk           (REG_EDIT_STATE + 4)        // 口令x正确(工厂口令)
-  #define GetPasswordxOk          (STATE_TRUE == DevCache.DeviceState[REG_PasswordxOk - REG_DEVSTATE])
-  #define SetPasswordxOk          (DevCache.DeviceState[REG_PasswordxOk - REG_DEVSTATE] = STATE_TRUE)
-  #define ClrPasswordxOk          (DevCache.DeviceState[REG_PasswordxOk - REG_DEVSTATE] = STATE_FALSE)
+#define REG_DynPermission         (REG_EDIT_STATE + 4)        // 动态授权(工厂口令)
+  #define GetDynPermission        (STATE_TRUE == DevCache.DeviceState[REG_DynPermission - REG_DEVSTATE])
+  #define SetDynPermission        (DevCache.DeviceState[REG_DynPermission - REG_DEVSTATE] = STATE_TRUE)
+  #define ClrDynPermission        (DevCache.DeviceState[REG_DynPermission - REG_DEVSTATE] = STATE_FALSE)
 
 #define REG_CTRL_STATE            (REG_EDIT_STATE + 5)
 #define REG_Rly_RmtCtrl           (REG_CTRL_STATE + 0)        // 当前遥控序号(1~N)
@@ -675,13 +675,15 @@ extern "C" {
 #define REG_LANGUAGE              (REG_FN_DEV_CONFIG + 9)  // 界面语言
 #define REG_FN_Language           (REG_FN_DEV_CONFIG + 10) // 界面语言(用于编辑)
 
-#define REG_PASSWORD              (REG_FN_DEV_CONFIG + 11) // 操作口令(写操作用于检验口令，结果在REG_Password1Ok)
-#define REG_FN_PASSWORD           (REG_FN_DEV_CONFIG + 12) // 操作口令(用于编辑)
+#define REG_CFG_PASSWORD          (REG_FN_DEV_CONFIG + 11) // 配置口令(写操作用于检验口令，结果在REG_CfgPermission)
+#define REG_FN_CFG_PASSWORD       (REG_FN_DEV_CONFIG + 12) // 配置口令(用于编辑)
 
-#define REG_PASSWORD2             (REG_FN_DEV_CONFIG + 13) // 配置口令
-#define REG_FN_PASSWORD2          (REG_FN_DEV_CONFIG + 14) // 配置口令(用于编辑)
+#define REG_ADM_PASSWORD          (REG_FN_DEV_CONFIG + 13) // 管理口令(写操作用于检验口令，结果在REG_AdmPermission)
+#define REG_FN_ADM_PASSWORD       (REG_FN_DEV_CONFIG + 14) // 管理口令(用于编辑)
 
-#define REG_PASSWORDx             (REG_FN_DEV_CONFIG + 15) // 动态口令
+// 读操作：获得授权码
+// 写操作：校验动态口令，结果在REG_DynPermission
+#define REG_DYNA_PASSWORD         (REG_FN_DEV_CONFIG + 15) // 动态口令
 
 // 
 #define REG_FN_DEV_ADDR           (REG_FN_DEV_CONFIG + 20) // 装置地址

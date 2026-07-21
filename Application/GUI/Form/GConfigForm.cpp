@@ -474,56 +474,134 @@ static void _FlushForm(void)
 static void _FormatValue(const CfgRow* pRow, const TDevRegInfoItem* pInfo,
                          char* pBuf, int nLen)
 {
-  if (0 >= nLen) {
-    return;
-  }
+
+  DEV_ASSERT(0 >= nLen || nullptr == pBuf  || nullptr == pRow || nullptr == pInfo, GFC_ErrParam);
+
   pBuf[0] = 0;
   uint32_t uVal   = DevReg_Read(pRow->regNum);
   uint32_t uVType = SIT_GetVType(pInfo->Property);
 
-  if (SIT_VAT_ENUM == uVType) {
-//    // Enum text: register value indexes the option list (spec 6.6)
-//    if (nullptr == pRow->pEnum || 0 == pRow->enumCount) {
-//      return;
-//    }
-//    uint8_t idx = (uint8_t)uVal;
-//    if (pRow->enumCount <= idx) {
-//      idx = (uint8_t)(pRow->enumCount - 1);
-//    }
-//    const char* pTxt = GetMultiLangString(pRow->pEnum[idx]);
-    // Wey. 2026.7.21 
-    // uses RINF_getRegEnumList
-    const uint16_t* pEnum;
-    const int enumCount = RINF_getRegEnumList(pRow->regNum, pEnum );
-    if( nullptr == pEnum || 0 == enumCount ) {
-      return ;
-    }
-    uint8_t idx = (uint8_t)uVal;
-    if (enumCount <= idx) {
-      idx = (uint8_t)(enumCount - 1);
-    }
-    const char* pTxt = GetMultiLangString(pEnum[idx]);
-    
-    if (nullptr != pTxt) {
-      int pos = snprintf(pBuf, nLen, "%s", pTxt);
-      // Append dimension if present (e.g., REG_UART1_BAUDRATE -> "9600 bps")
-      const char* pDim = RINF_GetDIMNameEx(pInfo);
-      if (nullptr != pDim && 0 < pos && nLen > pos) {
-        snprintf(pBuf + pos, nLen - pos, " %s", pDim);
+  int pos = 0;
+  switch( uVType ) {
+    case SIT_VAT_BIN:
+      // BIN registers draw a switch image in _DrawItem; no text here.
+      return;
+
+    case SIT_VAT_ENUM: 
+      {
+      // Enum text: register value indexes the option list (spec 6.6)
+      // Wey. 2026.7.21 
+      // uses RINF_getRegEnumList
+      
+      // get register enum list and count
+      const uint16_t* pEnum;
+      const int enumCount = RINF_getRegEnumList(pRow->regNum, pEnum );
+      if( nullptr == pEnum || 0 == enumCount ) {
+        return ;
       }
-    }
-    return;
+
+      uint8_t idx = (uint8_t)uVal;
+      if (enumCount <= idx) {
+        idx = (uint8_t)(enumCount - 1);
+        }
+
+      // Get the multi-language string for the enum option 
+      // and format it into pBuf
+      const char* pTxt = GetMultiLangString(pEnum[idx]);
+      if (nullptr != pTxt) {
+        pos = snprintf(pBuf, nLen, "%s", pTxt);
+        }
+      break;
+      }
+
+    case SIT_VAT_INT:
+      {
+      if( 0 != (pInfo->Property & SIT_SIGNED)) {
+        // signed integer: apply scale factor (spec 6.7.2) and print as decimal
+        int32_t sVal = (int32_t)uVal;
+        if( 1 < pInfo->Scale ) {
+          sVal = sVal / pInfo->Scale;
+          } else if( -1 > pInfo->Scale ) {
+          sVal = sVal * (-pInfo->Scale);
+          }
+        pos = snprintf(pBuf, nLen, "%d", sVal);
+        } 
+      else {
+        // Unsigned integer: apply scale factor (spec 6.7.2) and print as decimal
+        if( 1 < pInfo->Scale ) {
+          uVal = uVal / pInfo->Scale;
+          } else if( -1 > pInfo->Scale ) {
+          uVal = uVal * (-pInfo->Scale);
+          }
+ 
+        pos = snprintf(pBuf, nLen, "%u", (unsigned)uVal);
+        }
+      break;
+      }
+
+    case SIT_VAT_HEX:
+      {
+      pos = snprintf(pBuf, nLen, "0x%08X", (unsigned)uVal);
+      break;
+      }
+
+    case SIT_VAT_REAL: 
+      {
+      float fVal;
+      if( 0 != (pInfo->Property & SIT_SIGNED) ) {
+        fVal = (float)((int)uVal);
+      } else {
+        fVal = (float)(uVal);
+      }
+
+      // Scale
+      if( 1 < pInfo->Scale ) {
+        fVal = fVal / pInfo->Scale;
+      } else if( -1 > pInfo->Scale ) {
+        fVal = fVal * (-pInfo->Scale);
+      }
+ 
+      pos = snprintf(pBuf, nLen, "%.*f", pInfo->Decimal, fVal);
+      break;
+      }
+
+    case SIT_VAT_DATETIME:
+      {
+      TDateTimeType dt;
+      DevIntf_getDateTime(&dt);
+      snprintf(pBuf, nLen, "%02u:%02u:%02u",
+               dt.Hours, dt.Minutes, dt.Seconds);
+      return ;
+      }
+
+    case SIT_VAT_PASSWORD:
+      {
+      snprintf(pBuf, nLen, "****" );
+      return ;
+      }
+
+    case SIT_VAT_IPADDRv4:
+      {
+      snprintf(pBuf, nLen, "%2X.%2X.%2X.%2X",
+               (uVal >> 24) & 0xFF,
+               (uVal >> 16) & 0xFF,
+               (uVal >> 8) & 0xFF,
+               uVal & 0xFF);
+      return ;
+      }
+
+    default:
+      {
+      break;
+      }
   }
 
-  // Numeric value + 1-space + dimension (improvement #4).
-  // Config registers are INT/HEX (no REAL group); note SIT_VAT_BIN and
-  // SIT_VAT_REAL share the same encoding, and BIN is handled as a switch
-  // image in _DrawItem before this runs.
-  int pos = snprintf(pBuf, nLen, "%u", (unsigned)uVal);
+  // String + 1-space + dimension (improvement #4).
+  // Append dimension if present (e.g., REG_UART1_BAUDRATE -> "9600 bps")
   const char* pDim = RINF_GetDIMNameEx(pInfo);
   if (nullptr != pDim && 0 < pos && nLen > pos) {
     snprintf(pBuf + pos, nLen - pos, " %s", pDim);
-  }
+    }
 }
 
 /// Draw one config row: name (left) + value/switch (right).
@@ -920,13 +998,15 @@ static void _OnTick(uint32_t uNow)
 /// Destroy active dialog and free resources
 static void destroyDialog(void)
 {
+
   if (nullptr == s_pState || nullptr == s_pState->pDialog) {
     return;
   }
 
   // Close and destroy dialog
   s_pState->pDialog->onClose();
-  s_pState->pDialog->~GWidget();  // Virtual destructor dispatches to GDialog/GListbox
+  // Virtual destructor dispatches to GDialog/GListbox
+  s_pState->pDialog->~GWidget();  
   RAM_Free(s_pState->pDialog);
   s_pState->pDialog = nullptr;
 
@@ -937,14 +1017,15 @@ static void destroyDialog(void)
   }
 
   s_pState->dlgType = dtNone;
+  s_pState->dlgTodo = dtdNone;
+  s_pState->pendingRegNum = 0;
 }
 
 /// Check if user has permission to edit (Phase 6: Permission gate)
 static bool checkPermission(uint16_t regNum)
 {
   // Check if password is already validated (use Normal permission for now)
-  // TODO: Determine which permission level (Password1Ok vs Password2Ok) based on register
-  if (GetPassword1Ok) {
+  if (true == GetCfgPermission) {
     return true;
   }
 
@@ -952,24 +1033,21 @@ static bool checkPermission(uint16_t regNum)
   s_pState->pendingRegNum = regNum;
   s_pState->dlgTodo = dtdEdit;
 
-  // Create login dialog based on user level
-  // TODO: Determine login mode based on register or user level
+  // Create login dialog try to get config permission (Phase 6: Permission gate)
   // For now, use lmLoginNormal (Password1)
   GLoginDialog::GLoginMode mode = GLoginDialog::lmLoginNormal;
 
   // Create login dialog with resource configuration
   GLoginDialog* pDlg = static_cast<GLoginDialog*>(RAM_Malloc(sizeof(GLoginDialog)));
-  if (nullptr == pDlg) {
-    return false;
-  }
+  DEV_ASSERT(nullptr == pDlg, GFC_OutOfMem);
 
   ::new (pDlg) GLoginDialog(&g_loginDialogConfig, (void*)(uintptr_t)mode);
   pDlg->Init();
   pDlg->onShow();
 
-  s_pState->pDialog = pDlg;
+  s_pState->pDialog  = pDlg;
   s_pState->pDlgData = nullptr;
-  s_pState->dlgType = dtLogin;
+  s_pState->dlgType  = dtLogin;
 
   return false;  // Permission not yet granted
 }
@@ -979,9 +1057,7 @@ static void createNumberDialog(uint16_t regNum)
 {
   // Create number dialog with resource configuration
   GNumRegDialog* pDlg = static_cast<GNumRegDialog*>(RAM_Malloc(sizeof(GNumRegDialog)));
-  if (nullptr == pDlg) {
-    return;
-  }
+  DEV_ASSERT(nullptr == pDlg, GFC_OutOfMem);
 
   ::new (pDlg) GNumRegDialog(&g_numRegDialogConfig, (void*)(uintptr_t)regNum);
   pDlg->Init();
@@ -990,6 +1066,7 @@ static void createNumberDialog(uint16_t regNum)
   s_pState->pDialog = pDlg;
   s_pState->pDlgData = nullptr;
   s_pState->dlgType = dtNumReg;
+  s_pState->dlgTodo = dtdNone;
 }
 
 /// Create IP address dialog
@@ -997,17 +1074,16 @@ static void createIPAddressDialog(uint16_t regNum)
 {
   // Create IP address dialog with resource configuration
   GIPAddressDialog* pDlg = static_cast<GIPAddressDialog*>(RAM_Malloc(sizeof(GIPAddressDialog)));
-  if (nullptr == pDlg) {
-    return;
-  }
+  DEV_ASSERT(nullptr == pDlg, GFC_OutOfMem);
 
   ::new (pDlg) GIPAddressDialog(&g_ipDialogConfig, (void*)(uintptr_t)regNum);
   pDlg->Init();
   pDlg->onShow();
 
-  s_pState->pDialog = pDlg;
+  s_pState->pDialog  = pDlg;
   s_pState->pDlgData = nullptr;
-  s_pState->dlgType = dtIPAddress;
+  s_pState->dlgType  = dtIPAddress;
+  s_pState->dlgTodo  = dtdNone;
 }
 
 /// Create listbox for enum register
@@ -1030,9 +1106,7 @@ static void createListbox(uint16_t regNum)
 
   // Allocate GListbox::GConfig
   GListbox::GConfig* pCfg = static_cast<GListbox::GConfig*>(RAM_Malloc(sizeof(GListbox::GConfig)));
-  if (nullptr == pCfg) {
-    return;
-  }
+  DEV_ASSERT(nullptr == pCfg, GFC_OutOfMem);
 
   // Fill config (position will be set by GListbox based on current selection)
   pCfg->x = CF_CONTENT_X0;
@@ -1048,17 +1122,15 @@ static void createListbox(uint16_t regNum)
 
   // Create GListbox with resource style
   GListbox* pListbox = static_cast<GListbox*>(RAM_Malloc(sizeof(GListbox)));
-  if (nullptr == pListbox) {
-    RAM_Free(pCfg);
-    return;
-  }
+  DEV_ASSERT(nullptr == pListbox, GFC_OutOfMem);
 
   ::new (pListbox) GListbox(&g_listboxStyle, pCfg, curVal);
   pListbox->onShow();
 
-  s_pState->pDialog = pListbox;
+  s_pState->dlgTodo  = dtdNone;
+  s_pState->pDialog  = pListbox;
   s_pState->pDlgData = pCfg;
-  s_pState->dlgType = dtListbox;
+  s_pState->dlgType  = dtListbox;
   s_pState->pendingRegNum = regNum;  // Store regNum for later write
 }
 
@@ -1067,17 +1139,16 @@ static void createDatetimeDialog(uint16_t regNum)
 {
   // Create datetime dialog with resource configuration
   GDatetimeDialog* pDlg = static_cast<GDatetimeDialog*>(RAM_Malloc(sizeof(GDatetimeDialog)));
-  if (nullptr == pDlg) {
-    return;
-  }
+  DEV_ASSERT(nullptr == pDlg, GFC_OutOfMem);
 
   ::new (pDlg) GDatetimeDialog(&g_datetimeDialogConfig, (void*)(uintptr_t)regNum);
   pDlg->Init();
   pDlg->onShow();
 
-  s_pState->pDialog = pDlg;
+  s_pState->dlgTodo  = dtdNone;
+  s_pState->pDialog  = pDlg;
   s_pState->pDlgData = nullptr;
-  s_pState->dlgType = dtDatetime;
+  s_pState->dlgType  = dtDatetime;
 }
 
 /// Type dispatch - create appropriate dialog based on register type
@@ -1147,9 +1218,8 @@ static void acceptEdit(void)
   if (dtLogin == s_pState->dlgType) {
     destroyDialog();
 
-    // Check if password is now OK and we have pending edit
-    // TODO: Check appropriate permission level based on login mode
-    if (GetPassword1Ok && dtdEdit == s_pState->dlgTodo) {
+    // Check if config permission is now OK and we have pending edit
+    if (true == GetCfgPermission  && dtdEdit == s_pState->dlgTodo) {
       uint16_t regNum = s_pState->pendingRegNum;
       s_pState->dlgTodo = dtdNone;
       s_pState->pendingRegNum = 0;
@@ -1210,8 +1280,6 @@ static void cancelEdit(void)
   }
 
   destroyDialog();
-  s_pState->dlgTodo = dtdNone;
-  s_pState->pendingRegNum = 0;
 }
 
 //=============================================================================
@@ -1226,9 +1294,6 @@ static void _Init(const void* argument)
 
   s_pState = static_cast<TConfigFormState*>(RAM_Malloc(sizeof(TConfigFormState)));
   DEV_ASSERT(nullptr == s_pState, GFC_OutOfMem);
-  if (nullptr == s_pState) {
-    return;
-  }
 
   memset(s_pState, 0, sizeof(TConfigFormState));
   // Initial config type from the menu argument; default to cgtLogic.
@@ -1245,8 +1310,8 @@ static void _Init(const void* argument)
   DevIntf_DevCfgEditPropare( TOKEN_INTF_OPERATE );
 
   // Phase 6: Clear password permissions on form entry
-  ClrPassword1Ok;
-  ClrPassword2Ok;
+  ClrCfgPermission ;
+  ClrAdmPermission ;
 }
 
 static void _Show(const void* argument)
@@ -1277,8 +1342,8 @@ static void _Close(const void* argument)
   }
 
   // Phase 6: Clear password permissions on form exit
-  ClrPassword1Ok;
-  ClrPassword2Ok;
+  ClrCfgPermission ;
+  ClrAdmPermission ;
 }
 
 static void _OnMessage(GM_MESSAGE* pMsg)

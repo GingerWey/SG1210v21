@@ -30,16 +30,16 @@ void GLoginDialog::Init()
 {
   switch( m_mode ) {
     case lmLoginNormal:
-      m_uRegNum = REG_PASSWORD;
+      m_uRegNum = REG_CFG_PASSWORD;
       break;
     case lmLoginAdmin:
-      m_uRegNum = REG_PASSWORD2;
+      m_uRegNum = REG_ADM_PASSWORD;
       break;
     case lmPassword:
-      m_uRegNum = REG_FN_PASSWORD;
+      m_uRegNum = REG_FN_CFG_PASSWORD;
       break;
     case lmDynaPassword:
-      m_uRegNum = REG_PASSWORD;
+      m_uRegNum = REG_DYNA_PASSWORD;
       break;
     default:
       m_uRegNum = 0;
