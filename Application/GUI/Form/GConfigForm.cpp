@@ -934,14 +934,13 @@ static bool checkPermission(uint16_t regNum)
   // For now, use lmLoginNormal (Password1)
   GLoginDialog::GLoginMode mode = GLoginDialog::lmLoginNormal;
 
-  // Create login dialog (no GDialogConfig needed for now - TODO: add resource)
+  // Create login dialog with resource configuration
   GLoginDialog* pDlg = static_cast<GLoginDialog*>(RAM_Malloc(sizeof(GLoginDialog)));
   if (nullptr == pDlg) {
     return false;
   }
 
-  // TODO: Use proper GDialogConfig from GDialogRes
-  ::new (pDlg) GLoginDialog(nullptr, (void*)(uintptr_t)mode);
+  ::new (pDlg) GLoginDialog(&g_loginDialogConfig, (void*)(uintptr_t)mode);
   pDlg->Init();
   pDlg->onShow();
 
@@ -955,13 +954,13 @@ static bool checkPermission(uint16_t regNum)
 /// Create number register dialog (INT/HEX/REAL)
 static void createNumberDialog(uint16_t regNum)
 {
-  // Create number dialog (TODO: use proper GDialogConfig from GDialogRes)
+  // Create number dialog with resource configuration
   GNumRegDialog* pDlg = static_cast<GNumRegDialog*>(RAM_Malloc(sizeof(GNumRegDialog)));
   if (nullptr == pDlg) {
     return;
   }
 
-  ::new (pDlg) GNumRegDialog(nullptr, (void*)(uintptr_t)regNum);
+  ::new (pDlg) GNumRegDialog(&g_numRegDialogConfig, (void*)(uintptr_t)regNum);
   pDlg->Init();
   pDlg->onShow();
 
@@ -973,13 +972,13 @@ static void createNumberDialog(uint16_t regNum)
 /// Create IP address dialog
 static void createIPAddressDialog(uint16_t regNum)
 {
-  // Create IP address dialog (TODO: use proper GDialogConfig from GDialogRes)
+  // Create IP address dialog with resource configuration
   GIPAddressDialog* pDlg = static_cast<GIPAddressDialog*>(RAM_Malloc(sizeof(GIPAddressDialog)));
   if (nullptr == pDlg) {
     return;
   }
 
-  ::new (pDlg) GIPAddressDialog(nullptr, (void*)(uintptr_t)regNum);
+  ::new (pDlg) GIPAddressDialog(&g_ipDialogConfig, (void*)(uintptr_t)regNum);
   pDlg->Init();
   pDlg->onShow();
 
@@ -1024,15 +1023,14 @@ static void createListbox(uint16_t regNum)
   pCfg->pStrings = nullptr;
   pCfg->pStrIds = pStrIds;
 
-  // TODO: Use proper GStyle from GDialogRes
-  // For now, use nullptr (GListbox should have default style)
+  // Create GListbox with resource style
   GListbox* pListbox = static_cast<GListbox*>(RAM_Malloc(sizeof(GListbox)));
   if (nullptr == pListbox) {
     RAM_Free(pCfg);
     return;
   }
 
-  ::new (pListbox) GListbox(nullptr, pCfg, curVal);
+  ::new (pListbox) GListbox(&g_listboxStyle, pCfg, curVal);
   pListbox->onShow();
 
   s_pState->pDialog = pListbox;
@@ -1044,13 +1042,13 @@ static void createListbox(uint16_t regNum)
 /// Create datetime dialog
 static void createDatetimeDialog(uint16_t regNum)
 {
-  // Create datetime dialog (TODO: use proper GDialogConfig from GDialogRes)
+  // Create datetime dialog with resource configuration
   GDatetimeDialog* pDlg = static_cast<GDatetimeDialog*>(RAM_Malloc(sizeof(GDatetimeDialog)));
   if (nullptr == pDlg) {
     return;
   }
 
-  ::new (pDlg) GDatetimeDialog(nullptr, (void*)(uintptr_t)regNum);
+  ::new (pDlg) GDatetimeDialog(&g_datetimeDialogConfig, (void*)(uintptr_t)regNum);
   pDlg->Init();
   pDlg->onShow();
 

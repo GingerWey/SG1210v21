@@ -1,17 +1,20 @@
 ﻿//-----------------------------------------------------------------------------
 /*
  File        : GDialogRes.cpp
- Version     : V1.00
+ Version     : V2.00
  By          : Wey@SilverGrid
 
- Description : Dialog resource configurations for GConfigDialog
+ Description : Dialog resource configurations for GConfigForm
                - DigitalKeyboard key grid
                - GNumRegDialog (INT/HEX/REAL register editing)
                - GLoginDialog (password input)
                - GIPAddressDialog (IPv4 address editing)
                - GDatetimeDialog (date/time editing)
+               - GListbox (enum register editing)
+               All resources exported via extern declarations
 
- Date        : 2026.07.21
+ Date        : 2026.07.21 (V2.00 - refactor to extern, add GListbox style)
+               2026.07.21 (V1.00 - initial implementation with getters)
 */
 //-----------------------------------------------------------------------------
 #include "GDialogRes.h"
@@ -20,6 +23,7 @@
 #include "GKeyboard.h"
 #include "GLabel.h"
 #include "GEditorPanel.h"
+#include "GListbox.h"
 
 #include "DevIntf.h"
 #include "DevRegs.h"
@@ -183,8 +187,8 @@ static const GEditorPanel::GConfig s_numRegEditorPanelConfig = {
   &s_numRegEditorConfig
 };
 
-// GNumRegDialog main config
-static const GDialog::GDialogConfig s_numRegDialogConfig = {
+// GNumRegDialog main config (exported)
+const GDialog::GDialogConfig g_numRegDialogConfig = {
   4,  // labelCount
   s_numRegLabels,
   15, 150, 271, 145,  // kbdX, kbdY, kbdW, kbdH
@@ -260,8 +264,8 @@ static const GEditorPanel::GConfig s_loginEditorPanelConfig = {
   s_loginEditors
 };
 
-// GLoginDialog main config
-static const GDialog::GDialogConfig s_loginDialogConfig = {
+// GLoginDialog main config (exported)
+const GDialog::GDialogConfig g_loginDialogConfig = {
   3,
   s_loginLabels,
   15, 150, 271, 145,
@@ -305,7 +309,8 @@ static const GEditorPanel::GConfig s_ipEditorPanelConfig = {
   4, s_ipEditors
 };
 
-static const GDialog::GDialogConfig s_ipDialogConfig = {
+// GIPAddressDialog main config (exported)
+const GDialog::GDialogConfig g_ipDialogConfig = {
   2, s_ipLabels,
   15, 150, 271, 145,
   &s_commonKeyboardStyle, &s_digitalKeyGrid,
@@ -348,7 +353,8 @@ static const GEditorPanel::GConfig s_datetimeEditorPanelConfig = {
   6, s_datetimeEditors
 };
 
-static const GDialog::GDialogConfig s_datetimeDialogConfig = {
+// GDatetimeDialog main config (exported)
+const GDialog::GDialogConfig g_datetimeDialogConfig = {
   2, s_datetimeLabels,
   15, 150, 271, 145,
   &s_commonKeyboardStyle, &s_digitalKeyGrid,
@@ -356,26 +362,17 @@ static const GDialog::GDialogConfig s_datetimeDialogConfig = {
 };
 
 //=============================================================================
-// Public Accessor Functions
+// GListbox Style (§9)
 //=============================================================================
 
-const GDialog::GDialogConfig* GetNumRegDialogConfig()
-{
-  return &s_numRegDialogConfig;
-}
+// GListbox style (exported)
+const GListbox::GStyle g_listboxStyle = {
+  0x031635,    // crBackground - dark blue background
+  0xC0C0C0,    // crFrame - light gray frame
+  0x4A90E2,    // crSelected - blue selection background
+  0xFFFFFF,    // crText - white text
+  0xFFFF00,    // crTextFocus - yellow text when focused
+  GUI_FONT_20_ASCII  // ftText - 20pt ASCII font
+};
 
-const GDialog::GDialogConfig* GetLoginDialogConfig()
-{
-  return &s_loginDialogConfig;
-}
-
-const GDialog::GDialogConfig* GetIPAddressDialogConfig()
-{
-  return &s_ipDialogConfig;
-}
-
-const GDialog::GDialogConfig* GetDatetimeDialogConfig()
-{
-  return &s_datetimeDialogConfig;
-}
 //-----------------------------------------------------------------------------

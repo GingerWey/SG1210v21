@@ -1,38 +1,44 @@
-﻿//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 /*
  File        : GDialogRes.h
- Version     : V1.00
+ Version     : V2.00
  By          : Wey@SilverGrid
 
- Description : Dialog resource configurations for GConfigDialog
-               Public accessor functions for dialog configs
+ Description : Dialog resource configurations for GConfigForm
+               All dialog resources exported as extern declarations
+               Per SG1210v25对话框.md specification
 
- Date        : 2026.07.21
+ Date        : 2026.07.21 (V2.00 - refactor to extern declarations, add GListbox)
+               2026.07.21 (V1.00 - initial implementation with getter functions)
 */
 //-----------------------------------------------------------------------------
 #ifndef GDIALOGRES_H
 #define GDIALOGRES_H
 
 #include "GDialog.h"
+#include "GListbox.h"
 //-----------------------------------------------------------------------------
 #ifdef __cplusplus
 extern "C" {
 #endif
 //=============================================================================
-// Public Functions
+// Dialog Resource Declarations
 //=============================================================================
 
-// Get GNumRegDialog configuration
-const GDialog::GDialogConfig* GetNumRegDialogConfig();
+// GNumRegDialog configuration (§5)
+extern const GDialog::GDialogConfig g_numRegDialogConfig;
 
-// Get GLoginDialog configuration
-const GDialog::GDialogConfig* GetLoginDialogConfig();
+// GLoginDialog configuration (§6)
+extern const GDialog::GDialogConfig g_loginDialogConfig;
 
-// Get GIPAddressDialog configuration
-const GDialog::GDialogConfig* GetIPAddressDialogConfig();
+// GIPAddressDialog configuration (§7)
+extern const GDialog::GDialogConfig g_ipDialogConfig;
 
-// Get GDatetimeDialog configuration
-const GDialog::GDialogConfig* GetDatetimeDialogConfig();
+// GDatetimeDialog configuration (§8)
+extern const GDialog::GDialogConfig g_datetimeDialogConfig;
+
+// GListbox style (§9)
+extern const GListbox::GStyle g_listboxStyle;
 
 //-----------------------------------------------------------------------------
 #ifdef __cplusplus
