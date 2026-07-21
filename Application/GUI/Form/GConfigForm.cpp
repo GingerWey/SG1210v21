@@ -76,8 +76,18 @@
 #include "DevDebug.h"
 #include "RamHeap.h"
 
+// Phase 6: Dialog integration
+#include "Dialog/GDialog.h"
+#include "Dialog/GDialogRes.h"
+#include "Dialog/GLoginDialog.h"
+#include "Dialog/GNumRegDialog.h"
+#include "Dialog/GIPAddressDialog.h"
+#include "Dialog/GDatetimeDialog.h"
+#include "Dialog/GListbox.h"
+
 #include <cstdio>
 #include <cstring>
+#include <new>
 #include <GUI_Type.h>
 #include <GUIConf.h>
 
@@ -236,6 +246,17 @@ static const CfgTypeDesc kCfgTypes[] = {
 //=============================================================================
 // Form state (heap-allocated in _Init, freed in _Close)
 //=============================================================================
+
+// Dialog type (Phase 6: Type dispatch)
+enum TDialogType {
+  dtNone = 0,        // No dialog active
+  dtLogin = 1,       // GLoginDialog
+  dtNumReg = 2,      // GNumRegDialog (INT/HEX/REAL)
+  dtIPAddress = 3,   // GIPAddressDialog
+  dtDatetime = 4,    // GDatetimeDialog
+  dtListbox = 5      // GListbox (enum selection)
+};
+
 struct TConfigFormState {
   TConfigType eType;
   uint16_t    uCount;
@@ -249,9 +270,25 @@ struct TConfigFormState {
   int16_t     touchLastY;
   bool        touchActive;
 #endif
+
+  // Phase 6: Dialog integration
+  TDialogType  dlgType;        // Current dialog type
+  GDialogTodo  dlgTodo;        // Pending action after login (from GDialogDefs.h)
+  GWidget*     pDialog;        // Active dialog instance (GDialog* or GListbox*)
+  uint16_t     pendingRegNum;  // Register to edit after permission granted
+  void*        pDlgData;       // Dialog-specific data (e.g., GDialogConfig)
 };
 
 static TConfigFormState* s_pState = nullptr;
+
+//=============================================================================
+// Forward declarations for Phase 6: Dialog Integration
+//=============================================================================
+static bool checkPermission(uint16_t regNum);
+static void dispatchEdit(uint16_t regNum);
+static void destroyDialog(void);
+static void acceptEdit(void);
+static void cancelEdit(void);
 
 //=============================================================================
 // Helpers
@@ -692,15 +729,32 @@ static void _OnKey(uint16_t uwKey, bool bRepeat)
     }
     break;
   }
-  
+
   case KEY_RIGHT: {
     if (false == bRepeat) {
       _CycleNext();
     }
-    
+
     break;
   }
-  
+
+  // Phase 6: ENTER key triggers edit for current row
+  case KEY_ENTER: {
+    if (false == bRepeat && s_pState->uCurItem < s_pState->uCount) {
+      const CfgRow* pRow = _GetRow(s_pState->uCurItem);
+      if (nullptr != pRow) {
+        uint16_t regNum = (uint16_t)pRow->regNum;
+        // Check permission first
+        if (checkPermission(regNum)) {
+          // Permission granted, dispatch edit
+          dispatchEdit(regNum);
+        }
+        // If permission denied, checkPermission already created login dialog
+      }
+    }
+    break;
+  }
+
   default:
     break;
   }
@@ -817,6 +871,262 @@ static void _OnTick(uint32_t uNow)
 }
 
 //=============================================================================
+// Phase 6: Dialog Integration Helpers
+//=============================================================================
+
+// TODO: Move to DevIntf.h - temporary stubs for permission API
+static bool g_bPasswordOk = false;
+
+static bool GetPasswordOk(void)
+{
+  return g_bPasswordOk;
+}
+
+static void ClrPasswordOk(void)
+{
+  g_bPasswordOk = false;
+}
+
+static void SetPasswordOk(void)
+{
+  g_bPasswordOk = true;
+}
+
+/// Destroy active dialog and free resources
+static void destroyDialog(void)
+{
+  if (nullptr == s_pState || nullptr == s_pState->pDialog) {
+    return;
+  }
+
+  // Close and destroy dialog
+  s_pState->pDialog->onClose();
+  s_pState->pDialog->~GWidget();  // Virtual destructor dispatches to GDialog/GListbox
+  RAM_Free(s_pState->pDialog);
+  s_pState->pDialog = nullptr;
+
+  // Free dialog-specific data if any
+  if (nullptr != s_pState->pDlgData) {
+    RAM_Free(s_pState->pDlgData);
+    s_pState->pDlgData = nullptr;
+  }
+
+  s_pState->dlgType = dtNone;
+}
+
+/// Check if user has permission to edit (Phase 6: Permission gate)
+static bool checkPermission(uint16_t regNum)
+{
+  // Check if password is already validated
+  if (GetPasswordOk()) {
+    return true;
+  }
+
+  // Permission denied - save pending action and show login dialog
+  s_pState->pendingRegNum = regNum;
+  s_pState->dlgTodo = dtdEdit;
+
+  // Create login dialog based on user level
+  // TODO: Determine login mode based on register or user level
+  // For now, use lmLoginNormal
+  GLoginDialog::GLoginMode mode = GLoginDialog::lmLoginNormal;
+
+  // Create login dialog (no GDialogConfig needed for now - TODO: add resource)
+  GLoginDialog* pDlg = static_cast<GLoginDialog*>(RAM_Malloc(sizeof(GLoginDialog)));
+  if (nullptr == pDlg) {
+    return false;
+  }
+
+  // TODO: Use proper GDialogConfig from GDialogRes
+  ::new (pDlg) GLoginDialog(nullptr, (void*)(uintptr_t)mode);
+  pDlg->Init();
+  pDlg->onShow();
+
+  s_pState->pDialog = pDlg;
+  s_pState->pDlgData = nullptr;
+  s_pState->dlgType = dtLogin;
+
+  return false;  // Permission not yet granted
+}
+
+/// Create number register dialog (INT/HEX/REAL)
+static void createNumberDialog(uint16_t regNum)
+{
+  // Create number dialog (TODO: use proper GDialogConfig from GDialogRes)
+  GNumRegDialog* pDlg = static_cast<GNumRegDialog*>(RAM_Malloc(sizeof(GNumRegDialog)));
+  if (nullptr == pDlg) {
+    return;
+  }
+
+  ::new (pDlg) GNumRegDialog(nullptr, (void*)(uintptr_t)regNum);
+  pDlg->Init();
+  pDlg->onShow();
+
+  s_pState->pDialog = pDlg;
+  s_pState->pDlgData = nullptr;
+  s_pState->dlgType = dtNumReg;
+}
+
+/// Create IP address dialog
+static void createIPAddressDialog(uint16_t regNum)
+{
+  // Create IP address dialog (TODO: use proper GDialogConfig from GDialogRes)
+  GIPAddressDialog* pDlg = static_cast<GIPAddressDialog*>(RAM_Malloc(sizeof(GIPAddressDialog)));
+  if (nullptr == pDlg) {
+    return;
+  }
+
+  ::new (pDlg) GIPAddressDialog(nullptr, (void*)(uintptr_t)regNum);
+  pDlg->Init();
+  pDlg->onShow();
+
+  s_pState->pDialog = pDlg;
+  s_pState->pDlgData = nullptr;
+  s_pState->dlgType = dtIPAddress;
+}
+
+/// Create datetime dialog
+static void createDatetimeDialog(uint16_t regNum)
+{
+  // Create datetime dialog (TODO: use proper GDialogConfig from GDialogRes)
+  GDatetimeDialog* pDlg = static_cast<GDatetimeDialog*>(RAM_Malloc(sizeof(GDatetimeDialog)));
+  if (nullptr == pDlg) {
+    return;
+  }
+
+  ::new (pDlg) GDatetimeDialog(nullptr, (void*)(uintptr_t)regNum);
+  pDlg->Init();
+  pDlg->onShow();
+
+  s_pState->pDialog = pDlg;
+  s_pState->pDlgData = nullptr;
+  s_pState->dlgType = dtDatetime;
+}
+
+/// Type dispatch - create appropriate dialog based on register type
+static void dispatchEdit(uint16_t regNum)
+{
+  // Get register info
+  const TDevRegInfoItem* pProp = DevIntf_GetRegInfo(regNum);
+  if (nullptr == pProp) {
+    return;
+  }
+
+  // Dispatch based on value type
+  uint32_t vType = SIT_GetVType(pProp->Property);
+
+  switch (vType) {
+    case SIT_VAT_INT:
+    case SIT_VAT_HEX:
+    case SIT_VAT_REAL:
+      createNumberDialog(regNum);
+      break;
+
+    case SIT_VAT_BIN:
+      // Direct toggle - no dialog needed
+      {
+        uint32_t curVal = DevReg_Read(regNum);
+        DevReg_Write(regNum, curVal ? 0 : 1);
+        _UpdateList();  // Refresh display
+      }
+      break;
+
+    case SIT_VAT_ENUM:
+      // TODO: Create listbox
+      // createListBox(regNum);
+      break;
+
+    case SIT_VAT_DATETIME:
+      createDatetimeDialog(regNum);
+      break;
+
+    case SIT_VAT_PASSWORD:
+      // Password register - show login dialog
+      if (checkPermission(regNum)) {
+        // Already have permission, proceed
+        createNumberDialog(regNum);
+      }
+      break;
+
+    // case SIT_VAT_IP:  // TODO: Define this constant if needed
+    //   createIPAddressDialog(regNum);
+    //   break;
+
+    default:
+      // Unsupported type or IP address (handle as numeric for now)
+      createNumberDialog(regNum);
+      break;
+  }
+}
+
+/// Accept dialog result and write to register
+static void acceptEdit(void)
+{
+  if (nullptr == s_pState || nullptr == s_pState->pDialog) {
+    return;
+  }
+
+  // Special handling for login dialog
+  if (dtLogin == s_pState->dlgType) {
+    destroyDialog();
+
+    // Check if password is now OK and we have pending edit
+    if (GetPasswordOk() && dtdEdit == s_pState->dlgTodo) {
+      uint16_t regNum = s_pState->pendingRegNum;
+      s_pState->dlgTodo = dtdNone;
+      s_pState->pendingRegNum = 0;
+      dispatchEdit(regNum);  // Retry the edit
+    }
+    return;
+  }
+
+  // For other dialogs, get result and write to register
+  uint32_t result = 0;
+  uint16_t regNum = 0;
+
+  // Get register number from dialog
+  switch (s_pState->dlgType) {
+    case dtNumReg:
+      regNum = static_cast<GNumRegDialog*>(s_pState->pDialog)->getRegNum();
+      result = static_cast<GNumRegDialog*>(s_pState->pDialog)->getResult();
+      break;
+    case dtIPAddress:
+      regNum = static_cast<GIPAddressDialog*>(s_pState->pDialog)->getRegNum();
+      result = static_cast<GIPAddressDialog*>(s_pState->pDialog)->getResult();
+      break;
+    case dtDatetime:
+      regNum = static_cast<GDatetimeDialog*>(s_pState->pDialog)->getRegNum();
+      // Datetime returns TDateTimeType, need to handle differently
+      // For now, skip writing (TODO: implement proper datetime write)
+      destroyDialog();
+      _UpdateList();
+      return;
+    default:
+      break;
+  }
+
+  if (regNum != 0) {
+    DevReg_Write(regNum, result);
+  }
+
+  // Cleanup and refresh
+  destroyDialog();
+  _UpdateList();
+}
+
+/// Cancel dialog edit
+static void cancelEdit(void)
+{
+  if (nullptr == s_pState) {
+    return;
+  }
+
+  destroyDialog();
+  s_pState->dlgTodo = dtdNone;
+  s_pState->pendingRegNum = 0;
+}
+
+//=============================================================================
 // Form lifecycle
 //=============================================================================
 static void _Init(const void* argument)
@@ -831,7 +1141,7 @@ static void _Init(const void* argument)
   if (nullptr == s_pState) {
     return;
   }
-  
+
   memset(s_pState, 0, sizeof(TConfigFormState));
   // Initial config type from the menu argument; default to cgtLogic.
   TConfigType eInit = (nullptr != argument)
@@ -845,6 +1155,9 @@ static void _Init(const void* argument)
 
   // Propare the device interface for config editing (spec 6.7.1).
   DevIntf_DevCfgEditPropare( TOKEN_INTF_OPERATE );
+
+  // Phase 6: Clear password permission on form entry
+  ClrPasswordOk();
 }
 
 static void _Show(const void* argument)
@@ -867,9 +1180,15 @@ static void _Close(const void* argument)
   (void)argument;
 
   if (nullptr != s_pState) {
+    // Phase 6: Destroy any active dialog before closing
+    destroyDialog();
+
     RAM_Free(s_pState);
     s_pState = nullptr;
   }
+
+  // Phase 6: Clear password permission on form exit
+  ClrPasswordOk();
 }
 
 static void _OnMessage(GM_MESSAGE* pMsg)
@@ -879,11 +1198,39 @@ static void _OnMessage(GM_MESSAGE* pMsg)
     return;
   }
 
+  // Phase 6: If dialog is active, delegate messages to it first
+  if (nullptr != s_pState->pDialog) {
+    switch (pMsg->MsgId) {
+      case GM_DIALOG_ACCEPT:
+        acceptEdit();
+        pMsg->MsgId = 0;
+        return;
+
+      case GM_DIALOG_CANCEL:
+        cancelEdit();
+        pMsg->MsgId = 0;
+        return;
+
+      case GM_KEYDOWN:
+      case GM_KEYPRESS:
+      case GM_KEYUP:
+      case GM_TOUCH:
+        // Delegate to dialog
+        s_pState->pDialog->onMessage(pMsg);
+        pMsg->MsgId = 0;
+        return;
+
+      default:
+        break;
+    }
+  }
+
+  // Handle form's own messages
   switch (pMsg->MsgId) {
   case GM_TIMER_TICK:
     _OnTick(static_cast<uint32_t>(pMsg->Data.v));
     break;
-  
+
   case GM_KEYDOWN:
     _OnKey(pMsg->Param, false);
     pMsg->MsgId = 0;
